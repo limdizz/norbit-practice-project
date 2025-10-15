@@ -1,0 +1,6 @@
+@WebAPI_HostAddress = http://localhost:5056
+
+GET {{WebAPI_HostAddress}}/bill/
+Accept: application/json
+
+###
