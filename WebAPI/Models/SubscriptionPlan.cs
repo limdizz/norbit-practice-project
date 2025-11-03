@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using WebAPI.Models;
 
-namespace WebAPI.Models;
+namespace WebAPI;
 
 public partial class SubscriptionPlan
 {
@@ -16,4 +17,6 @@ public partial class SubscriptionPlan
     public int? ValidityDays { get; set; }
 
     public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
+
+    public virtual ICollection<UserSubscriptionsAdvanced> UserSubscriptionsAdvanceds { get; set; } = new List<UserSubscriptionsAdvanced>();
 }

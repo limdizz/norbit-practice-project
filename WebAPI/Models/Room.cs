@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using WebAPI.Models;
 
-namespace WebAPI.Models;
+namespace WebAPI;
 
 public partial class Room
 {
@@ -15,7 +16,9 @@ public partial class Room
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
+    public virtual ICollection<BookingsAdvanced> BookingsAdvanceds { get; set; } = new List<BookingsAdvanced>();
+
     public virtual ICollection<RoomEquipment> RoomEquipments { get; set; } = new List<RoomEquipment>();
 
-    public virtual RoomType? RoomType { get; set; } = null!;
+    public virtual RoomType RoomType { get; set; } = null!;
 }
