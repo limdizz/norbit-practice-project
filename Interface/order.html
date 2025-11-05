@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Зарегистрироваться</title>
+    <link rel="stylesheet" href="css\style.css">
+    <script src="scripts/order.js" defer></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header class="header">
+            <div class="header__logo">
+                <img src="img/logo.png" alt="logo" width="100" height="100">
+            </div>
+            <nav class="menu">
+               <a class="menu__item" href="#">Главная</a>
+                <a class="menu__item" href="#">Бронирование</a>
+                <a class="menu__item" href="#">Мои бронирования</a>
+                <a class="menu__item" href="#">Абонементы</a>
+                <a class="menu__item" href="#">Цены</a>
+                <a class="menu__item" href="#">Контакты</a>
+                <a class="menu__item" href="#">Профиль</a>
+            </nav>
+        </header>
+        <main class="main">
+
+            <h1 class="register_h" id="order-title">Заказ №1323213</h1>
+            <section class="register">
+                <p class="register_p">
+                    Фамилия:
+                </p>
+                <input class="register_p" placeholder="Иванов" type="text" disabled>
+                <p class="register_p">
+                    Имя:
+                </p>
+                <input class="register_p" placeholder="Иван" type="text" disabled>
+                <p class="register_p">
+                    Детали заказа:
+                </p>
+                <p class="register_p" id="order-instrument">Аренда инструмента: Fender Jaguar</p>
+                <p class="register_p" id="order-dates">Срок бронирования: 04.11.2025-05.11.2025</p>
+                <h2 id="order-total">Итого: ₽2800</h2>
+                
+
+                <button class="register_button" onclick="location.href='booking_confirmed.html'">Подтвердить бронирование</button>
+            </section>
+        </main>
+        <footer class="footer">
+            <section class="instruments">
+                <a class="footer_menu__item" href="#">Каталог инструментов</a><br><br>
+                <a class="footer_menu__item" href="#">Электрогитары</a><br>
+                <a class="footer_menu__item" href="#">Классические гитары</a><br>
+                <a class="footer_menu__item" href="#">Бас-гитары</a><br>
+                <a class="footer_menu__item" href="#">Синтезаторы</a><br>
+                <a class="footer_menu__item" href="#">Ударные установки</a><br>
+                <a class="footer_menu__item" href="#">Микрофоны</a><br><br>
+            </section>
+            <section class="rooms">
+                <a class="footer_menu__item" href="#">Помещения</a><br><br>
+                <a class="footer_menu__item" href="#">Студия звукозаписи</a><br>
+                <a class="footer_menu__item" href="#">Репетиционные залы</a><br>
+                <a class="footer_menu__item" href="#">Лаунж-зоны</a><br><br>
+            </section>
+            <section class="contacts">
+                <a class="footer_menu__item" href="#">Студия</a><br><br>
+                <a class="footer_menu__item" href="#">О нас</a><br>
+                <a class="footer_menu__item" href="#">Новости</a><br>
+                <a class="footer_menu__item" href="#">Отзывы</a><br>
+            </section>
+        </footer>
+    </div>
+</body>
+
+</html>
