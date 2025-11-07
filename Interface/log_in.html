@@ -7,7 +7,7 @@
     <title>Войти</title>
     <link rel="stylesheet" href="css\style.css">
     <script src="scripts/log_in.js" defer></script>
-    
+
 </head>
 
 <body>
@@ -22,29 +22,33 @@
                 <a class="menu__item" href="#">Абонементы</a>
                 <a class="menu__item" href="#">Цены</a>
                 <a class="menu__item" href="#">Контакты</a>
+
                 <button class="menu__item__button" href="#">Войти</a>
                     <button class="menu__item__button" href="#">Зарегистрироваться</a>
             </nav>
         </header>
         <main class="main">
+            <form id="loginForm">
+                <h1 class="register_h">Войти</h1>
+                <section class="register">
+                    <label for="loginEmail" class="register_p" id="loginEmailLabel">
+                        Email:
+                    </label>
 
-            <h1 class="register_h">Войти</h1>
-            <section class="register">
-                <p class="register_p">
-                    Email:
-                </p>
+                    <input class="register_p" placeholder="21313@example.com" type="email" id="loginEmail" required><br>
 
-                <input class="register_p" placeholder="21313@example.com" type="text">
+                    <label for="loginPassword" class="register_p">
+                        Пароль:
+                    </label>
 
-                <p class="register_p">
-                    Пароль:
-                </p>
+                    <input class="register_p" placeholder="*************" type="password" id="loginPassword" required>
 
-                <input class="register_p" placeholder="*************" type="text">
-
-                <!-- <button class="register_button" onclick=signIn() onclick="location.href='index_auth.html'">Войти</button> -->
-                 <button class="register_button">Войти</button>
-            </section>
+                    <!-- <button class="register_button" onclick=signIn() onclick="location.href='index_auth.html'">Войти</button> -->
+                    <!-- <button class="register_button">Войти</button> -->
+                    <button class="register_button" id="loginButton" type="submit" value="Войти"
+                        onclick="location.href='index_auth.html'">Войти</button>
+                </section>
+            </form>
         </main>
         <footer class="footer">
             <section class="instruments">

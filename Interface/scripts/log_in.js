@@ -1,55 +1,79 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const loginButton = document.querySelector('.register_button');
-    
-    if (loginButton) {
-        // Удаляем все встроенные onclick
-        loginButton.removeAttribute('onclick');
+document.addEventListener('DOMContentLoaded', function () {
 
-        // Добавляем наш собственный обработчик
-        loginButton.addEventListener('click', handleLogin);
-    }
-});
+    // Находим форму и ее элементы
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('loginEmail');
 
-function handleLogin(event) {
-    event.preventDefault(); // Останавливаем любое поведение по умолчанию
+    const passwordInput = document.getElementById('loginPassword');
+    const loginButton = document.getElementById('loginButton');
 
-    const inputs = document.querySelectorAll('input.register_p');
-    const email = inputs[0]?.value.trim();
-    const password = inputs[1]?.value.trim();
-
-    if (!email || !password) {
-        alert('Пожалуйста, введите email и пароль.');
+    // Проверяем, что все элементы найдены
+    if (!loginForm || !emailInput || !passwordInput || !loginButton) {
+        console.error('Не все элементы формы входа были найдены!');
         return;
     }
 
-    // Проверяем, есть ли пользователь в localStorage
-    const existingUser = localStorage.getItem('userData');
-    let userData;
+    // 1. Убираем встроенный onclick, чтобы он не мешал скрипту
+    loginButton.removeAttribute('onclick');
 
-    if (existingUser) {
-        // Если пользователь есть, "входим" под ним
-        userData = JSON.parse(existingUser);
-        console.log('Вход под существующим пользователем:', userData.email);
-    } else {
-        // Если пользователя нет, создаем нового (для демонстрации)
-        // В реальном приложении здесь должна быть ошибка "пользователь не найден"
-        console.warn('Пользователь не найден. Создаем нового для демонстрации.');
-        userData = {
-            firstName: 'Иван',
-            lastName: 'Иванов',
-            email: email
-        };
-    }
+    // 2. Вешаем обработчик на 'submit' (отправку) формы
+    loginForm.addEventListener('submit', function (event) {
 
-    // Сохраняем/обновляем данные и флаг входа
-    try {
-        localStorage.setItem('userData', JSON.stringify(userData));
-        localStorage.setItem('isLoggedIn', 'true');
-        console.log('Пользователь вошел:', userData);
+        // 3. Предотвращаем стандартное поведение формы (перезагрузку страницы)
+        event.preventDefault();
 
-        // Перенаправляем на авторизованную главную страницу
-        window.location.href = 'index_auth.html';
-    } catch (error) {
-        console.error('Ошибка сохранения в localStorage:', error);
-    }
-}
+        // 4. Собираем введённые данные
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!email || !password) {
+            alert('Пожалуйста, заполните поля Email и Пароль.');
+            return;
+        }
+
+        console.log(`Попытка входа с email: ${email}`);
+
+        // 5. Проверяем наличие зарегистрированного пользователя
+        const savedUserDataString = localStorage.getItem('userData');
+
+        if (!savedUserDataString) {
+            alert('Зарегистрированный пользователь не найден. Пожалуйста, сначала зарегистрируйтесь.');
+            return;
+        }
+
+        try {
+            const savedUserData = JSON.parse(savedUserDataString);
+
+            // 6. Сравниваем email
+            if (savedUserData.email === email) {
+
+                // --- ВАЖНОЕ ЗАМЕЧАНИЕ О ПАРОЛЕ ---
+                // Ваш скрипт sign_up.js намеренно не сохраняет пароль в localStorage
+                // (что является правильной практикой безопасности).
+                // В реальном приложении, здесь бы отправлялся запрос на сервер:
+                // fetch('/api/login', { method: 'POST', body: {email, password} })
+                //
+                // Поскольку у нас нет сервера, мы просто считаем, что если email
+                // совпал, то вход успешен (имитация).
+
+                console.log('Email совпал. Вход выполнен (имитация).');
+
+                // 7. "Пересылаем данные" (сохраняем статус входа)
+                localStorage.setItem('isLoggedIn', 'true');
+                // Данные пользователя (userData) уже лежат в localStorage
+
+                // 8. Перенаправляем пользователя
+                alert('Вход выполнен успешно!');
+                window.location.href = 'index_auth.html';
+
+            } else {
+                // Email не совпал
+                alert('Пользователь с таким email не найден или пароль неверный.');
+            }
+
+        } catch (error) {
+            console.error('Ошибка при чтении данных из localStorage:', error);
+            alert('Произошла ошибка при попытке входа.');
+        }
+    });
+});

@@ -1,54 +1,58 @@
-// scripts/sign_up.js
-document.addEventListener('DOMContentLoaded', function() {
-    // Находим кнопку регистрации
+document.addEventListener('DOMContentLoaded', function () {
     const registerButton = document.querySelector('.register_button');
 
     if (registerButton) {
-        // Убираем встроенный onclick, чтобы наш скрипт мог его обработать
         registerButton.removeAttribute('onclick');
-        
-        registerButton.addEventListener('click', function(event) {
-            // Предотвращаем немедленный переход по ссылке (если он был)
-            event.preventDefault(); 
-            
+
+        registerButton.addEventListener('click', function (event) {
+            event.preventDefault();
+
             console.log('Кнопка регистрации нажата');
 
-            // Собираем все поля ввода
-            const inputs = document.querySelectorAll('.register_p[type="text"]');
-            
-            const lastName = inputs[0]?.value.trim();
-            const firstName = inputs[1]?.value.trim();
-            const email = inputs[2]?.value.trim();
-            const password = inputs[3]?.value.trim();
+            // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+            // Находим каждое поле по его уникальному ID
+            const lastName = document.getElementById('regLastName')?.value.trim();
+            const firstName = document.getElementById('regFirstName')?.value.trim();
+            const email = document.getElementById('regEmail')?.value.trim();
+            const password = document.getElementById('regPassword')?.value.trim();
+            // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
+            // 1. Валидация
             if (!lastName || !firstName || !email || !password) {
                 alert('Пожалуйста, заполните все поля.');
                 return;
             }
 
-            // Создаем объект пользователя
+            // Простая проверка email (можно улучшить)
+            if (!email.includes('@')) {
+                alert('Пожалуйста, введите корректный email.');
+                return;
+            }
+
+            // 2. Создаем объект пользователя
             const userData = {
                 firstName: firstName,
                 lastName: lastName,
                 email: email
-                // Мы не храним пароль в localStorage в реальном приложении!
-                // Это только для демонстрации.
             };
 
-            // Сохраняем данные пользователя в localStorage
+            // 3. Сохраняем данные пользователя в localStorage
             try {
                 localStorage.setItem('userData', JSON.stringify(userData));
                 localStorage.setItem('isLoggedIn', 'true');
+
                 console.log('Пользователь сохранен:', userData);
 
-                // Теперь перенаправляем на страницу для авторизованных
-                window.location.href = 'index_auth.html'; 
-                // (или на 'catalog.html' или куда вы хотите)
+                // 4. Перенаправляем
+                alert('Регистрация прошла успешно!');
+                window.location.href = 'index_auth.html';
 
             } catch (error) {
                 console.error('Ошибка сохранения в localStorage:', error);
-                alert('Не удалось зарегистрироваться. Хранилище может быть переполнено.');
+                alert('Не удалось зарегистрироваться.');
             }
         });
+    } else {
+        console.error('Кнопка регистрации не найдена.');
     }
 });
