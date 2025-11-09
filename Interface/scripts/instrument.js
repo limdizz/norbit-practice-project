@@ -1,11 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('Страница инструмента загружается...');
-    
+
     // Инициализация страницы
     initializePage();
-    
+
     // Слушаем изменения URL (при нажатии назад/вперед)
-    window.addEventListener('popstate', function() {
+    window.addEventListener('popstate', function () {
         console.log('Обнаружено изменение истории браузера');
         initializePage();
     });
@@ -66,14 +66,14 @@ const instrumentsDatabase = {
 function loadInstrumentData() {
     const instrumentId = getInstrumentIdFromURL();
     console.log('Загружаем инструмент с ID:', instrumentId, 'из URL:', window.location.href);
-    
+
     const instrument = instrumentsDatabase[instrumentId];
     localStorage.setItem('lastInstrumentId', instrumentId);
     if (instrument) {
         renderInstrumentDetails(instrument);
         updatePageTitle(instrument.name);
         updateBookingButton(instrument.id);
-        
+
         // Добавляем в историю браузера
         addToBrowserHistory(instrumentId);
     } else {
@@ -114,7 +114,7 @@ function addToBrowserHistory(instrumentId) {
 // 4. Рендеринг деталей инструмента
 function renderInstrumentDetails(instrument) {
     console.log('Рендерим инструмент:', instrument.name);
-    
+
     // Очищаем старые динамические элементы
     clearDynamicElements();
 
@@ -146,7 +146,7 @@ function clearDynamicElements() {
         '.instrument-details',
         '.price-calculator'
     ];
-    
+
     elementsToRemove.forEach(selector => {
         const element = document.querySelector(selector);
         if (element) {
@@ -159,7 +159,7 @@ function clearDynamicElements() {
 // 6. Добавление дополнительной информации об инструменте
 function addInstrumentDetails(instrument) {
     const instrumentCard = document.querySelector('.instrument_card');
-    
+
     // Создаем контейнер для деталей
     const detailsContainer = document.createElement('div');
     detailsContainer.className = 'instrument-details';
@@ -205,7 +205,6 @@ function addInstrumentDetails(instrument) {
 // 7. Добавление калькулятора стоимости
 function addPriceCalculator(dailyPrice) {
     const instrumentCard = document.querySelector('.instrument_card');
-
     const calculator = document.createElement('div');
     calculator.className = 'price-calculator';
     calculator.style.cssText = `
@@ -233,7 +232,7 @@ function addPriceCalculator(dailyPrice) {
     `;
 
     // Вставляем калькулятор перед кнопкой бронирования
-    const bookButton = document.querySelector('.card_item');
+    const bookButton = document.getElementById('book_button');
     instrumentCard.insertBefore(calculator, bookButton);
 
     console.log('Калькулятор стоимости добавлен');
@@ -249,15 +248,15 @@ function initDateSelects() {
         populateDateSelects(startDateSelect, endDateSelect);
 
         // Обновляем конечные даты при изменении начальной
-        startDateSelect.addEventListener('change', function() {
+        startDateSelect.addEventListener('change', function () {
             updateEndDateOptions(this.value);
             updatePriceCalculation();
         });
 
-        endDateSelect.addEventListener('change', function() {
+        endDateSelect.addEventListener('change', function () {
             updatePriceCalculation();
         });
-        
+
         console.log('Селекты дат инициализированы');
     }
 }
@@ -268,53 +267,50 @@ function populateDateSelects(startSelect, endSelect) {
     startSelect.innerHTML = '';
     endSelect.innerHTML = '';
 
+    // Заполняем стартовые даты (30 дней вперёд)
     for (let i = 0; i < 30; i++) {
-        const date = new Date();
+        const date = new Date(today);
         date.setDate(today.getDate() + i);
-        
-        const dateString = formatDate(date);
-        const option = document.createElement('option');
-        option.value = dateString;
-        option.textContent = dateString;
 
-        startSelect.appendChild(option.cloneNode(true));
-        
-        // Для конечной даты начинаем со следующего дня
-        if (i > 0) {
-            endSelect.appendChild(option);
-        }
+        const dateString = formatDate(date);
+        const startOption = document.createElement('option');
+        startOption.value = dateString;
+        startOption.textContent = dateString;
+
+        startSelect.appendChild(startOption);
     }
 
-    // Устанавливаем начальные значения
+    // Заполняем конечные даты (до месяца от выбранной начальной)
+    updateEndDateOptions(formatDate(today));
+
+    // Устанавливаем значения по умолчанию: сегодня и через день
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    
     startSelect.value = formatDate(today);
     endSelect.value = formatDate(tomorrow);
 }
 
-// 10. Обновление опций конечной даты
+// 10. Обновление опций конечной даты (до 30 дней после выбранной)
 function updateEndDateOptions(selectedStartDate) {
     const endDateSelect = document.getElementById('end_date');
     const startDate = parseDate(selectedStartDate);
-    
     if (!endDateSelect) return;
 
     endDateSelect.innerHTML = '';
 
+    // Добавляем 30 последующих дней
     for (let i = 1; i <= 30; i++) {
         const date = new Date(startDate);
         date.setDate(startDate.getDate() + i);
-        
+
         const dateString = formatDate(date);
         const option = document.createElement('option');
         option.value = dateString;
         option.textContent = dateString;
-
         endDateSelect.appendChild(option);
     }
 
-    // Устанавливаем первую доступную дату
+    // Устанавливаем первую доступную дату как конец по умолчанию
     if (endDateSelect.options.length > 0) {
         endDateSelect.value = endDateSelect.options[0].value;
     }
@@ -329,12 +325,12 @@ function initPriceCalculation() {
 function updatePriceCalculation() {
     const instrumentId = getInstrumentIdFromURL();
     const instrument = instrumentsDatabase[instrumentId];
-    
+
     if (!instrument) return;
 
     const startDate = document.getElementById('start_date')?.value;
     const endDate = document.getElementById('end_date')?.value;
-    
+
     if (!startDate || !endDate) return;
 
     const days = calculateDaysDifference(startDate, endDate);
@@ -357,13 +353,13 @@ function updateBookingButton(instrumentId) {
         // Удаляем старый обработчик, если есть
         const newBookButton = bookButton.cloneNode(true);
         bookButton.parentNode.replaceChild(newBookButton, bookButton);
-        
+
         // Добавляем новый обработчик
-        newBookButton.addEventListener('click', function(e) {
+        newBookButton.addEventListener('click', function (e) {
             e.preventDefault();
             handleBooking(instrumentId);
         });
-        
+
         console.log('Кнопка бронирования обновлена');
     }
 }
@@ -373,7 +369,7 @@ function handleBooking(instrumentId) {
     const instrument = instrumentsDatabase[instrumentId];
     const startDate = document.getElementById('start_date')?.value;
     const endDate = document.getElementById('end_date')?.value;
-    
+
     if (!instrument || !startDate || !endDate) {
         alert('Пожалуйста, выберите даты бронирования');
         return;
@@ -382,27 +378,27 @@ function handleBooking(instrumentId) {
     const days = calculateDaysDifference(startDate, endDate);
     const totalPrice = days * instrument.price;
 
-    // Сохраняем данные бронирования
+    // Создаём объект данных бронирования
     const bookingData = {
-        instrumentId: instrumentId,
+        bookingId: 'ORD' + Date.now(),
+        instrumentId: instrument.id,
         instrumentName: instrument.name,
         instrumentImage: instrument.image,
-        startDate: startDate,
-        endDate: endDate,
-        days: days,
-        totalPrice: totalPrice,
+        startDate,
+        endDate,
+        days,
+        totalPrice,
         dailyPrice: instrument.price,
-        bookingDate: new Date().toISOString(),
-        bookingId: 'ORD' + Date.now()
+        bookingDate: new Date().toISOString()
     };
 
-    console.log('Сохранение данных бронирования:', bookingData);
-    
-    // Сохраняем в sessionStorage и localStorage
+    console.log('Сохраняем данные бронирования:', bookingData);
+
+    // Сохраняем в sessionStorage для order.html
     sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
+
+    // Также дублируем в localStorage (для истории)
     localStorage.setItem('lastBooking', JSON.stringify(bookingData));
-    
-    console.log('Данные сохранены в sessionStorage и localStorage');
 
     // Переходим на страницу заказа
     window.location.href = 'order.html';
@@ -412,7 +408,7 @@ function saveBookingData(bookingData) {
     try {
         // Сохраняем в sessionStorage для текущей сессии
         sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
-        
+
         // Сохраняем в историю бронирований в localStorage
         let bookingHistory = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
         bookingHistory.push({
@@ -420,7 +416,7 @@ function saveBookingData(bookingData) {
             bookingId: Date.now() // Уникальный ID бронирования
         });
         localStorage.setItem('bookingHistory', JSON.stringify(bookingHistory));
-        
+
         console.log('Данные бронирования сохранены:', bookingData);
     } catch (error) {
         console.error('Ошибка при сохранении данных бронирования:', error);
@@ -432,7 +428,7 @@ function initNavigation() {
     // Обработчики для header меню
     const menuItems = document.querySelectorAll('.menu__item');
     menuItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             e.preventDefault();
             const page = this.textContent.trim().toLowerCase();
             navigateToPage(page);
@@ -442,13 +438,13 @@ function initNavigation() {
     // Обработчики для footer меню
     const footerItems = document.querySelectorAll('.footer_menu__item');
     footerItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             e.preventDefault();
             const page = this.textContent.trim().toLowerCase();
             navigateToPage(page);
         });
     });
-    
+
     console.log('Навигация инициализирована');
 }
 
@@ -485,7 +481,7 @@ function parseDate(dateString) {
 function calculateDaysDifference(startDateStr, endDateStr) {
     const startDate = parseDate(startDateStr);
     const endDate = parseDate(endDateStr);
-    
+
     const difference = endDate.getTime() - startDate.getTime();
     const days = Math.ceil(difference / (1000 * 3600 * 24));
     return days > 0 ? days : 1; // Минимум 1 день
@@ -521,16 +517,3 @@ function initBookingButton() {
     }
 }
 
-function saveBookingData(bookingData) {
-    try {
-        // Сохраняем в sessionStorage
-        sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
-        
-        // Дублируем в localStorage для надежности
-        localStorage.setItem('lastBooking', JSON.stringify(bookingData));
-        
-        console.log('Данные бронирования сохранены:', bookingData);
-    } catch (error) {
-        console.error('Ошибка при сохранении данных бронирования:', error);
-    }
-}
