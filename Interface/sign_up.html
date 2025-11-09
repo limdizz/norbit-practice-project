@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
     <meta charset="UTF-8">
@@ -16,38 +16,39 @@
                 <img src="img/logo.png" alt="logo" width="100" height="100">
             </div>
             <nav class="menu">
-                <a class="menu__item" href="#">Главная</a>
+                <a class="menu__item" href="index.html">Главная</a>
                 <a class="menu__item" href="#">Бронирование</a>
                 <a class="menu__item" href="#">Абонементы</a>
                 <a class="menu__item" href="#">Цены</a>
                 <a class="menu__item" href="#">Контакты</a>
-                <button class="menu__item__button" href="#">Войти</a>
-                    <button class="menu__item__button" href="#">Зарегистрироваться</a>
+                
+                <button class="menu__item__button" onclick="location.href='log_in.html'">Войти</a>
+                <button class="menu__item__button" onclick="location.href='sign_up.html'">Зарегистрироваться</a>
             </nav>
         </header>
         <main class="main">
-
             <h1 class="register_h">Зарегистрироваться</h1>
             <section class="register">
-                <p class="register_p">
+                <label for="regLastName" class="register_p" id="regLastNameLabel">
                     Фамилия:
-                </p>
+                </label>
                 <input class="register_p" placeholder="Иванов" type="text" id="regLastName">
-                <p class="register_p">
+
+                <label for="regFirstName" class="register_p" id="regFirstNameLabel">
                     Имя:
-                </p>
+                </label>
                 <input class="register_p" placeholder="Иван" type="text" id="regFirstName">
-                <p class="register_p">
+
+                <label for="regEmail" class="register_p" id="regEmailLabel">
                     Email:
-                </p>
+                </label>
                 <input class="register_p" placeholder="21313@example.com" type="email" id="regEmail">
-                <p class="register_p">
+
+                <label for="regFirstName" class="register_p" id="regPasswordLabel">
                     Пароль:
-                </p>
+                </label>
                 <input class="register_p" placeholder="*************" type="password" id="regPassword">
 
-                <!-- <button class="register_button" onclick="location.href='index_auth.html'">Зарегистрироваться</button>
-                  -->
                 <button class="register_button" id="register_button">Зарегистрироваться</button>
             </section>
         </main>

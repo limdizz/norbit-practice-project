@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Простая проверка email (можно улучшить)
-            if (!email.includes('@')) {
+            if (!email.includes('@') || email.length < 5) {
                 alert('Пожалуйста, введите корректный email.');
                 return;
             }
@@ -38,18 +38,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // 3. Сохраняем данные пользователя в localStorage
             try {
-                localStorage.setItem('userData', JSON.stringify(userData));
+                // Загружаем существующий список пользователей.
+                // Если его нет, создаем пустой массив.
+                let users = JSON.parse(localStorage.getItem('users') || '[]');
+
+                // Проверяем, существует ли пользователь с таким email
+                const existingUser = users.find(user => user.email === email);
+
+                if (existingUser) {
+                    // Пользователь найден! Отменяем регистрацию.
+                    alert('Ошибка: Пользователь с таким email уже зарегистрирован.');
+                    return;
+                }
+
+                // --- 4. Регистрация нового пользователя ---
+                // Пользователь не найден, продолжаем регистрацию
+
+                // Создаем объект нового пользователя
+                const newUser = {
+                    id: Date.now(), // Уникальный ID
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
+                    // Мы не сохраняем пароль в localStorage!
+                };
+
+                // Добавляем нового пользователя в массив
+                users.push(newUser);
+
+                // Сохраняем ОБНОВЛЕННЫЙ массив пользователей обратно
+                localStorage.setItem('users', JSON.stringify(users));
+
+                // --- 5. Вход в систему (для совместимости с другими скриптами) ---
+                // Сохраняем данные текущего пользователя отдельно,
+                // чтобы order.js и instrument.js могли их найти
+                localStorage.setItem('userData', JSON.stringify(newUser));
                 localStorage.setItem('isLoggedIn', 'true');
 
-                console.log('Пользователь сохранен:', userData);
+                console.log('Пользователь успешно зарегистрирован:', newUser);
 
-                // 4. Перенаправляем
+                // 6. Перенаправляем
                 alert('Регистрация прошла успешно!');
                 window.location.href = 'index_auth.html';
 
             } catch (error) {
-                console.error('Ошибка сохранения в localStorage:', error);
-                alert('Не удалось зарегистрироваться.');
+                console.error('Ошибка при работе с localStorage:', error);
+                alert('Не удалось зарегистрироваться. Ошибка хранилища.');
             }
         });
     } else {
