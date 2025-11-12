@@ -394,6 +394,8 @@ function handleBooking(instrumentId) {
 
     console.log('Сохраняем данные бронирования:', bookingData);
 
+    saveBookingData(bookingData);
+
     // Сохраняем в sessionStorage для order.html
     sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
 
@@ -451,14 +453,14 @@ function initNavigation() {
 // 17. Навигация между страницами
 function navigateToPage(page) {
     const pageMap = {
-        'главная': 'index.html',
+        'главная': 'index_auth.html',
         'бронирование': 'booking.html',
-        'мои бронирования': 'my-bookings.html',
-        'абонементы': 'subscriptions.html',
-        'цены': 'pricing.html',
+        'мои бронирования': 'my_bookings.html',
+        'абонементы': 'subscription_plans.html',
+        'цены': 'prices.html',
         'контакты': 'contacts.html',
         'профиль': 'profile.html',
-        'каталог инструментов': 'catalog.html'
+        'каталог инструментов': 'catalog_instruments.html'
     };
 
     const url = pageMap[page] || 'index.html';

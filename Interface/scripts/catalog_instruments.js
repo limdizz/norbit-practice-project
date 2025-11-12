@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Инициализация всех модулей
     initFilters();
     initSearch();
@@ -69,16 +69,16 @@ function initSearch() {
 
     const debouncedApply = debounce(applyFilters, 300);
 
-    searchInput.addEventListener('input', function() {
+    searchInput.addEventListener('input', function () {
         debouncedApply();
     });
 
-    searchButton.addEventListener('click', function(e) {
+    searchButton.addEventListener('click', function (e) {
         e.preventDefault();
         applyFilters();
     });
 
-    searchInput.addEventListener('keypress', function(e) {
+    searchInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             applyFilters();
@@ -114,7 +114,7 @@ function initPriceRange() {
 
     const debouncedApply = debounce(applyFilters, 300);
 
-    priceRange.addEventListener('input', function() {
+    priceRange.addEventListener('input', function () {
         priceDisplay.textContent = `до ${this.value} ₽`;
         debouncedApply();
     });
@@ -124,7 +124,7 @@ function initPriceRange() {
 function initNavigation() {
     const menuItems = document.querySelectorAll('.menu__item');
     menuItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             e.preventDefault();
             const page = this.textContent.trim().toLowerCase();
             navigateToPage(page);
@@ -133,7 +133,7 @@ function initNavigation() {
 
     const footerItems = document.querySelectorAll('.footer_menu__item');
     footerItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             e.preventDefault();
             const page = this.textContent.trim().toLowerCase();
             navigateToPage(page);
@@ -258,25 +258,25 @@ function createInstrumentCard(instrument) {
         </a>
     `;
 
-    cardContainer.addEventListener('mouseenter', function() {
+    cardContainer.addEventListener('mouseenter', function () {
         this.style.transform = 'translateY(-2px)';
         this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
     });
 
-    cardContainer.addEventListener('mouseleave', function() {
+    cardContainer.addEventListener('mouseleave', function () {
         this.style.transform = 'translateY(0)';
         this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     });
 
-    cardContainer.addEventListener('click', function(e) {
+    cardContainer.addEventListener('click', function (e) {
         // если клик по ссылке — пусть открывает ссылку; иначе навигация
         if (e.target.tagName.toLowerCase() === 'a') return;
         window.location.href = `instrument.html?id=${instrument.id}`;
     });
 
-    cardContainer.addEventListener('click', function() {
-    window.location.href = `instrument.html?id=${instrument.id}`;
-});
+    cardContainer.addEventListener('click', function () {
+        window.location.href = `instrument.html?id=${instrument.id}`;
+    });
 
     return cardContainer;
 }
@@ -285,13 +285,13 @@ function createInstrumentCard(instrument) {
 function navigateToPage(page) {
     const pageMap = {
         'главная': 'index_auth.html',
-        'бронирование': 'booking.html',
-        'мои бронирования': 'my-bookings.html',
-        'абонементы': 'subscriptions.html',
-        'цены': 'pricing.html',
+        'бронирование': 'index_auth.html',
+        'мои бронирования': 'my_bookings.html',
+        'абонементы': 'subscription_plans.html',
+        'цены': 'prices.html',
         'контакты': 'contacts.html',
         'профиль': 'profile.html',
-        'каталог инструментов': 'catalog.html',
+        'каталог инструментов': 'catalog_instruments.html',
         'электрогитары': 'catalog.html?category=electroguitars',
         'классические гитары': 'catalog.html?category=classicguitars',
         'бас-гитары': 'catalog.html?category=bassguitars',

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link rel="stylesheet" href="css\style.css">
-     <script src="scripts/catalog_instruments.js"></script>
+    <link rel="stylesheet" href="css\style.css">
+    <script src="scripts/catalog_instruments.js"></script>
     <title>Каталог инструментов</title>
 </head>
 
@@ -17,12 +17,13 @@
             </div>
             <nav class="menu">
                 <a class="menu__item" href="index_auth.html">Главная</a>
-                <a class="menu__item" href="#">Бронирование</a>
-                <a class="menu__item" href="#">Мои бронирования</a>
-                <a class="menu__item" href="#">Абонементы</a>
-                <a class="menu__item" href="#">Цены</a>
-                <a class="menu__item" href="#">Контакты</a>
-                <a class="menu__item" href="#">Профиль</a>
+                <a class="menu__item" href="index_auth.html">Бронирование</a>
+                <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
+                <a class="menu__item" href="subscription_plans.html">Абонементы</a>
+                <a class="menu__item" href="prices.html">Цены</a>
+                <a class="menu__item" href="contacts.html">Контакты</a>
+                <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</a>
+                    <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</a>
             </nav>
         </header>
         <main class="main_cat">
@@ -44,13 +45,13 @@
                 <div id="price-container"></div>
                 <h1 class="filters_h">Цвет</h1>
                 <select name="colors" id="colors">
-                     <option value="Все">Все</option>
+                    <option value="Все">Все</option>
                     <option value="Чёрный">Чёрный</option>
                     <option value="Белый">Белый</option>
                     <option value="Синий">Синий</option>
                     <option value="Красный">Красный</option>
                     <option value="Зелёный">Зелёный</option>
-                     <option value="Санбёрст">Санбёрст</option>
+                    <option value="Санбёрст">Санбёрст</option>
                 </select>
                 <h1 class="filters_h">Удобство</h1>
                 <p><input type="checkbox" name="handedness" value="lefty">Левша</p>
@@ -58,14 +59,14 @@
             </section>
 
             <section class="cards">
-    <div class="controls">
-        <input type="search" placeholder="Поиск..." id="site-search" name="q" />
-        <button id="search-button">Search</button>
-        
-    </div>
+                <div class="controls">
+                    <input type="search" placeholder="Поиск..." id="site-search" name="q" />
+                    <button id="search-button">Search</button>
 
-    <div class="product-list"></div>
-</section>
+                </div>
+
+                <div class="product-list"></div>
+            </section>
         </main>
         <footer class="footer">
             <section class="instruments">

@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('Страница заказа загружена. Заполняем данные...');
 
     // 1. Получаем данные пользователя из localStorage
     const userDataString = localStorage.getItem('userData');
     let userData = { firstName: 'Гость', lastName: 'Гость' }; // По умолчанию
-    
+
     if (userDataString) {
         try {
             userData = JSON.parse(userDataString);
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 3. Находим элементы на странице
     const lastNameInput = document.querySelector('input[placeholder="Иванов"]');
     const firstNameInput = document.querySelector('input[placeholder="Иван"]');
-    
+
     // Элементы, которые нужно найти (добавьте им ID в HTML)
     const orderTitle = document.getElementById('order-title');
     const orderInstrument = document.getElementById('order-instrument');
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
             orderTotal.textContent = 'Итого: ₽0';
         }
     }
-    
+
     // 6. (Опционально) Очищаем sessionStorage после использования,
     // чтобы этот заказ не показался снова при обновлении
     // sessionStorage.removeItem('currentBooking');
