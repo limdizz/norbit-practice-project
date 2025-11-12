@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выход из профиля</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: #f8f8f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .logout-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 40px 60px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .redirect {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+    <script src="scripts/log_out.js" defer></script>
+</head>
+
+<body>
+    <div class="logout-box">
+        <h1>Вы вышли из профиля</h1>
+        <p>Все данные сессии были успешно очищены.</p>
+        <p class="redirect">Переход на страницу входа через 3 секунды...</p>
+    </div>
+</body>
+
+</html>

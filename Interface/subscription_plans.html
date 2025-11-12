@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Абонементы — MusicRent</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background-color: #f6f6f6;
+            font-family: Arial, sans-serif;
+        }
+
+        .plans-container {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .plan-card {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 320px;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .plan-card h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .plan-card .price {
+            font-size: 28px;
+            color: #e44d26;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .plan-card ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .plan-card ul li {
+            margin: 8px 0;
+            color: #444;
+        }
+
+        .plan-card button {
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .plan-card button:hover {
+            background-color: white;
+            color: black;
+        }
+
+
+        .header a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script src="scripts/subscription_plans.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header__logo">
+            <img src="img/logo.png" alt="logo" width="100" height="100">
+        </div>
+        <nav class="menu">
+            <a class="menu__item" href="index_auth.html">Главная</a>
+            <a class="menu__item" href="index_auth.html">Бронирование</a>
+            <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
+            <a class="menu__item" href="subscription_plans.html">Абонементы</a>
+            <a class="menu__item" href="prices.html">Цены</a>
+            <a class="menu__item" href="contacts.html">Контакты</a>
+
+            <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</a>
+                <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="plans-container">
+            <div class="plan-card">
+                <h2>🎵 Рядовой (Private)</h2>
+                <p class="price">₽499 / месяц</p>
+                <ul>
+                    <li>5 доступных сеансов записи</li>
+                    <li>Бронирование до 2 инструментов</li>
+                    <li>Поддержка по e-mail</li>
+                </ul>
+                <button onclick="subscribe('Базовый', 499)">Выбрать</button>
+            </div>
+
+            <div class="plan-card">
+                <h2>🎶 Ветеран (Veteran)</h2>
+                <p class="price">₽999 / месяц</p>
+                <ul>
+                    <li>10 доступных сеансов записи</li>
+                    <li>Бронирование до 5 инструментов</li>
+                    <li>Приоритетная поддержка</li>
+                    <li>Скидка 10% на аренду помещения</li>
+                </ul>
+                <button onclick="subscribe('Стандартный', 999)">Выбрать</button>
+            </div>
+
+            <div class="plan-card">
+                <h2>⭐ Завсегдатай (Regular)</h2>
+                <p class="price">₽1999 / месяц</p>
+                <ul>
+                    <li>Безлимитное бронирование инструментов</li>
+                    <li>Доступ ко всем инструментам и аксессуарам</li>
+                    <li>Личный менеджер</li>
+                    <li>Скидка 25% на аренду помещения</li>
+                </ul>
+                <button onclick="subscribe('Премиум', 1999)">Выбрать</button>
+            </div>
+        </section>
+    </main>
+    <footer class="footer">
+        <section class="instruments">
+            <a class="footer_menu__item" href="catalog_instruments.html">Каталог инструментов</a><br><br>
+            <a class="footer_menu__item" href="#">Электрогитары</a><br>
+            <a class="footer_menu__item" href="#">Классические гитары</a><br>
+            <a class="footer_menu__item" href="#">Бас-гитары</a><br>
+            <a class="footer_menu__item" href="#">Синтезаторы</a><br>
+            <a class="footer_menu__item" href="#">Ударные установки</a><br>
+            <a class="footer_menu__item" href="#">Микрофоны</a><br><br>
+        </section>
+
+        <section class="rooms">
+            <a class="footer_menu__item" href="#">Помещения</a><br><br>
+            <a class="footer_menu__item" href="#">Студия звукозаписи</a><br>
+            <a class="footer_menu__item" href="#">Репетиционные залы</a><br>
+            <a class="footer_menu__item" href="#">Лаунж-зоны</a><br><br>
+        </section>
+
+        <section class="contacts">
+            <a class="footer_menu__item" href="#">Студия</a><br><br>
+            <a class="footer_menu__item" href="#">О нас</a><br>
+            <a class="footer_menu__item" href="#">Новости</a><br>
+            <a class="footer_menu__item" href="#">Отзывы</a><br>
+        </section>
+    </footer>
+</body>
+
+</html>
