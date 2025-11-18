@@ -78,10 +78,36 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<UsersAdvanced>> PostUsersAdvanced(UsersAdvanced usersAdvanced)
         {
+            var exists = await _context.UsersAdvanceds
+            .AnyAsync(u => u.Email == usersAdvanced.Email);
+
+            if (exists)
+            {
+                return Conflict("Пользователь с такой почтой уже существует.");
+            }
+
+            var salt = await _context.Database
+    .SqlQueryRaw<string>("SELECT gen_salt('bf', 8) as \"Value\"")
+    .FirstOrDefaultAsync();
+
+            // То же самое для хэша
+            var hash = await _context.Database
+                .SqlQueryRaw<string>(
+                    "SELECT crypt({0}, {1}) as \"Value\"",
+                    usersAdvanced.PasswordOrigin,
+                    salt
+                )
+                .FirstOrDefaultAsync();
+
+            usersAdvanced.UserUid = Guid.NewGuid();
+            usersAdvanced.PasswordSalt = salt;
+            usersAdvanced.PasswordHash = hash;
+            usersAdvanced.RegistrationDate = DateTime.Now;
+
             _context.UsersAdvanceds.Add(usersAdvanced);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUsersAdvanced", new { id = usersAdvanced.UserUid }, usersAdvanced);
+            return CreatedAtAction(nameof(GetUsersAdvanced), new { id = usersAdvanced.UserUid }, usersAdvanced);
         }
 
         // DELETE: api/UsersAdvanced/5
@@ -103,6 +129,51 @@ namespace WebAPI.Controllers
         private bool UsersAdvancedExists(Guid id)
         {
             return _context.UsersAdvanceds.Any(e => e.UserUid == id);
+        }
+
+        // POST: api/UsersAdvanced/login
+        [HttpPost("login")]
+        public async Task<ActionResult<UsersAdvanced>> Login([FromBody] LoginRequest loginRequest)
+        {
+            if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
+            {
+                return BadRequest("Не указан email или пароль.");
+            }
+
+            // 1. Ищем пользователя по Email
+            var user = await _context.UsersAdvanceds
+                .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
+
+            if (user == null)
+            {
+                return Unauthorized("Пользователь с таким email не найден.");
+            }
+
+            // 2. Проверяем пароль через базу данных (используя сохраненную соль)
+            // Postgres функция crypt зашифрует введенный пароль с той же солью.
+            // Если результат совпадет с хэшем в базе - пароль верный.
+            var computedHash = await _context.Database
+                .SqlQueryRaw<string>(
+                    "SELECT crypt({0}, {1}) as \"Value\"",
+                    loginRequest.Password,
+                    user.PasswordSalt
+                )
+                .FirstOrDefaultAsync();
+
+            if (computedHash != user.PasswordHash)
+            {
+                return Unauthorized("Неверный пароль.");
+            }
+
+            // 3. Если всё ок, возвращаем данные пользователя (без секретов)
+            return Ok(user);
+        }
+
+        // Вспомогательный класс для получения данных (можно разместить внизу файла или внутри namespace)
+        public class LoginRequest
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
         }
     }
 }

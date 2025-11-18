@@ -1,0 +1,293 @@
+ @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+ .menu__item {
+     color: #000000;
+     text-decoration: none;
+     font-family: Inter;
+ }
+
+ .menu {
+     display: flex;
+     gap: 15px;
+     align-items: center;
+     flex-wrap: wrap;
+ }
+
+ .header {
+     display: flex;
+     justify-content: space-between;
+     padding-bottom: 20px;
+     border-bottom: 1px solid #000000;
+
+ }
+
+ .main {
+     padding: 20px;
+
+     
+ }
+ .main_cat {
+    display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+ }
+
+ .header__logo {
+     display: flex;
+     align-items: center;
+ }
+
+ .about {
+     padding: 50px;
+     text-align: center;
+     font-family: Inter;
+     display: flex;
+     flex-direction: column;
+ }
+
+ .about_h {
+     font-size: 60px;
+ }
+
+ .about_button {
+     margin-top: 25px;
+     padding: 19px;
+     background-color: black;
+     color: white;
+     font-size: 19px;
+ }
+
+ .about_p {
+     font-size: 28px;
+ }
+
+ .footer {
+     margin-top: auto;
+     padding: 20px;
+     border-top: 1px solid #000000;
+     display: flex;
+     flex-direction: row;
+     justify-content: center;
+ }
+
+ .wrapper {
+     display: flex;
+     flex-direction: column;
+     min-height: 100vh;
+ }
+
+ .rooms,
+ .instruments,
+ .contacts {
+     margin-right: 40px;
+     color: #000000;
+     font-family: Inter;
+ }
+
+ .menu__item__button {
+     padding: 5px;
+     background-color: black;
+     color: white;
+     font-family: Inter;
+ }
+
+ .about_button:hover {
+     padding: 20px;
+     background-color: white;
+     color: black;
+ }
+
+ .menu__item__button:hover {
+     background-color: white;
+     color: black;
+ }
+
+ .footer_menu__item {
+     color: #000;
+ }
+
+ .footer_menu__item:hover {
+     color: gray;
+ }
+
+ .register_h {
+     text-align: center;
+     font-size: 40px;
+     font-family: Inter;
+ }
+
+ .register_p,
+ .register_button {
+     font-size: 20px;
+     font-family: Inter;
+ }
+
+ .register_button {
+     margin-top: 40px;
+     background-color: black;
+     color: white;
+ }
+
+ .register_button:hover {
+    background-color: white;
+    color: black;
+ }
+
+ .register {
+     align-items: center;
+     display: flex;
+     flex-direction: column;
+     background: white;
+     border: 5px solid #ddd;
+     border-radius: 10px;
+     padding: 20px;
+     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+     width: fit-content;
+     margin: 0 auto;
+ }
+
+.filters {
+            display: flex;
+     flex-direction: column;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: fit-content;
+            max-width: 25%;
+            flex: 0 0 300px; 
+        }
+
+        .filters_h {
+            font-size: 20px;
+            margin: 20px 0 15px 0;
+            color: #000;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+        }
+
+         .filters_h:first-child {
+            margin-top: 0;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background-color: white;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .filters p {
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #000;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 15px 0;
+            accent-color: #000;
+        }
+
+        /* Стили для карточек товаров */
+        .cards {
+            flex: 1;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            
+        }
+
+        
+
+        .cards > input[type="search"] {
+            width: 300px;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .cards > button {
+            padding: 12px 25px;
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .cards > button:hover {
+            background-color: #333;
+        }
+
+        /* Сетка карточек товаров */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #000;
+        }
+
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .card a {
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .card a:hover {
+            color: #333;
+        }
+
+        .card_item {
+            background-color: black;
+            color: white;
+            padding: 10px;
+        }

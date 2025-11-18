@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css\style.css">
+    <script src="scripts/catalog_instruments.js" defer></script>
+    <title>Каталог инструментов</title>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header class="header">
+            <div class="header__logo">
+                <img src="img/logo.png" alt="logo" width="100" height="100">
+            </div>
+            <nav class="menu">
+                <a class="menu__item" href="index_auth.html">Главная</a>
+                <a class="menu__item" href="index_auth.html">Бронирование</a>
+                <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
+                <a class="menu__item" href="subscription_plans.html">Абонементы</a>
+                <a class="menu__item" href="prices.html">Цены</a>
+                <a class="menu__item" href="contacts.html">Контакты</a>
+                <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</a>
+                    <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</a>
+            </nav>
+        </header>
+        <main class="main_cat">
+            <section class="filters">
+                <h1 class="filters_h">Фильтры</h1>
+                <h1 class="filters_h">Категории</h1>
+                <select name="categories" id="categories">
+                    <option value="Все">Все</option>
+                    <option value="Электрогитары">Электрогитары</option>
+                    <option value="Классические гитары">Классические гитары</option>
+                    <option value="Синтезаторы">Синтезаторы</option>
+                    <option value="Ударные установки">Ударные установки</option>
+                    <option value="Микрофоны">Микрофоны</option>
+                    <option value="Бас-гитары">Бас-гитары</option>
+                </select>
+                <p><input type="checkbox" name="current_status" value="excellent">Отличное состояние</p>
+                <p><input type="checkbox" name="current_status" value="new">Новое</p>
+                <h1 class="filters_h">Цена</h1>
+                <div id="price-container"></div>
+                <h1 class="filters_h">Цвет</h1>
+                <select name="colors" id="colors">
+                    <option value="Все">Все</option>
+                    <option value="Чёрный">Чёрный</option>
+                    <option value="Белый">Белый</option>
+                    <option value="Синий">Синий</option>
+                    <option value="Красный">Красный</option>
+                    <option value="Зелёный">Зелёный</option>
+                    <option value="Санбёрст">Санбёрст</option>
+                </select>
+                <h1 class="filters_h">Удобство</h1>
+                <p><input type="checkbox" name="handedness" value="lefty">Левша</p>
+                <p><input type="checkbox" name="handedness" value="righty">Правша</p>
+            </section>
+
+            <section class="cards">
+                <div class="controls">
+                    <input type="search" placeholder="Поиск..." id="site-search" name="q" />
+                    <button id="search-button">Search</button>
+
+                </div>
+
+                <div class="product-list"></div>
+            </section>
+        </main>
+        <footer class="footer">
+            <section class="instruments">
+                <a class="footer_menu__item" href="#">Каталог инструментов</a><br><br>
+                <a class="footer_menu__item" href="#">Электрогитары</a><br>
+                <a class="footer_menu__item" href="#">Классические гитары</a><br>
+                <a class="footer_menu__item" href="#">Бас-гитары</a><br>
+                <a class="footer_menu__item" href="#">Синтезаторы</a><br>
+                <a class="footer_menu__item" href="#">Ударные установки</a><br>
+                <a class="footer_menu__item" href="#">Микрофоны</a><br><br>
+            </section>
+            <section class="rooms">
+                <a class="footer_menu__item" href="#">Помещения</a><br><br>
+                <a class="footer_menu__item" href="#">Студия звукозаписи</a><br>
+                <a class="footer_menu__item" href="#">Репетиционные залы</a><br>
+                <a class="footer_menu__item" href="#">Лаунж-зоны</a><br><br>
+            </section>
+            <section class="contacts">
+                <a class="footer_menu__item" href="#">Студия</a><br><br>
+                <a class="footer_menu__item" href="#">О нас</a><br>
+                <a class="footer_menu__item" href="#">Новости</a><br>
+                <a class="footer_menu__item" href="#">Отзывы</a><br>
+            </section>
+        </footer>
+    </div>
+</body>
+
+</html>

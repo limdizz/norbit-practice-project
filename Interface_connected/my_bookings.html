@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои бронирования</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: #f5f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .booking-card {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .booking-card img {
+            width: 180px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .booking-info h2 {
+            margin: 0 0 10px;
+            color: #333;
+        }
+
+        .booking-info p {
+            margin: 6px 0;
+            color: #555;
+        }
+
+        .no-bookings {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 15px;
+            background: #007bff;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .button:hover {
+            background: white;
+            color: black;
+        }
+
+        .logout {
+            background: black;
+        }
+
+        h3.section-title {
+            margin-top: 30px;
+            border-top: 2px solid #007bff;
+            padding-top: 15px;
+            color: #007bff;
+        }
+    </style>
+    <script src="scripts/my_bookings.js" defer></script>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header__logo">
+            <img src="img/logo.png" alt="logo" width="100" height="100">
+        </div>
+        <nav class="menu">
+            <a class="menu__item" href="index_auth.html">Главная</a>
+            <a class="menu__item" href="index_auth.html">Бронирование</a>
+            <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
+            <a class="menu__item" href="subscription_plans.html">Абонементы</a>
+            <a class="menu__item" href="prices.html">Цены</a>
+            <a class="menu__item" href="contacts.html">Контакты</a>
+            <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</a>
+                <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="booking-content" class="booking-content">
+            <p>Загрузка информации...</p>
+        </div>
+        <button id="clear-history" class="button logout">Очистить историю</button>
+        <button id="to-catalog" class="button logout" onclick="location.href='catalog_instruments.html'">Бронировать
+            ещё</button>
+    </main>
+    <footer class="footer">
+        <section class="instruments">
+            <a class="footer_menu__item" href="#">Каталог инструментов</a><br><br>
+            <a class="footer_menu__item" href="#">Электрогитары</a><br>
+            <a class="footer_menu__item" href="#">Классические гитары</a><br>
+            <a class="footer_menu__item" href="#">Бас-гитары</a><br>
+            <a class="footer_menu__item" href="#">Синтезаторы</a><br>
+            <a class="footer_menu__item" href="#">Ударные установки</a><br>
+            <a class="footer_menu__item" href="#">Микрофоны</a><br><br>
+        </section>
+        <section class="rooms">
+            <a class="footer_menu__item" href="#">Помещения</a><br><br>
+            <a class="footer_menu__item" href="#">Студия звукозаписи</a><br>
+            <a class="footer_menu__item" href="#">Репетиционные залы</a><br>
+            <a class="footer_menu__item" href="#">Лаунж-зоны</a><br><br>
+        </section>
+        <section class="contacts">
+            <a class="footer_menu__item" href="#">Студия</a><br><br>
+            <a class="footer_menu__item" href="#">О нас</a><br>
+            <a class="footer_menu__item" href="#">Новости</a><br>
+            <a class="footer_menu__item" href="#">Отзывы</a><br>
+        </section>
+    </footer>
+</body>
+
+</html>
