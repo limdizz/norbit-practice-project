@@ -86,11 +86,8 @@ namespace WebAPI.Controllers
                 return Conflict("Пользователь с такой почтой уже существует.");
             }
 
-            var salt = await _context.Database
-    .SqlQueryRaw<string>("SELECT gen_salt('bf', 8) as \"Value\"")
-    .FirstOrDefaultAsync();
+            var salt = await _context.Database.SqlQueryRaw<string>("SELECT gen_salt('bf', 8) as \"Value\"").FirstOrDefaultAsync();
 
-            // То же самое для хэша
             var hash = await _context.Database
                 .SqlQueryRaw<string>(
                     "SELECT crypt({0}, {1}) as \"Value\"",
@@ -140,7 +137,6 @@ namespace WebAPI.Controllers
                 return BadRequest("Не указан email или пароль.");
             }
 
-            // 1. Ищем пользователя по Email
             var user = await _context.UsersAdvanceds
                 .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
 
@@ -149,9 +145,6 @@ namespace WebAPI.Controllers
                 return Unauthorized("Пользователь с таким email не найден.");
             }
 
-            // 2. Проверяем пароль через базу данных (используя сохраненную соль)
-            // Postgres функция crypt зашифрует введенный пароль с той же солью.
-            // Если результат совпадет с хэшем в базе - пароль верный.
             var computedHash = await _context.Database
                 .SqlQueryRaw<string>(
                     "SELECT crypt({0}, {1}) as \"Value\"",
@@ -165,15 +158,13 @@ namespace WebAPI.Controllers
                 return Unauthorized("Неверный пароль.");
             }
 
-            // 3. Если всё ок, возвращаем данные пользователя (без секретов)
             return Ok(user);
         }
 
-        // Вспомогательный класс для получения данных (можно разместить внизу файла или внутри namespace)
         public class LoginRequest
         {
-            public string Email { get; set; }
-            public string Password { get; set; }
+            public required string Email { get; set; }
+            public required string Password { get; set; }
         }
     }
 }

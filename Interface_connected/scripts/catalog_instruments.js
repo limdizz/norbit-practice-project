@@ -2,56 +2,185 @@ document.addEventListener('DOMContentLoaded', function () {
     // Инициализация всех модулей
     initFilters();
     initSearch();
-    initInstrumentCards();
+    // Загружаем данные с сервера вместо initInstrumentCards()
+    loadInstrumentsFromApi();
     initPriceRange();
     initNavigation();
     handleUrlParams();
 });
 
-// Данные инструментов (в реальном приложении будут приходить с API)
-const instrumentsData = [
-    {
-        id: 1,
-        name: "Fender Jaguar",
-        price: 2800,
-        category: "Электрогитары",
-        image: "https://bxuiiaeu1l.a.trbcdn.net/898/8p5/b4b/5kw/kcw/gwo/scw/wg8/8/8988p5b4b5kwkcwgwoscwwg88.jpg",
-        condition: "Отличное состояние",
-        color: "Санбёрст",
-        handedness: "Правша",
-        isNew: false
-    },
-    {
-        id: 2,
-        name: "Fender Jazzmaster",
-        price: 3000,
-        category: "Электрогитары",
-        image: "https://bxuiiaeu1l.a.trbcdn.net/8hw/nq5/7kq/9cs/4ww/gks/wcs/wg4/4/8hwnq57kq9cs4wwgkswcswg44.jpg",
-        condition: "Новое",
-        color: "Белый",
-        handedness: "Правша",
-        isNew: true
-    },
-    {
-        id: 3,
-        name: "Fender Stratocaster",
-        price: 2000,
-        category: "Электрогитары",
-        image: "https://86gvdq3w04.a.trbcdn.net/212/4a3/aqo/x5w/4kg/gks/0gg/sgo/w/2124a3aqox5w4kggks0ggsgow.jpg",
-        condition: "Отличное состояние",
-        color: "Чёрный",
-        handedness: "Правша",
-        isNew: false
+// Глобальная переменная для хранения данных
+let instrumentsData = [];
+
+const categoryTranslations = {
+    "Electric Guitars": "Электрогитары",
+    "Classical Guitars": "Классические гитары",
+    "Microphones": "Микрофоны",
+    "Synths": "Клавишные",
+    "Bass Guitars": "Бас-гитары",     // На случай, если появятся
+    "Drums": "Ударные установки"      // На случай, если появятся
+};
+
+async function loadInstrumentsFromApi() {
+    const productList = document.querySelector('.product-list');
+    productList.innerHTML = '<p style="text-align:center;">Загрузка инструментов...</p>';
+
+    try {
+        const response = await fetch('https://localhost:7123/api/Equipments');
+
+        if (!response.ok) {
+            throw new Error('Ошибка сети: ' + response.status);
+        }
+
+        const data = await response.json();
+
+        instrumentsData = data.map(item => {
+            // 1. Переводим категорию. Если перевода нет, оставляем как есть из БД
+            const translatedCategory = categoryTranslations[item.category] || item.category;
+
+            // 2. Определяем логику "Новизны" и "Состояния"
+            // В вашей таблице current_condition это строки "good", "excellent", "unsignificant defects"
+            // Нам нужно превратить их в красивые русские надписи
+            let conditionRus = "Хорошее";
+            let isNewBool = false;
+
+            if (item.currentCondition === "excellent") conditionRus = "Отличное состояние";
+            if (item.currentCondition === "good") conditionRus = "Хорошее состояние";
+            if (item.currentCondition === "unsignificant defects") conditionRus = "Незначительные дефекты";
+            if (item.currentCondition === "new") {
+                conditionRus = "Новое";
+                isNewBool = true;
+            }
+            if (item.currentCondition === "repairing") conditionRus = "В ремонте";
+
+            return {
+                id: item.equipmentId,
+                name: item.name,
+                price: item.rentalPrice || 0,
+                category: translatedCategory, // Используем переведенную категорию
+                condition: conditionRus,
+
+                // Заглушки для полей, которых нет в БД
+                image: item.imageUrl || "img/file_not_found.png",
+
+                // 2. Цвет. Если в БД пусто, пишем "Не указан"
+                color: item.color || "Не указан",
+
+                // 3. Левша/Правша. Если пусто - считаем Правша
+                handedness: item.handedness || "Правша",
+
+                // 4. Новизна. Берем напрямую из БД (true/false)
+                // Если в БД null, считаем false
+                isNew: item.isNew === true,
+
+                // Дополнительно сохраняем статус доступности из БД
+                isRentable: item.isRentable
+            };
+        });
+
+        // Фильтруем те, что в ремонте или недоступны (если нужно скрывать их)
+        // instrumentsData = instrumentsData.filter(i => i.isRentable); 
+
+        // 1. Заполняем фильтр (теперь там будут русские названия)
+        populateCategoryOptions();
+
+        // 2. Проверяем URL параметры
+        handleUrlParams();
+
+        checkHandednessVisibility();
+
+        // 3. Применяем фильтры
+        applyFilters();
+
+        // 4. Обновляем цены
+        updatePriceRange();
+
+    } catch (error) {
+        console.error('Ошибка при загрузке инструментов:', error);
+        productList.innerHTML = '<p style="text-align:center; color:red;">Не удалось загрузить список инструментов.</p>';
     }
-];
+}
+
+function populateCategoryOptions() {
+    const categorySelect = document.getElementById('categories');
+    if (!categorySelect) return;
+
+    const currentValue = categorySelect.value;
+
+    // Получаем уникальные категории (уже переведенные на русский)
+    const uniqueCategories = [...new Set(instrumentsData.map(i => i.category))].filter(c => c);
+
+    // Очищаем и добавляем "Все"
+    categorySelect.innerHTML = '<option value="Все">Все категории</option>';
+
+    uniqueCategories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+    });
+
+    // Восстанавливаем выбор
+    if (uniqueCategories.includes(currentValue)) {
+        categorySelect.value = currentValue;
+    }
+}
+
+function checkHandednessVisibility() {
+    const categorySelect = document.getElementById('categories');
+    const handednessContainer = document.getElementById('handedness-container');
+
+    if (!categorySelect || !handednessContainer) return;
+
+    const selectedCategory = categorySelect.value;
+
+    // Список категорий, для которых актуален этот фильтр
+    const guitarCategories = [
+        "Электрогитары",
+        "Классические гитары",
+        "Бас-гитары",
+        "Акустические гитары"
+    ];
+
+    // Проверяем, входит ли выбранная категория в список гитар
+    if (guitarCategories.includes(selectedCategory)) {
+        // Показываем
+        handednessContainer.style.display = 'block';
+    } else {
+        // Скрываем
+        handednessContainer.style.display = 'none';
+
+        // ВАЖНО: Сбрасываем галочки, чтобы скрытый фильтр не влиял на поиск
+        const checkboxes = document.querySelectorAll('input[name="handedness"]');
+        let changed = false;
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                cb.checked = false;
+                changed = true;
+            }
+        });
+
+        // Если были убраны галочки, нужно перезапустить фильтрацию
+        if (changed) {
+            applyFilters();
+        }
+    }
+}
 
 // 1. Инициализация фильтров
 function initFilters() {
     const categorySelect = document.getElementById('categories');
     const colorSelect = document.getElementById('colors');
 
-    categorySelect.addEventListener('change', applyFilters);
-    colorSelect.addEventListener('change', applyFilters);
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function () {
+            // Сначала проверяем видимость блока handedness
+            checkHandednessVisibility();
+            // Потом применяем фильтры
+            applyFilters();
+        });
+    }
+    if (colorSelect) colorSelect.addEventListener('change', applyFilters);
 
     document.querySelectorAll('input[name="current_status"]').forEach(checkbox => {
         checkbox.addEventListener('change', applyFilters);
@@ -66,6 +195,8 @@ function initFilters() {
 function initSearch() {
     const searchInput = document.getElementById('site-search');
     const searchButton = document.getElementById('search-button');
+
+    if (!searchInput || !searchButton) return;
 
     const debouncedApply = debounce(applyFilters, 300);
 
@@ -86,28 +217,22 @@ function initSearch() {
     });
 }
 
-// ---- 3. Инициализация карточек инструментов (первоначальный рендер) ----
-function initInstrumentCards() {
-    // Рендерим все элементы при загрузке (позже фильтры будут обновлять)
-    renderInstruments(instrumentsData);
-}
-
 // ---- 4. Инициализация диапазона цен ----
 function initPriceRange() {
     const priceContainer = document.getElementById('price-container');
+    if (!priceContainer) return;
 
-    const maxPriceValue = Math.max(...instrumentsData.map(i => i.price), 1000);
-    // Создаём input range динамически
+    // Создаем элементы, но max значение обновим позже
     const priceRange = document.createElement('input');
     priceRange.type = 'range';
     priceRange.min = 1;
-    priceRange.max = maxPriceValue;
-    priceRange.value = maxPriceValue;
+    priceRange.max = 10000; // Временное значение
+    priceRange.value = 10000;
     priceRange.id = 'price-range';
 
     const priceDisplay = document.createElement('span');
     priceDisplay.className = 'price-display';
-    priceDisplay.textContent = `до ${priceRange.value} ₽`;
+    priceDisplay.textContent = `Загрузка...`;
 
     priceContainer.appendChild(priceRange);
     priceContainer.appendChild(priceDisplay);
@@ -118,6 +243,19 @@ function initPriceRange() {
         priceDisplay.textContent = `до ${this.value} ₽`;
         debouncedApply();
     });
+}
+
+// Функция обновления слайдера после получения данных
+function updatePriceRange() {
+    const priceRange = document.getElementById('price-range');
+    const priceDisplay = document.querySelector('.price-display');
+
+    if (priceRange && instrumentsData.length > 0) {
+        const maxPriceValue = Math.max(...instrumentsData.map(i => i.price), 1000);
+        priceRange.max = maxPriceValue;
+        priceRange.value = maxPriceValue;
+        priceDisplay.textContent = `до ${priceRange.value} ₽`;
+    }
 }
 
 // ---- 5. Навигация ----
@@ -143,10 +281,14 @@ function initNavigation() {
 
 // ---- 6. Основная функция применения фильтров ----
 function applyFilters() {
-    const selectedCategory = document.getElementById('categories').value;
-    const selectedColor = document.getElementById('colors').value;
-    const searchTerm = (document.getElementById('site-search').value || '').trim().toLowerCase();
+    const categoryEl = document.getElementById('categories');
+    const colorEl = document.getElementById('colors');
+    const searchEl = document.getElementById('site-search');
     const priceRangeEl = document.getElementById('price-range');
+
+    const selectedCategory = categoryEl ? categoryEl.value : "Все";
+    const selectedColor = colorEl ? colorEl.value : "Все";
+    const searchTerm = (searchEl ? searchEl.value : '').trim().toLowerCase();
     const maxPrice = priceRangeEl ? parseInt(priceRangeEl.value, 10) : Infinity;
 
     const excellentCondition = !!document.querySelector('input[value="excellent"]') && document.querySelector('input[value="excellent"]').checked;
@@ -167,7 +309,7 @@ function applyFilters() {
         }
 
         // Поиск
-        if (searchTerm && !instrument.name.toLowerCase().includes(searchTerm)) {
+        if (searchTerm && instrument.name && !instrument.name.toLowerCase().includes(searchTerm)) {
             return false;
         }
 
@@ -176,8 +318,8 @@ function applyFilters() {
             return false;
         }
 
-        // Состояние
-        if (excellentCondition && instrument.condition !== "Отличное состояние") {
+        // Состояние (Маппинг API условий на фильтры)
+        if (excellentCondition && instrument.condition !== "Отличное состояние" && instrument.condition !== "Хорошее") {
             return false;
         }
         if (newCondition && !instrument.isNew) {
@@ -186,7 +328,7 @@ function applyFilters() {
 
         // Удобство (левша/правша)
         if (leftyChecked && rightyChecked) {
-            // оба выбраны — ничего не фильтруем
+            // оба выбраны
         } else if (leftyChecked && instrument.handedness !== "Левша") {
             return false;
         } else if (rightyChecked && instrument.handedness !== "Правша") {
@@ -199,16 +341,18 @@ function applyFilters() {
     renderInstruments(filteredInstruments);
 }
 
-// ---- 7. Рендеринг инструментов (чисто в .product-list) ----
+// ---- 7. Рендеринг инструментов ----
 function renderInstruments(instruments) {
     const productList = document.querySelector('.product-list');
-    productList.innerHTML = ''; // простая и надёжная очистка
+    if (!productList) return;
+
+    productList.innerHTML = '';
 
     if (instruments.length === 0) {
         const noResults = document.createElement('p');
         noResults.className = 'no-results';
         noResults.textContent = 'Инструменты не найдены. Попробуйте изменить фильтры.';
-        noResults.style.cssText = 'text-align: center; padding: 20px; color: #666;';
+        noResults.style.cssText = 'text-align: center; padding: 20px; color: #666; width: 100%;';
         productList.appendChild(noResults);
         return;
     }
@@ -236,21 +380,40 @@ function createInstrumentCard(instrument) {
         display: inline-block;
         vertical-align: top;
         width: 150px;
+        height: 275px;
     `;
 
+    // Используем заглушку, если картинки нет
+    const imgSrc = instrument.image || 'img/file_not_found.png';
+
+    const guitarCategories = [
+        "Электрогитары",
+        "Классические гитары",
+        "Бас-гитары",
+        "Акустические гитары"
+    ];
+
+    // Начинаем с цвета
+    let detailsText = instrument.color;
+
+    // Если категория относится к гитарам, добавляем ориентацию
+    if (guitarCategories.includes(instrument.category)) {
+        detailsText += ` • ${instrument.handedness}`;
+    }
+
     cardContainer.innerHTML = `
-        <img src="${instrument.image}" 
+        <img src="${imgSrc}" 
              alt="${instrument.name}" 
-             style="width: 100px; height: 300px; object-fit: cover; border-radius: 4px;">
+             style="width: 100px; height: 150px; object-fit: contain; border-radius: 4px;">
         <h3 style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">${instrument.name}</h3>
         <div style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
             <span class="condition-badge" style="background: ${instrument.isNew ? '#4CAF50' : '#2196F3'}; 
-                   color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
+                  color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
                 ${instrument.condition}
             </span>
         </div>
         <div style="color: #888; font-size: 0.75em; margin-bottom: 5px;">
-            ${instrument.color} • ${instrument.handedness}
+            ${detailsText}
         </div>
         <a href="instrument.html?id=${instrument.id}" 
            style="color: #e44d26; font-weight: bold; font-size: 1em; text-decoration: none;">
@@ -269,12 +432,7 @@ function createInstrumentCard(instrument) {
     });
 
     cardContainer.addEventListener('click', function (e) {
-        // если клик по ссылке — пусть открывает ссылку; иначе навигация
         if (e.target.tagName.toLowerCase() === 'a') return;
-        window.location.href = `instrument.html?id=${instrument.id}`;
-    });
-
-    cardContainer.addEventListener('click', function () {
         window.location.href = `instrument.html?id=${instrument.id}`;
     });
 
@@ -283,6 +441,7 @@ function createInstrumentCard(instrument) {
 
 // ---- 9. Навигация между страницами ----
 function navigateToPage(page) {
+    // Ваша логика навигации осталась без изменений
     const pageMap = {
         'главная': 'index_auth.html',
         'бронирование': 'index_auth.html',
@@ -292,12 +451,12 @@ function navigateToPage(page) {
         'контакты': 'contacts.html',
         'профиль': 'profile.html',
         'каталог инструментов': 'catalog_instruments.html',
-        'электрогитары': 'catalog.html?category=electroguitars',
-        'классические гитары': 'catalog.html?category=classicguitars',
-        'бас-гитары': 'catalog.html?category=bassguitars',
-        'синтезаторы': 'catalog.html?category=synthesizers',
-        'ударные установки': 'catalog.html?category=drums',
-        'микрофоны': 'catalog.html?category=microphones',
+        'электрогитары': 'catalog_instruments.html?category=electroguitars',
+        'классические гитары': 'catalog_instruments.html?category=classicguitars',
+        'бас-гитары': 'catalog_instruments.html?category=bassguitars',
+        'синтезаторы': 'catalog_instruments.html?category=synths',
+        'ударные установки': 'catalog_instruments.html?category=drums',
+        'микрофоны': 'catalog_instruments.html?category=microphones',
         'помещения': 'rooms.html',
         'студия звукозаписи': 'rooms.html?type=recording',
         'репетиционные залы': 'rooms.html?type=rehearsal',
@@ -331,21 +490,35 @@ function handleUrlParams() {
     const category = urlParams.get('category');
 
     if (category) {
+        const categorySelect = document.getElementById('categories');
+        if (!categorySelect) return;
+
+        // Маппинг: "ссылка в футере" -> "Русское название в фильтре"
         const categoryMap = {
             'electroguitars': 'Электрогитары',
             'classicguitars': 'Классические гитары',
             'bassguitars': 'Бас-гитары',
-            'synthesizers': 'Синтезаторы',
+            'synths': 'Клавишные',
             'drums': 'Ударные установки',
             'microphones': 'Микрофоны'
         };
 
-        if (categoryMap[category]) {
-            document.getElementById('categories').value = categoryMap[category];
-            applyFilters();
+        const targetCategory = categoryMap[category];
+
+        if (targetCategory) {
+            // Проверяем, есть ли такая категория в списке (она могла не загрузиться из БД)
+            // Для этого ищем option с таким value
+            const optionExists = Array.from(categorySelect.options).some(opt => opt.value === targetCategory);
+
+            if (optionExists) {
+                categorySelect.value = targetCategory;
+
+                // Если мы перешли на гитары, нужно сразу показать фильтр правша/левша
+                checkHandednessVisibility();
+
+                // Принудительно запускаем фильтрацию
+                applyFilters();
+            }
         }
     }
 }
-
-// Инициализация обработки URL параметров
-document.addEventListener('DOMContentLoaded', handleUrlParams);
