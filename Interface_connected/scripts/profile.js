@@ -5,8 +5,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    let bookingHistory = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
-    const subscription = JSON.parse(localStorage.getItem('subscription') || 'null');
+
+    const userEmail = userData.email;
+    const storageKey = userEmail ? `bookingHistory_${userEmail}` : 'bookingHistory_guest';
+
+    let bookingHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+    const subscriptionKey = userEmail ? `subscription_${userEmail}` : 'subscription_guest';
+    const subscription = JSON.parse(localStorage.getItem(subscriptionKey) || 'null');
 
     if (!isLoggedIn) {
         userInfoDiv.innerHTML = '<p>Вы не авторизованы. <a href="log_in.html">Войти</a></p>';
@@ -48,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => {
             if (confirm('Вы уверены, что хотите отменить абонемент?')) {
-                localStorage.removeItem('subscription');
+                localStorage.removeItem(subscriptionKey);
                 alert('Абонемент успешно отменён.');
                 location.reload();
             }
@@ -63,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
             bookingContainer.innerHTML = `
                     <div class="no-bookings">
                         <p>У вас нет активных бронирований.</p>
-                        <a href="catalog_instruments.html" class="button">Перейти в каталог</a>
+                        <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
                     </div>`;
             clearBtn.style.display = 'none';
             return;
@@ -91,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
             card.querySelector('.delete-booking').addEventListener('click', () => {
                 if (confirm('Отменить это бронирование?')) {
                     bookingHistory = bookingHistory.filter(x => String(x.bookingId) !== String(b.bookingId));
-                    localStorage.setItem('bookingHistory', JSON.stringify(bookingHistory));
+                    localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
                     renderBookings();
                 }
             });
@@ -103,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
     clearBtn.addEventListener('click', () => {
         if (confirm('Вы уверены, что хотите удалить всю историю бронирований?')) {
             bookingHistory = [];
-            localStorage.removeItem('bookingHistory');
+            localStorage.removeItem(storageKey);
             renderBookings();
         }
     });

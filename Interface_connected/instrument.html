@@ -8,6 +8,106 @@
     <script src="scripts/instrument.js" defer></script>
     <title>Детали инструмента</title>
 </head>
+<style>
+    .instrument_card {
+        display: grid;
+        /* 3 колонки: Фото (350px) | Инфо (растягивается) | Покупка (300px) */
+        grid-template-columns: 350px 1fr 300px;
+        gap: 30px;
+        align-items: start;
+
+        /* Сброс старых стилей, если они мешают (например, text-align: center) */
+        text-align: left;
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 0 15px;
+        border: none;
+        /* Убираем рамку вокруг всего, если она была */
+        background: transparent;
+        /* Убираем фон общего контейнера */
+        box-shadow: none;
+    }
+
+    /* Стили для картинки */
+    .card_column_image img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid #eee;
+        object-fit: cover;
+    }
+
+    /* Стили для центральной части */
+    .card_column_info h2 {
+        font-size: 24px;
+        color: #333;
+    }
+
+    .card_column_info h3 {
+        font-size: 16px;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .card_column_info ul {
+        padding-left: 20px;
+        color: #666;
+    }
+
+    /* Стили для правой колонки (аналог Buy Box) */
+    .card_column_buy {
+        background: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        /* Тень для выделения блока */
+        border: 1px solid #f0f0f0;
+
+        /* Липкое позиционирование */
+        position: sticky;
+        top: 20px;
+    }
+
+    /* Стили для селектов дат внутри правой колонки */
+    .card_column_buy select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    @media (max-width: 900px) {
+        .instrument_card {
+            grid-template-columns: 1fr;
+            /* Одна колонка */
+        }
+
+        /* 1. Сначала идет Фотография */
+        .card_column_image {
+            order: 1;
+            margin-bottom: 15px;
+        }
+
+        /* 2. Потом идет Цена и Кнопка (Buy Box) */
+        .card_column_buy {
+            order: 2;
+            position: static;
+            /* Отключаем "липкость", чтобы блок не плавал */
+            margin-bottom: 25px;
+            /* Отступ до описания */
+            box-shadow: none;
+            /* Можно убрать тень, чтобы выглядело чище */
+            border: 1px solid #eee;
+            /* Легкая рамка */
+        }
+
+        /* 3. В конце идет Описание и Характеристики */
+        .card_column_info {
+            order: 3;
+        }
+    }
+</style>
 
 <body>
     <div class="wrapper">
@@ -28,36 +128,67 @@
         </header>
         <main class="main">
             <section class="instrument_card">
-                <img src="https://bxuiiaeu1l.a.trbcdn.net/898/8p5/b4b/5kw/kcw/gwo/scw/wg8/8/8988p5b4b5kwkcwgwoscwwg88.jpg"
-                    width=100 height=300 alt="Fender Jaguar">
-                <h2>₽2800</h2>
-                <h2>Fender Jaguar</h2>
-                <p>Дата начала бронирования:</p>
-                <select name="start_date" id="start_date">
-                    <option value="04.11.2025">04.11.2025</option>
-                    <option value="05.11.2025">05.11.2025</option>
-                    <option value="06.11.2025">06.11.2025</option>
-                </select>
-                <p>Дата конца бронирования:</p>
-                <select name="end_date" id="end_date">
-                    <option value="05.11.2025">05.11.2025</option>
-                    <option value="06.11.2025">06.11.2025</option>
-                    <option value="07.11.2025">07.11.2025</option>
-                </select>
-                <button class="card_item" id="book_button" onclick="location.href='order.html'">Забронировать</button>
+                <div class="card_column_image">
+                    <img id="inst-image" src="" alt="Инструмент">
+                </div>
+
+                <div class="card_column_info">
+                    <span id="inst-category" style="color: #999; font-size: 0.9em;"></span>
+
+                    <h2 id="inst-name" style="margin-top: 5px;"></h2>
+
+                    <div class="specs_block">
+                        <h3>Характеристики:</h3>
+                        <ul id="inst-features"></ul>
+                    </div>
+
+                    <div class="desc_block">
+                        <h3>Описание:</h3>
+                        <p id="inst-desc"></p>
+                    </div>
+
+                    <div id="inst-details-extra" style="margin-top: 15px; color: #555;"></div>
+                </div>
+
+                <div class="card_column_buy">
+                    <div class="price_block">
+                        <span style="color: #666; font-size: 0.9em;">Цена аренды:</span>
+                        <h2 id="inst-price-display" style="color: #e44d26; margin: 5px 0;">0 ₽</h2>
+                    </div>
+
+                    <div class="date_selector">
+                        <label>С:</label>
+                        <select id="start_date"></select>
+
+                        <label>По:</label>
+                        <select id="end_date"></select>
+                    </div>
+
+                    <div class="total_calc" style="margin: 15px 0; font-weight: bold;">
+                        Итого (<span id="days-count">1</span> дн.):
+                        <span id="total-price" style="color: #e44d26;">0 ₽</span>
+                    </div>
+
+                    <button id="book_button" class="card_item"
+                        style="width: 100%; text-align: center; margin-top: 10px; cursor: pointer;">
+                        Забронировать
+                    </button>
+
+                    <div id="inst-status" style="text-align: center; margin-top: 10px; font-size: 0.8em;"></div>
+                </div>
             </section>
         </main>
         <footer class="footer">
             <section class="instruments">
-                 <a class="footer_menu__item" href="catalog_instruments.html">Каталог инструментов</a><br><br>
+                <a class="footer_menu__item" href="instruments_catalog.html">Каталог инструментов</a><br><br>
                 <a class="footer_menu__item"
-                    href="catalog_instruments.html?category=electroguitars">Электрогитары</a><br>
-                <a class="footer_menu__item" href="catalog_instruments.html?category=classicguitars">Классические
+                    href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
+                <a class="footer_menu__item" href="instruments_catalog.html?category=classicguitars">Классические
                     гитары</a><br>
-                <!-- <a class="footer_menu__item" href="catalog_instruments.html?category=bassguitars">Бас-гитары</a><br> -->
-                <a class="footer_menu__item" href="catalog_instruments.html?category=synths">Синтезаторы</a><br>
-                <!-- <a class="footer_menu__item" href="catalog_instruments.html?category=drums">Ударные установки</a><br> -->
-                <a class="footer_menu__item" href="catalog_instruments.html?category=microphones">Микрофоны</a><br><br>
+                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=bassguitars">Бас-гитары</a><br> -->
+                <a class="footer_menu__item" href="instruments_catalog.html?category=synths">Синтезаторы</a><br>
+                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=drums">Ударные установки</a><br> -->
+                <a class="footer_menu__item" href="instruments_catalog.html?category=microphones">Микрофоны</a><br><br>
             </section>
             <section class="rooms">
                 <a class="footer_menu__item" href="#">Помещения</a><br><br>

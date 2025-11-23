@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бронирование подтверждено!</title>
-    <link rel="stylesheet" href="css\style.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Каталог помещений</title>
+    <script src="scripts/rooms_catalog.js" defer></script>
 </head>
 
 <body>
@@ -21,17 +22,36 @@
                 <a class="menu__item" href="subscription_plans.html">Абонементы</a>
                 <a class="menu__item" href="prices.html">Цены</a>
                 <a class="menu__item" href="contacts.html">Контакты</a>
-                <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</a>
-                    <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</a>
+                <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</button>
+                <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</button>
             </nav>
         </header>
-        <main class="main">
-            <section class="about">
-                <h1 class="about_h">Бронирование оформлено!</h1>
-                <p class="about_p">
-                    Для просмотра подробной информации перейдите в профиль или в раздел "Мои бронирования"
-                </p>
-                <button class="about_button" onclick="location.href='my_bookings.html'">Мои бронирования</button>
+        <main class="main_cat">
+            <section class="filters">
+                <h1 class="filters_h">Фильтры</h1>
+
+                <h1 class="filters_h">Тип помещения</h1>
+                <select name="categories" id="categories">
+                    <option value="Все">Все</option>
+                    <option value="Студия звукозаписи">Студия звукозаписи</option>
+                    <option value="Репетиционный зал">Репетиционный зал</option>
+                    <option value="Лаунж-зона">Лаунж-зона</option>
+                </select>
+
+                <h1 class="filters_h">Доступность</h1>
+                <p><input type="checkbox" name="availability" value="free"> Только свободные</p>
+
+                <h1 class="filters_h">Цена за час</h1>
+                <div id="price-container"></div>
+            </section>
+
+            <section class="cards">
+                <div class="controls">
+                    <input type="search" placeholder="Поиск помещения..." id="site-search" name="q" />
+                    <button id="search-button">Найти</button>
+                </div>
+
+                <div class="product-list"></div>
             </section>
         </main>
         <footer class="footer">
@@ -39,11 +59,7 @@
                 <a class="footer_menu__item" href="instruments_catalog.html">Каталог инструментов</a><br><br>
                 <a class="footer_menu__item"
                     href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
-                <a class="footer_menu__item" href="instruments_catalog.html?category=classicguitars">Классические
-                    гитары</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=bassguitars">Бас-гитары</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=synths">Синтезаторы</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=drums">Ударные установки</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=microphones">Микрофоны</a><br><br>
             </section>
             <section class="rooms">
@@ -60,6 +76,7 @@
             </section>
         </footer>
     </div>
+
 
 </body>
 

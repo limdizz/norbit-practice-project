@@ -4,7 +4,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const bookingContainer = document.getElementById('booking-content');
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    let bookingHistory = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
+
+    const userEmail = userData.email;
+    const storageKey = userEmail ? `bookingHistory_${userEmail}` : 'bookingHistory_guest';
+
+    let bookingHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
     if (!isLoggedIn) {
         bookingContainer.innerHTML = `
@@ -26,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="no-bookings">
                 <h2>У вас пока нет бронирований</h2>
                 <p>Перейдите в каталог и выберите инструмент для аренды.</p>
-                <a href="catalog_instruments.html" class="button">Перейти в каталог</a>
+                <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
             </div>
         `;
         return;
@@ -64,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 bookingHistory = bookingHistory.filter(b => String(b.bookingId) !== String(bookingId));
 
                 // Сохраняем обновлённый список в localStorage
-                localStorage.setItem('bookingHistory', JSON.stringify(bookingHistory));
+                localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
 
                 // Убираем карточку из DOM
                 card.remove();
@@ -75,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     bookingContainer.innerHTML = `
                         <div class="no-bookings">
                             <h2>У вас больше нет бронирований</h2>
-                            <a href="catalog_instruments.html" class="button">Перейти в каталог</a>
+                            <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
                         </div>
                     `;
                 }
@@ -102,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
         clearBtn.addEventListener('click', function () {
             if (confirm('Вы уверены, что хотите удалить всю историю бронирований?')) {
                 bookingHistory = [];
-                localStorage.removeItem('bookingHistory');
+                localStorage.removeItem(storageKey);
                 location.reload();
                 updateClearButtonVisibility();
             }

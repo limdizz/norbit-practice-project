@@ -4,102 +4,117 @@ document.addEventListener('DOMContentLoaded', function () {
     // Инициализация страницы
     initializePage();
 
-    // Слушаем изменения URL (при нажатии назад/вперед)
+    // Слушаем изменения URL
     window.addEventListener('popstate', function () {
         console.log('Обнаружено изменение истории браузера');
         initializePage();
     });
 });
 
+// Глобальная переменная для хранения текущего загруженного инструмента
+let currentInstrument = null;
+
+// Словари для перевода (как в каталоге)
+const categoryTranslations = {
+    "Electric Guitars": "Электрогитары",
+    "Classical Guitars": "Классические гитары",
+    "Microphones": "Микрофоны",
+    "Synths": "Клавишные",
+    "Bass Guitars": "Бас-гитары",
+    "Drums": "Ударные установки"
+};
+
 function initializePage() {
     loadInstrumentData();
     initDateSelects();
-    initBookingButton();
     initNavigation();
-    initPriceCalculation();
+    // initPriceCalculation и initBookingButton вызываются внутри loadInstrumentData после загрузки данных
 }
 
-// База данных инструментов (должна совпадать с catalog_instruments.js)
-const instrumentsDatabase = {
-    1: {
-        id: 1,
-        name: "Fender Jaguar",
-        price: 2800,
-        image: "https://bxuiiaeu1l.a.trbcdn.net/898/8p5/b4b/5kw/kcw/gwo/scw/wg8/8/8988p5b4b5kwkcwgwoscwwg88.jpg",
-        category: "Электрогитары",
-        description: "Легендарная электрогитара Fender Jaguar с уникальным звучанием и стильным дизайном. Идеальна для альтернативного рока и инди-музыки.",
-        features: ["22 лада", "Два сингловых звукоснимателя", "Тремоло система", "Корпус из ольхи"],
-        condition: "Отличное состояние",
-        color: "Санбёрст",
-        handedness: "Правша",
-        isNew: false
-    },
-    2: {
-        id: 2,
-        name: "Fender Jazzmaster",
-        price: 3000,
-        image: "https://bxuiiaeu1l.a.trbcdn.net/8hw/nq5/7kq/9cs/4ww/gks/wcs/wg4/4/8hwnq57kq9cs4wwgkswcswg44.jpg",
-        category: "Электрогитары",
-        description: "Fender Jazzmaster - классика для джазовых и рок-гитаристов. Уникальная форма корпуса и богатый звук.",
-        features: ["21 лад", "Два сингловых звукоснимателя", "Фиксированный бридж", "Корпус из ясеня"],
-        condition: "Новое",
-        color: "Белый",
-        handedness: "Правша",
-        isNew: true
-    },
-    3: {
-        id: 3,
-        name: "Fender Stratocaster",
-        price: 2000,
-        image: "https://86gvdq3w04.a.trbcdn.net/212/4a3/aqo/x5w/4kg/gks/0gg/sgo/w/2124a3aqox5w4kggks0ggsgow.jpg",
-        category: "Электрогитары",
-        description: "Самая узнаваемая электрогитара в мире. Fender Stratocaster предлагает универсальное звучание для любого стиля.",
-        features: ["21 лад", "Три сингловых звукоснимателя", "Тремоло система", "Корпус из ольхи"],
-        condition: "Отличное состояние",
-        color: "Чёрный",
-        handedness: "Правша",
-        isNew: false
-    }
-};
-
-// 1. Загрузка данных инструмента из URL параметров
-function loadInstrumentData() {
+// 1. Загрузка данных инструмента из API
+async function loadInstrumentData() {
     const instrumentId = getInstrumentIdFromURL();
-    console.log('Загружаем инструмент с ID:', instrumentId, 'из URL:', window.location.href);
+    console.log('Загружаем инструмент с ID:', instrumentId);
 
-    const instrument = instrumentsDatabase[instrumentId];
-    localStorage.setItem('lastInstrumentId', instrumentId);
-    if (instrument) {
-        renderInstrumentDetails(instrument);
-        updatePageTitle(instrument.name);
-        updateBookingButton(instrument.id);
+    if (!instrumentId) {
+        showInstrumentNotFound();
+        return;
+    }
 
-        // Добавляем в историю браузера
+    try {
+        // Запрос к API
+        const response = await fetch(`https://localhost:7123/api/Equipments/${instrumentId}`);
+
+        if (!response.ok) {
+            throw new Error('Инструмент не найден');
+        }
+
+        const apiData = await response.json();
+
+        // Преобразуем данные из формата БД в формат для UI
+        currentInstrument = mapApiDataToUi(apiData);
+
+        // Рендерим страницу
+        renderInstrumentDetails(currentInstrument);
+        updatePageTitle(currentInstrument.name);
+
+        // Инициализируем зависимые элементы
+        updateBookingButton();
+        initPriceCalculation(); // Запускаем расчет цены только когда данные есть
+
+        // История браузера
         addToBrowserHistory(instrumentId);
-    } else {
+
+    } catch (error) {
+        console.error('Ошибка загрузки:', error);
         showInstrumentNotFound();
     }
+}
+
+// Функция преобразования данных из БД (C#) в формат JS
+function mapApiDataToUi(item) {
+    // Перевод категории
+    const translatedCategory = categoryTranslations[item.category] || item.category;
+
+    // Перевод состояния
+    let conditionRus = "Хорошее";
+    let isNewBool = false;
+
+    if (item.currentCondition === "excellent") conditionRus = "Отличное состояние";
+    if (item.currentCondition === "good") conditionRus = "Хорошее состояние";
+    if (item.currentCondition === "unsignificant defects") conditionRus = "Незначительные дефекты";
+    if (item.currentCondition === "new") {
+        conditionRus = "Новое";
+        isNewBool = true;
+    }
+
+    // Заглушка для характеристик (features), так как их нет в этой таблице БД
+    // Можно распарсить description или оставить стандартные
+    const featuresList = [
+        item.color ? `Цвет: ${item.color}` : "Цвет не указан",
+        item.handedness ? `Ориентация: ${item.handedness}` : "Универсальный",
+        item.isRentable ? "Доступен для аренды" : "Временно недоступен"
+    ];
+
+    return {
+        id: item.equipmentId,
+        name: item.name,
+        price: item.rentalPrice || 0,
+        image: item.imageUrl || "img/file_not_found.png",
+        category: translatedCategory,
+        description: item.description || "Описание отсутствует",
+        features: featuresList,
+        condition: conditionRus,
+        color: item.color || "Не указан",
+        handedness: item.handedness || "Правша",
+        isNew: item.isNew === true
+    };
 }
 
 function getInstrumentIdFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
-
-    let instrumentId = id ? parseInt(id) : null;
-
-    // Если ID нет в URL, пробуем взять из localStorage
-    if (!instrumentId || !instrumentsDatabase[instrumentId]) {
-        const savedId = localStorage.getItem('lastInstrumentId');
-        if (savedId && instrumentsDatabase[savedId]) {
-            console.log('Восстанавливаем ID инструмента из localStorage:', savedId);
-            instrumentId = parseInt(savedId);
-        } else {
-            console.warn('Инструмент не найден, показываем первый инструмент');
-            instrumentId = 1;
-        }
-    }
-
-    return instrumentId;
+    return id ? parseInt(id) : null;
 }
 
 // 3. Добавление в историю браузера
@@ -112,130 +127,84 @@ function addToBrowserHistory(instrumentId) {
 }
 
 // 4. Рендеринг деталей инструмента
+// Замените только функцию renderInstrumentDetails
+
 function renderInstrumentDetails(instrument) {
-    console.log('Рендерим инструмент:', instrument.name);
-
-    // Очищаем старые динамические элементы
-    clearDynamicElements();
-
-    // Обновляем изображение
-    const instrumentImage = document.querySelector('.instrument_card img');
-    if (instrumentImage) {
-        instrumentImage.src = instrument.image;
-        instrumentImage.alt = instrument.name;
-        console.log('Изображение обновлено');
+    // 1. Картинка
+    const img = document.getElementById('inst-image');
+    if (img) {
+        img.src = instrument.image;
+        img.alt = instrument.name;
     }
 
-    // Обновляем название и цену
-    const instrumentNameElements = document.querySelectorAll('.instrument_card h2');
-    if (instrumentNameElements.length >= 2) {
-        // Первый h2 - цена
-        instrumentNameElements[0].textContent = `₽${instrument.price}`;
-        // Второй h2 - название
-        instrumentNameElements[1].textContent = instrument.name;
-        console.log('Название и цена обновлены');
+    // 2. Текстовые данные
+    setText('inst-category', instrument.category);
+    setText('inst-name', instrument.name);
+    setText('inst-desc', instrument.description);
+
+    // Цена в блоке справа
+    const priceDisplay = document.getElementById('inst-price-display');
+    if (priceDisplay) {
+        priceDisplay.textContent = `${instrument.price} ₽ / сутки`;
     }
 
-    // Добавляем дополнительную информацию
-    addInstrumentDetails(instrument);
+    // 3. Характеристики (список)
+    const featuresList = document.getElementById('inst-features');
+    if (featuresList && instrument.features) {
+        featuresList.innerHTML = instrument.features
+            .map(f => `<li>${f}</li>`)
+            .join('');
+    }
+
+    // 4. Дополнительные детали (Цвет, Состояние)
+    const extraInfo = document.getElementById('inst-details-extra');
+    if (extraInfo) {
+        extraInfo.innerHTML = `
+            <p><strong>Состояние:</strong> ${instrument.condition}</p>
+            <p><strong>Цвет:</strong> ${instrument.color}</p>
+            <p><strong>Рука:</strong> ${instrument.handedness}</p>
+        `;
+    }
+
+    // 5. Статус доступности
+    const statusEl = document.getElementById('inst-status');
+    const btn = document.getElementById('book_button');
+
+    if (statusEl) {
+        if (instrument.isRentable === false) { // Если API вернул false
+            statusEl.innerHTML = '<span style="color:red">Временно недоступен</span>';
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+        } else {
+            statusEl.innerHTML = '<span style="color:green">В наличии</span>';
+            if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            }
+        }
+    }
 }
+
+// Вспомогательная функция (добавьте её, если нет)
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+// ВАЖНО: Удалите старые функции addPriceCalculator() и addInstrumentDetails(), 
+// так как теперь все элементы уже есть в HTML.
 
 // 5. Очистка динамических элементов
 function clearDynamicElements() {
-    const elementsToRemove = [
-        '.instrument-details',
-        '.price-calculator'
-    ];
-
+    const elementsToRemove = ['.instrument-details', '.price-calculator'];
     elementsToRemove.forEach(selector => {
         const element = document.querySelector(selector);
-        if (element) {
-            element.remove();
-            console.log('Удален элемент:', selector);
-        }
+        if (element) element.remove();
     });
-}
-
-// 6. Добавление дополнительной информации об инструменте
-function addInstrumentDetails(instrument) {
-    const instrumentCard = document.querySelector('.instrument_card');
-
-    // Создаем контейнер для деталей
-    const detailsContainer = document.createElement('div');
-    detailsContainer.className = 'instrument-details';
-    detailsContainer.style.cssText = `
-        margin: 20px 0;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border-left: 4px solid #007bff;
-    `;
-
-    detailsContainer.innerHTML = `
-        <h3 style="margin-top: 0; color: #333;">Описание</h3>
-        <p style="color: #666; line-height: 1.5;">${instrument.description}</p>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-            <div>
-                <h4 style="margin: 0 0 8px 0; color: #333;">Характеристики</h4>
-                <ul style="color: #666; margin: 0; padding-left: 20px;">
-                    ${instrument.features.map(feature => `<li>${feature}</li>`).join('')}
-                </ul>
-            </div>
-            <div>
-                <h4 style="margin: 0 0 8px 0; color: #333;">Детали</h4>
-                <div style="color: #666;">
-                    <p><strong>Состояние:</strong> ${instrument.condition}</p>
-                    <p><strong>Цвет:</strong> ${instrument.color}</p>
-                    <p><strong>Для:</strong> ${instrument.handedness}</p>
-                    <p><strong>Категория:</strong> ${instrument.category}</p>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Вставляем детали после изображения
-    const instrumentImage = document.querySelector('.instrument_card img');
-    instrumentImage.parentNode.insertBefore(detailsContainer, instrumentImage.nextSibling);
-
-    // Добавляем калькулятор стоимости
-    addPriceCalculator(instrument.price);
-}
-
-// 7. Добавление калькулятора стоимости
-function addPriceCalculator(dailyPrice) {
-    const instrumentCard = document.querySelector('.instrument_card');
-    const calculator = document.createElement('div');
-    calculator.className = 'price-calculator';
-    calculator.style.cssText = `
-        margin: 20px 0;
-        padding: 15px;
-        background: #e8f5e8;
-        border-radius: 8px;
-        border: 1px solid #4CAF50;
-    `;
-
-    calculator.innerHTML = `
-        <h3 style="margin-top: 0; color: #2e7d32;">Калькулятор стоимости</h3>
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <span style="color: #666;">Стоимость за день:</span>
-            <strong style="color: #e44d26;">₽${dailyPrice}</strong>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="color: #666;">Количество дней:</span>
-            <strong id="days-count" style="color: #2e7d32;">1</strong>
-        </div>
-        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc;">
-            <strong style="color: #333;">Итоговая стоимость: </strong>
-            <span id="total-price" style="color: #e44d26; font-size: 1.2em; font-weight: bold;">₽${dailyPrice}</span>
-        </div>
-    `;
-
-    // Вставляем калькулятор перед кнопкой бронирования
-    const bookButton = document.getElementById('book_button');
-    instrumentCard.insertBefore(calculator, bookButton);
-
-    console.log('Калькулятор стоимости добавлен');
 }
 
 // 8. Инициализация селектов дат
@@ -244,10 +213,8 @@ function initDateSelects() {
     const endDateSelect = document.getElementById('end_date');
 
     if (startDateSelect && endDateSelect) {
-        // Заполняем даты на 30 дней вперед
         populateDateSelects(startDateSelect, endDateSelect);
 
-        // Обновляем конечные даты при изменении начальной
         startDateSelect.addEventListener('change', function () {
             updateEndDateOptions(this.value);
             updatePriceCalculation();
@@ -261,36 +228,30 @@ function initDateSelects() {
     }
 }
 
-// 9. Заполнение селектов датами
+// 9. Заполнение селектов
 function populateDateSelects(startSelect, endSelect) {
     const today = new Date();
     startSelect.innerHTML = '';
     endSelect.innerHTML = '';
 
-    // Заполняем стартовые даты (30 дней вперёд)
     for (let i = 0; i < 30; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
-
         const dateString = formatDate(date);
         const startOption = document.createElement('option');
         startOption.value = dateString;
         startOption.textContent = dateString;
-
         startSelect.appendChild(startOption);
     }
 
-    // Заполняем конечные даты (до месяца от выбранной начальной)
     updateEndDateOptions(formatDate(today));
 
-    // Устанавливаем значения по умолчанию: сегодня и через день
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     startSelect.value = formatDate(today);
     endSelect.value = formatDate(tomorrow);
 }
 
-// 10. Обновление опций конечной даты (до 30 дней после выбранной)
 function updateEndDateOptions(selectedStartDate) {
     const endDateSelect = document.getElementById('end_date');
     const startDate = parseDate(selectedStartDate);
@@ -298,11 +259,9 @@ function updateEndDateOptions(selectedStartDate) {
 
     endDateSelect.innerHTML = '';
 
-    // Добавляем 30 последующих дней
     for (let i = 1; i <= 30; i++) {
         const date = new Date(startDate);
         date.setDate(startDate.getDate() + i);
-
         const dateString = formatDate(date);
         const option = document.createElement('option');
         option.value = dateString;
@@ -310,7 +269,6 @@ function updateEndDateOptions(selectedStartDate) {
         endDateSelect.appendChild(option);
     }
 
-    // Устанавливаем первую доступную дату как конец по умолчанию
     if (endDateSelect.options.length > 0) {
         endDateSelect.value = endDateSelect.options[0].value;
     }
@@ -323,10 +281,8 @@ function initPriceCalculation() {
 
 // 12. Обновление расчета стоимости
 function updatePriceCalculation() {
-    const instrumentId = getInstrumentIdFromURL();
-    const instrument = instrumentsDatabase[instrumentId];
-
-    if (!instrument) return;
+    // ВАЖНО: Используем глобальную переменную currentInstrument вместо поиска в базе
+    if (!currentInstrument) return;
 
     const startDate = document.getElementById('start_date')?.value;
     const endDate = document.getElementById('end_date')?.value;
@@ -334,9 +290,8 @@ function updatePriceCalculation() {
     if (!startDate || !endDate) return;
 
     const days = calculateDaysDifference(startDate, endDate);
-    const totalPrice = days * instrument.price;
+    const totalPrice = days * currentInstrument.price;
 
-    // Обновляем отображение
     const daysCountElement = document.getElementById('days-count');
     const totalPriceElement = document.getElementById('total-price');
 
@@ -347,127 +302,123 @@ function updatePriceCalculation() {
 }
 
 // 13. Обновление кнопки бронирования
-function updateBookingButton(instrumentId) {
-    const bookButton = document.querySelector('.card_item');
+function updateBookingButton() {
+    // Ищем кнопку. В HTML она может быть кнопкой или div'ом с классом card_item, который выглядит как кнопка
+    const bookButton = document.getElementById('book_button') || document.querySelector('.card_item');
+
     if (bookButton) {
-        // Удаляем старый обработчик, если есть
+        // Клонируем, чтобы удалить старые EventListener'ы
         const newBookButton = bookButton.cloneNode(true);
         bookButton.parentNode.replaceChild(newBookButton, bookButton);
 
-        // Добавляем новый обработчик
         newBookButton.addEventListener('click', function (e) {
             e.preventDefault();
-            handleBooking(instrumentId);
+            handleBooking();
         });
 
-        console.log('Кнопка бронирования обновлена');
+        // Добавляем ID, если его не было, для удобства
+        if (!newBookButton.id) newBookButton.id = 'book_button';
     }
 }
 
 // 14. Обработка бронирования
-function handleBooking(instrumentId) {
-    const instrument = instrumentsDatabase[instrumentId];
+function handleBooking() {
+    // Используем currentInstrument
+    if (!currentInstrument) {
+        alert("Ошибка: Инструмент не загружен");
+        return;
+    }
+
     const startDate = document.getElementById('start_date')?.value;
     const endDate = document.getElementById('end_date')?.value;
 
-    if (!instrument || !startDate || !endDate) {
+    if (!startDate || !endDate) {
         alert('Пожалуйста, выберите даты бронирования');
         return;
     }
 
     const days = calculateDaysDifference(startDate, endDate);
-    const totalPrice = days * instrument.price;
+    const totalPrice = days * currentInstrument.price;
 
-    // Создаём объект данных бронирования
     const bookingData = {
         bookingId: 'ORD' + Date.now(),
-        instrumentId: instrument.id,
-        instrumentName: instrument.name,
-        instrumentImage: instrument.image,
+        instrumentId: currentInstrument.id,
+        instrumentName: currentInstrument.name,
+        instrumentImage: currentInstrument.image,
         startDate,
         endDate,
         days,
         totalPrice,
-        dailyPrice: instrument.price,
+        dailyPrice: currentInstrument.price,
         bookingDate: new Date().toISOString()
     };
 
-    console.log('Сохраняем данные бронирования:', bookingData);
-
     saveBookingData(bookingData);
 
-    // Сохраняем в sessionStorage для order.html
     sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
 
-    // Также дублируем в localStorage (для истории)
-    localStorage.setItem('lastBooking', JSON.stringify(bookingData));
-
-    // Переходим на страницу заказа
+    // Переход на страницу заказа
     window.location.href = 'order.html';
 }
-// 15. Сохранение данных бронирования
+
 function saveBookingData(bookingData) {
-    try {
-        // Сохраняем в sessionStorage для текущей сессии
-        sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
+    // 1. Получаем данные текущего пользователя
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userEmail = userData.email;
 
-        // Сохраняем в историю бронирований в localStorage
-        let bookingHistory = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
-        bookingHistory.push({
-            ...bookingData,
-            bookingId: Date.now() // Уникальный ID бронирования
-        });
-        localStorage.setItem('bookingHistory', JSON.stringify(bookingHistory));
-
-        console.log('Данные бронирования сохранены:', bookingData);
-    } catch (error) {
-        console.error('Ошибка при сохранении данных бронирования:', error);
+    if (!userEmail) {
+        alert("Ошибка: Пользователь не определен. Пожалуйста, войдите в систему.");
+        return;
     }
+
+    // 2. Формируем УНИКАЛЬНЫЙ ключ
+    const storageKey = `bookingHistory_${userEmail}`;
+
+    // 3. Загружаем историю ЭТОГО пользователя
+    let bookingHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+    // 4. Добавляем новое бронирование
+    bookingHistory.push({
+        ...bookingData,
+        bookingId: Date.now()
+    });
+
+    // 5. Сохраняем обратно под УНИКАЛЬНЫМ ключом
+    localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
 }
 
-// 16. Инициализация навигации
+// Вспомогательные функции навигации и дат
 function initNavigation() {
-    // Обработчики для header меню
-    const menuItems = document.querySelectorAll('.menu__item');
+    const menuItems = document.querySelectorAll('.menu__item, .footer_menu__item');
     menuItems.forEach(item => {
         item.addEventListener('click', function (e) {
+            // Если у ссылки есть href и он не #, даем браузеру перейти самому
+            const href = this.getAttribute('href');
+            if (href && href !== '#' && !href.startsWith('javascript')) {
+                return;
+            }
             e.preventDefault();
             const page = this.textContent.trim().toLowerCase();
             navigateToPage(page);
         });
     });
-
-    // Обработчики для footer меню
-    const footerItems = document.querySelectorAll('.footer_menu__item');
-    footerItems.forEach(item => {
-        item.addEventListener('click', function (e) {
-            e.preventDefault();
-            const page = this.textContent.trim().toLowerCase();
-            navigateToPage(page);
-        });
-    });
-
-    console.log('Навигация инициализирована');
 }
 
-// 17. Навигация между страницами
 function navigateToPage(page) {
     const pageMap = {
         'главная': 'index_auth.html',
-        'бронирование': 'booking.html',
+        'бронирование': 'index_auth.html',
         'мои бронирования': 'my_bookings.html',
         'абонементы': 'subscription_plans.html',
         'цены': 'prices.html',
         'контакты': 'contacts.html',
         'профиль': 'profile.html',
-        'каталог инструментов': 'catalog_instruments.html'
+        'каталог инструментов': 'instruments_catalog.html'
     };
-
     const url = pageMap[page] || 'index.html';
     window.location.href = url;
 }
 
-// 18. Вспомогательные функции
 function formatDate(date) {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -483,10 +434,9 @@ function parseDate(dateString) {
 function calculateDaysDifference(startDateStr, endDateStr) {
     const startDate = parseDate(startDateStr);
     const endDate = parseDate(endDateStr);
-
     const difference = endDate.getTime() - startDate.getTime();
     const days = Math.ceil(difference / (1000 * 3600 * 24));
-    return days > 0 ? days : 1; // Минимум 1 день
+    return days > 0 ? days : 1;
 }
 
 function updatePageTitle(instrumentName) {
@@ -494,28 +444,15 @@ function updatePageTitle(instrumentName) {
 }
 
 function showInstrumentNotFound() {
-    const main = document.querySelector('.main');
-    if (main) {
-        main.innerHTML = `
-            <div style="text-align: center; padding: 50px;">
-                <h2>Инструмент не найден</h2>
-                <p>Извините, запрашиваемый инструмент не существует.</p>
-                <button onclick="location.href='catalog.html'" 
-                        style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Вернуться в каталог
-                </button>
-            </div>
-        `;
-    }
+    const main = document.querySelector('.main') || document.body;
+    main.innerHTML = `
+        <div style="text-align: center; padding: 50px;">
+            <h2>Инструмент не найден</h2>
+            <p>Возможно, он был удален или ссылка некорректна.</p>
+            <button onclick="location.href='instruments_catalog.html'" 
+                    style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Вернуться в каталог
+            </button>
+        </div>
+    `;
 }
-
-// 19. Инициализация кнопки бронирования (отдельная функция)
-function initBookingButton() {
-    const bookButton = document.querySelector('.card_item');
-    if (bookButton) {
-        // Убираем встроенный onclick и добавляем наш обработчик
-        bookButton.removeAttribute('onclick');
-        console.log('Кнопка бронирования инициализирована');
-    }
-}
-
