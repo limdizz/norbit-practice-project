@@ -258,27 +258,6 @@ function updatePriceRange() {
     }
 }
 
-// ---- 5. Навигация ----
-function initNavigation() {
-    const menuItems = document.querySelectorAll('.menu__item');
-    menuItems.forEach(item => {
-        item.addEventListener('click', function (e) {
-            e.preventDefault();
-            const page = this.textContent.trim().toLowerCase();
-            navigateToPage(page);
-        });
-    });
-
-    const footerItems = document.querySelectorAll('.footer_menu__item');
-    footerItems.forEach(item => {
-        item.addEventListener('click', function (e) {
-            e.preventDefault();
-            const page = this.textContent.trim().toLowerCase();
-            navigateToPage(page);
-        });
-    });
-}
-
 // ---- 6. Основная функция применения фильтров ----
 function applyFilters() {
     const categoryEl = document.getElementById('categories');
@@ -401,13 +380,33 @@ function createInstrumentCard(instrument) {
         detailsText += ` • ${instrument.handedness}`;
     }
 
+    // --- НОВАЯ ЛОГИКА ДЛЯ ЦВЕТА СОСТОЯНИЯ ---
+    let conditionColor = '#2196F3'; // Синий по умолчанию (для "Хорошее" и "Новое")
+
+    switch (instrument.condition) {
+        case 'Отличное состояние':
+            conditionColor = '#4CAF50'; // Зеленый
+            break;
+        case 'Незначительные дефекты':
+            conditionColor = '#FFC107'; // Желтый (янтарный)
+            break;
+        case 'В ремонте':
+            conditionColor = '#F44336'; // Красный
+            break;
+        // case 'Новое':
+        // case 'Хорошее':
+        // default:
+        // Остается синий (#2196F3)
+    }
+    // ---------------------------------------
+
     cardContainer.innerHTML = `
         <img src="${imgSrc}" 
              alt="${instrument.name}" 
              style="width: 100px; height: 150px; object-fit: contain; border-radius: 4px;">
         <h3 style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">${instrument.name}</h3>
         <div style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
-            <span class="condition-badge" style="background: ${instrument.isNew ? '#4CAF50' : '#2196F3'}; 
+            <span class="condition-badge" style="background: ${conditionColor}; 
                   color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
                 ${instrument.condition}
             </span>
@@ -416,7 +415,7 @@ function createInstrumentCard(instrument) {
             ${detailsText}
         </div>
         <a href="instrument.html?id=${instrument.id}" 
-           style="color: #e44d26; font-weight: bold; font-size: 1em; text-decoration: none;">
+           style="color: black; font-weight: bold; font-size: 1em; text-decoration: none;">
             ₽${instrument.price}
         </a>
     `;
@@ -437,38 +436,6 @@ function createInstrumentCard(instrument) {
     });
 
     return cardContainer;
-}
-
-// ---- 9. Навигация между страницами ----
-function navigateToPage(page) {
-    // Ваша логика навигации осталась без изменений
-    const pageMap = {
-        'главная': 'index_auth.html',
-        'бронирование': 'index_auth.html',
-        'мои бронирования': 'my_bookings.html',
-        'абонементы': 'subscription_plans.html',
-        'цены': 'prices.html',
-        'контакты': 'contacts.html',
-        'профиль': 'profile.html',
-        'каталог инструментов': 'instruments_catalog.html',
-        'электрогитары': 'instruments_catalog.html?category=electroguitars',
-        'классические гитары': 'instruments_catalog.html?category=classicguitars',
-        'бас-гитары': 'instruments_catalog.html?category=bassguitars',
-        'синтезаторы': 'instruments_catalog.html?category=synths',
-        'ударные установки': 'instruments_catalog.html?category=drums',
-        'микрофоны': 'instruments_catalog.html?category=microphones',
-        'помещения': 'rooms.html',
-        'студия звукозаписи': 'rooms.html?type=recording',
-        'репетиционные залы': 'rooms.html?type=rehearsal',
-        'лаунж-зоны': 'rooms.html?type=lounge',
-        'студия': 'about.html',
-        'о нас': 'about.html',
-        'новости': 'news.html',
-        'отзывы': 'reviews.html'
-    };
-
-    const url = pageMap[page] || 'index.html';
-    window.location.href = url;
 }
 
 // ---- 10. debounce ----

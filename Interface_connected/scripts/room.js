@@ -202,29 +202,53 @@ function handleBooking() {
     if (!currentRoom) return;
 
     const date = document.getElementById('booking_date').value;
-    const hours = document.getElementById('booking_hours').value;
+    const hoursSelect = document.getElementById('booking_hours');
+    const hours = hoursSelect.value; // Получаем значение часов
     const total = parseInt(document.getElementById('total-price').textContent);
 
+    // 1. Получаем данные пользователя для уникального ключа истории
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userEmail = userData.email;
+
+    if (!userEmail) {
+        alert("Пожалуйста, войдите в систему для бронирования.");
+        window.location.href = 'log_in.html';
+        return;
+    }
+
+    // 2. Формируем объект бронирования
+    // Добавляем поле instrumentName, чтобы order.js мог его прочитать по старой логике,
+    // или используем itemName и дорабатываем order.js (сделаем второй вариант ниже)
     const bookingData = {
         bookingId: 'ROOM-' + Date.now(),
         itemId: currentRoom.id,
-        itemName: currentRoom.name,
-        itemType: 'Room', // Метка, что это помещение
+        // Сохраняем имя, цену и картинку
+        instrumentName: currentRoom.name, // Используем этот ключ для совместимости с order.js
+        itemName: currentRoom.name,       // Дублируем для ясности
+        itemType: 'Room',                 // МЕТКА: Это помещение
         image: currentRoom.image,
+
+        // Специфичные поля для комнат
         date: date,
         hours: hours,
+
+        // Общие поля цены
         totalPrice: total,
-        pricePerHour: currentRoom.price
+        pricePerHour: currentRoom.price,
+
+        bookingDate: new Date().toISOString()
     };
 
-    // Сохраняем и переходим
+    // 3. Сохраняем текущее бронирование для страницы order.html
     sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
 
-    // Также можно сохранить в историю
-    let history = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
+    // 4. Сохраняем в историю пользователя (изолированно)
+    const storageKey = `bookingHistory_${userEmail}`;
+    let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
     history.push(bookingData);
-    localStorage.setItem('bookingHistory', JSON.stringify(history));
+    localStorage.setItem(storageKey, JSON.stringify(history));
 
+    // 5. Переход на страницу заказа
     window.location.href = 'order.html';
 }
 

@@ -8,12 +8,14 @@ function subscribe(planName, price) {
         return;
     }
 
+    const subscriptionKey = `subscription_${userData.email}`;
+
     const subscription = {
         plan: planName,
         price: price,
         startDate: new Date().toLocaleDateString('ru-RU')
     };
 
-    localStorage.setItem('subscription', JSON.stringify(subscription));
+    localStorage.setItem(subscriptionKey, JSON.stringify(subscription));
     alert(`Вы успешно оформили абонемент "${planName}"!`);
 }

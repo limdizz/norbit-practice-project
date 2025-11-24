@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Микрофоны от", price: 185, unit: "в сутки" },
         { name: "Синтезаторы от", price: 1800, unit: "в сутки" },
         { name: "Бас-гитары от", price: 380, unit: "в сутки" },
-        { name: "Ударные установки Pearl Export", price: 2000, unit: "в сутки" }
+        { name: "Ударные установки от", price: 2000, unit: "в сутки" }
     ];
 
     const roomPrices = [

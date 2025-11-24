@@ -57,31 +57,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 5. Заполняем детали заказа
     if (bookingData) {
+        // Заголовок заказа
         if (orderTitle) {
             orderTitle.textContent = `Заказ №${bookingData.bookingId}`;
         }
+
+        // Название (для помещений и инструментов)
+        // Мы сохранили instrumentName в room.js для совместимости, но проверим оба поля
+        const nameText = bookingData.instrumentName || bookingData.itemName || 'Неизвестно';
+
         if (orderInstrument) {
-            orderInstrument.textContent = `Аренда инструмента: ${bookingData.instrumentName}`;
+            // Проверяем тип объекта
+            if (bookingData.itemType === 'Room') {
+                orderInstrument.textContent = `Бронирование помещения: ${nameText}`;
+            } else {
+                orderInstrument.textContent = `Аренда инструмента: ${nameText}`;
+            }
         }
+
+        // Даты и время (Самое важное отличие)
         if (orderDates) {
-            orderDates.textContent = `Срок бронирования: ${bookingData.startDate} - ${bookingData.endDate}`;
+            if (bookingData.itemType === 'Room') {
+                // ЛОГИКА ДЛЯ ПОМЕЩЕНИЙ
+                // Выводим конкретную дату и количество часов
+                orderDates.textContent = `Дата: ${bookingData.date}, Длительность: ${bookingData.hours} ч.`;
+            } else {
+                // ЛОГИКА ДЛЯ ИНСТРУМЕНТОВ (Старая)
+                orderDates.textContent = `Срок бронирования: ${bookingData.startDate} - ${bookingData.endDate}`;
+            }
         }
+
+        // Цена
         if (orderTotal) {
             orderTotal.textContent = `Итого: ₽${bookingData.totalPrice}`;
         }
     } else {
-        // Если данные о бронировании так и не нашлись
-        if (orderInstrument) {
-            orderInstrument.textContent = 'Ошибка: Детали заказа не найдены.';
-        }
-        if (orderTotal) {
-            orderTotal.textContent = 'Итого: ₽0';
-        }
+        // Ошибка, если данных нет
+        if (orderInstrument) orderInstrument.textContent = 'Ошибка: Детали заказа не найдены.';
+        if (orderTotal) orderTotal.textContent = 'Итого: ₽0';
     }
-
-    // 6. (Опционально) Очищаем sessionStorage после использования,
-    // чтобы этот заказ не показался снова при обновлении
-    // sessionStorage.removeItem('currentBooking');
-
-
 });

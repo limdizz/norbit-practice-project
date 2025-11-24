@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-       console.log(`Попытка входа через API для: ${email}`);
+        console.log(`Попытка входа через API для: ${email}`);
 
         try {
             // 3. Отправляем запрос на сервер (Backend)
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     email: userFromDb.email,
                     id: userFromDb.userUid
                 }));
-                
+
                 localStorage.setItem('isLoggedIn', 'true');
 
                 alert(`Добро пожаловать, ${userFromDb.name}!`);

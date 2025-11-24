@@ -18,18 +18,16 @@
      justify-content: space-between;
      padding-bottom: 20px;
      border-bottom: 1px solid #000000;
-
  }
 
  .main {
      padding: 20px;
-
-     
  }
+
  .main_cat {
-    display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+     display: flex;
+     flex-wrap: wrap;
+     justify-content: center;
  }
 
  .header__logo {
@@ -129,8 +127,8 @@
  }
 
  .register_button:hover {
-    background-color: white;
-    color: black;
+     background-color: white;
+     color: black;
  }
 
  .register {
@@ -146,148 +144,145 @@
      margin: 0 auto;
  }
 
-.filters {
-            display: flex;
+ .filters {
+     display: flex;
      flex-direction: column;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            height: fit-content;
-            max-width: 25%;
-            flex: 0 0 300px; 
-        }
+     background: white;
+     padding: 25px;
+     border-radius: 12px;
+     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+     height: fit-content;
+     max-width: 25%;
+     flex: 0 0 300px;
+ }
 
-        .filters_h {
-            font-size: 20px;
-            margin: 20px 0 15px 0;
-            color: #000;
-            border-bottom: 2px solid #000;
-            padding-bottom: 8px;
-        }
+ .filters_h {
+     font-size: 20px;
+     margin: 20px 0 15px 0;
+     color: #000;
+     border-bottom: 2px solid #000;
+     padding-bottom: 8px;
+ }
 
-         .filters_h:first-child {
-            margin-top: 0;
-        }
+ .filters_h:first-child {
+     margin-top: 0;
+ }
 
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            background-color: white;
-            transition: border-color 0.3s;
-        }
+ select {
+     width: 100%;
+     padding: 12px;
+     border: 2px solid #ddd;
+     border-radius: 6px;
+     font-size: 16px;
+     margin-bottom: 15px;
+     background-color: white;
+     transition: border-color 0.3s;
+ }
 
-        select:focus {
-            outline: none;
-            border-color: #000;
-        }
+ select:focus {
+     outline: none;
+     border-color: #000;
+ }
 
-        .filters p {
-            margin: 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+ .filters p {
+     margin: 12px 0;
+     display: flex;
+     align-items: center;
+     gap: 10px;
+ }
 
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #000;
-        }
+ input[type="checkbox"] {
+     width: 18px;
+     height: 18px;
+     accent-color: #000;
+ }
 
-        input[type="range"] {
-            width: 100%;
-            margin: 15px 0;
-            accent-color: #000;
-        }
+ input[type="range"] {
+     width: 100%;
+     margin: 15px 0;
+     accent-color: #000;
+ }
 
-        /* Стили для карточек товаров */
-        .cards {
-            flex: 1;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            
-        }
+ /* Стили для карточек товаров */
+ .cards {
+     flex: 1;
+     background: white;
+     padding: 30px;
+     border-radius: 12px;
+     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+ }
 
-        
+ .cards>input[type="search"] {
+     width: 300px;
+     padding: 12px 20px;
+     border: 2px solid #ddd;
+     border-radius: 25px;
+     font-size: 16px;
+     margin-right: 10px;
+ }
 
-        .cards > input[type="search"] {
-            width: 300px;
-            padding: 12px 20px;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            font-size: 16px;
-            margin-right: 10px;
-        }
+ .cards>button {
+     padding: 12px 25px;
+     background-color: #000;
+     color: white;
+     border: none;
+     border-radius: 25px;
+     font-size: 16px;
+     cursor: pointer;
+     transition: background-color 0.3s;
+ }
 
-        .cards > button {
-            padding: 12px 25px;
-            background-color: #000;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+ .cards>button:hover {
+     background-color: #333;
+ }
 
-        .cards > button:hover {
-            background-color: #333;
-        }
+ /* Сетка карточек товаров */
+ .cards-grid {
+     display: grid;
+     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+     gap: 25px;
+     margin-top: 30px;
+ }
 
-        /* Сетка карточек товаров */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
+ .card {
+     background: #f8f9fa;
+     border-radius: 12px;
+     padding: 20px;
+     text-align: center;
+     transition: transform 0.3s, box-shadow 0.3s;
+     border: 2px solid transparent;
+ }
 
-        .card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: 2px solid transparent;
-        }
+ .card:hover {
+     transform: translateY(-5px);
+     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+     border-color: #000;
+ }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            border-color: #000;
-        }
+ .card img {
+     width: 100%;
+     height: 180px;
+     object-fit: cover;
+     border-radius: 8px;
+     background-color: #ddd;
+     margin-bottom: 15px;
+ }
 
-        .card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            background-color: #ddd;
-            margin-bottom: 15px;
-        }
+ .card a {
+     display: block;
+     font-size: 20px;
+     font-weight: bold;
+     color: #000;
+     text-decoration: none;
+     margin-top: 10px;
+ }
 
-        .card a {
-            display: block;
-            font-size: 20px;
-            font-weight: bold;
-            color: #000;
-            text-decoration: none;
-            margin-top: 10px;
-        }
+ .card a:hover {
+     color: #333;
+ }
 
-        .card a:hover {
-            color: #333;
-        }
-
-        .card_item {
-            background-color: black;
-            color: white;
-            padding: 10px;
-        }
+ .card_item {
+     background-color: black;
+     color: white;
+     padding: 10px;
+ }

@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Загрузка истории бронирований...');
 
     const bookingContainer = document.getElementById('booking-content');
+    const clearBtn = document.getElementById('clear-history');
+
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 
@@ -14,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
         bookingContainer.innerHTML = `
             <div class="no-bookings">
                 <h2>Вы не авторизованы</h2>
-                <p>Пожалуйста, войдите в систему, чтобы просмотреть ваши бронирования.</p>
+                <p>Пожалуйста, войдите, чтобы просмотреть ваши бронирования.</p>
                 <a href="log_in.html" class="button">Войти</a>
             </div>
         `;
@@ -25,90 +27,106 @@ document.addEventListener('DOMContentLoaded', function () {
         bookingHistory = [];
     }
 
+    // --- ЕСЛИ НЕТ БРОНИРОВАНИЙ ---
     if (bookingHistory.length === 0) {
         bookingContainer.innerHTML = `
             <div class="no-bookings">
                 <h2>У вас пока нет бронирований</h2>
-                <p>Перейдите в каталог и выберите инструмент для аренды.</p>
+                <p>Перейдите в каталог и выберите инструмент или помещение.</p>
                 <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
             </div>
         `;
         return;
     }
 
-    // --- Рендер карточек с крестиками ---
-    bookingContainer.innerHTML = bookingHistory
-        .map(b => `
-            <div class="booking-card" data-id="${String(b.bookingId)}" 
-                style="position: relative; border: 1px solid #ccc; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                <button class="delete-booking" title="Отменить бронирование" 
-                        style="position:absolute; top:8px; right:8px; background:none; border:none; color:#e44d26; font-size:20px; cursor:pointer;">✖</button>
-                <img src="${b.instrumentImage}" alt="${b.instrumentName}" style="width:100px; height:300px; border-radius:8px;">
-                <div class="booking-info" style="margin-left: 10px;">
-                    <h2>${b.instrumentName}</h2>
-                    <p><strong>Номер бронирования:</strong> ${b.bookingId}</p>
-                    <p><strong>Дата бронирования:</strong> ${new Date(b.bookingDate).toLocaleString('ru-RU')}</p>
+    // --- РЕНДЕР КАРТОЧЕК ДЛЯ ОБОИХ ТИПОВ ---
+    function renderBookings() {
+        bookingContainer.innerHTML = '';
+
+        bookingHistory.forEach(b => {
+            const name = b.itemName || b.instrumentName || 'Без названия';
+            const image = b.image || b.instrumentImage || 'img/no-image.png';
+
+            let detailsHTML = '';
+
+            if (b.itemType === 'Room') {
+                // ▶ Новая система — помещения
+                detailsHTML = `
+                    <p><strong>Дата:</strong> ${b.date}</p>
+                    <p><strong>Длительность:</strong> ${b.hours} ч.</p>
+                    <p><strong>Цена за час:</strong> ₽${b.pricePerHour}</p>
+                `;
+            } else {
+                // ▶ Старая система — инструменты
+                detailsHTML = `
                     <p><strong>Период:</strong> ${b.startDate} – ${b.endDate} (${b.days} дн.)</p>
                     <p><strong>Цена за день:</strong> ₽${b.dailyPrice}</p>
-                    <p><strong>Итого:</strong> <span style="color:#e44d26;font-weight:bold;">₽${b.totalPrice}</span></p>
-                    <p><strong>Бронировал:</strong> ${userData.firstName || 'Неизвестно'} ${userData.lastName || ''}</p>
-                </div>
-            </div>
-        `)
-        .join('');
-
-    // --- Удаление отдельного бронирования ---
-    document.querySelectorAll('.delete-booking').forEach(button => {
-        button.addEventListener('click', function () {
-            const card = this.closest('.booking-card');
-            const bookingId = card.getAttribute('data-id');
-
-            if (confirm('Отменить это бронирование?')) {
-                // Удаляем из массива (с приведением типов)
-                bookingHistory = bookingHistory.filter(b => String(b.bookingId) !== String(bookingId));
-
-                // Сохраняем обновлённый список в localStorage
-                localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
-
-                // Убираем карточку из DOM
-                card.remove();
-                updateClearButtonVisibility();
-
-                // Проверяем, остались ли бронирования
-                if (bookingHistory.length === 0) {
-                    bookingContainer.innerHTML = `
-                        <div class="no-bookings">
-                            <h2>У вас больше нет бронирований</h2>
-                            <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
-                        </div>
-                    `;
-                }
+                `;
             }
+
+            const card = document.createElement('div');
+            card.className = 'booking-card';
+            card.dataset.id = String(b.bookingId);
+
+            card.innerHTML = `
+                <button class="delete-booking" title="Отменить бронирование" 
+                        style="position:absolute; top:8px; right:8px;">✖</button>
+
+                <img src="${image}" alt="${name}" class="booking-img">
+
+                <div class="booking-info">
+                    <h3>${name}</h3>
+                    <p style="font-size:0.85em;color:#777;">ID: ${b.bookingId}</p>
+                    <p><strong>Оформлено:</strong> ${new Date(b.bookingDate).toLocaleString('ru-RU')}</p>
+
+                    ${detailsHTML}
+
+                    <p style="margin-top:10px;font-size:1.1em;">
+                        <strong>Итого:</strong>
+                        <span style="color:#e44d26">₽${b.totalPrice}</span>
+                    </p>
+                </div>
+            `;
+
+            bookingContainer.appendChild(card);
+
+            // --- Удаление бронирования ---
+            card.querySelector('.delete-booking').addEventListener('click', () => {
+                if (confirm('Отменить это бронирование?')) {
+                    bookingHistory = bookingHistory.filter(x => String(x.bookingId) !== String(b.bookingId));
+                    localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
+                    renderBookings();
+                    updateClearButtonVisibility();
+                }
+            });
         });
-    });
-
-    // --- Очистить всю историю ---
-    const clearBtn = document.getElementById('clear-history');
-
-    function updateClearButtonVisibility() {
-        if (!clearBtn) return;
-        if (bookingHistory.length === 0) {
-            clearBtn.style.display = 'none';
-        } else {
-            clearBtn.style.display = 'inline-block'; // или 'block', в зависимости от дизайна
-        }
     }
 
-    // После загрузки страницы и рендера карточек:
+    renderBookings();
+
+    // --- ПОКАЗАТЬ ИЛИ СКРЫТЬ КНОПКУ "ОЧИСТИТЬ" ---
+    function updateClearButtonVisibility() {
+        if (!clearBtn) return;
+        clearBtn.style.display = bookingHistory.length > 0 ? 'inline-block' : 'none';
+    }
+
     updateClearButtonVisibility();
 
+    // --- ОЧИСТКА ВСЕЙ ИСТОРИИ ---
     if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
-            if (confirm('Вы уверены, что хотите удалить всю историю бронирований?')) {
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Удалить всю историю бронирований?')) {
                 bookingHistory = [];
                 localStorage.removeItem(storageKey);
-                location.reload();
+                renderBookings();
                 updateClearButtonVisibility();
+
+                bookingContainer.innerHTML = `
+                    <div class="no-bookings">
+                        <h2>У вас больше нет бронирований</h2>
+                        <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
+                    </div>
+                `;
             }
         });
     }
