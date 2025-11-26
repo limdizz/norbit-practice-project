@@ -27,9 +27,6 @@ public partial class Equipment
     [Column("handedness")]
     public string? Handedness { get; set; }
 
-    [Column("is_new")]
-    public bool? isNew { get; set; }
-
     public virtual ICollection<BookingEquipment> BookingEquipments { get; set; } = new List<BookingEquipment>();
 
     public virtual ICollection<RoomEquipment> RoomEquipments { get; set; } = new List<RoomEquipment>();

@@ -26,11 +26,16 @@
             position: relative
         }
 
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
         .booking-card img {
             width: 180px;
-            height: 120px;
+            height: 180px;
             border-radius: 8px;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         .booking-info h2 {
@@ -91,6 +96,7 @@
             <a class="menu__item" href="subscription_plans.html">Абонементы</a>
             <a class="menu__item" href="prices.html">Цены</a>
             <a class="menu__item" href="contacts.html">Контакты</a>
+
             <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</a>
                 <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</a>
         </nav>

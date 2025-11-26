@@ -74,6 +74,11 @@
         .header a:hover {
             text-decoration: underline;
         }
+
+        .plan-card button:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
     </style>
     <script src="scripts/subscription_plans.js" defer></script>
 </head>
@@ -107,7 +112,7 @@
                     <li>Бронирование до 2 инструментов</li>
                     <li>Поддержка по e-mail</li>
                 </ul>
-                <button onclick="subscribe('Базовый', 499)">Выбрать</button>
+                <button class="subscribe-btn">Выбрать</button>
             </div>
 
             <div class="plan-card">
@@ -119,7 +124,7 @@
                     <li>Приоритетная поддержка</li>
                     <li>Скидка 10% на аренду помещения</li>
                 </ul>
-                <button onclick="subscribe('Стандартный', 999)">Выбрать</button>
+                <button class="subscribe-btn">Выбрать</button>
             </div>
 
             <div class="plan-card">
@@ -131,7 +136,7 @@
                     <li>Личный менеджер</li>
                     <li>Скидка 25% на аренду помещения</li>
                 </ul>
-                <button onclick="subscribe('Премиум', 1999)">Выбрать</button>
+                <button class="subscribe-btn">Выбрать</button>
             </div>
         </section>
     </main>

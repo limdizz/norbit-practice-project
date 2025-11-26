@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Загружаем данные с сервера вместо initInstrumentCards()
     loadInstrumentsFromApi();
     initPriceRange();
-    initNavigation();
     handleUrlParams();
 });
 
@@ -19,6 +18,24 @@ const categoryTranslations = {
     "Synths": "Клавишные",
     "Bass Guitars": "Бас-гитары",     // На случай, если появятся
     "Drums": "Ударные установки"      // На случай, если появятся
+};
+
+const colorTranslations = {
+    "natural": "Натуральный",
+    "sunburst": "Санбёрст",
+    "black": "Чёрный",
+    "white": "Белый",
+    "red": "Красный",
+    "blue": "Синий",
+    "green": "Зелёный",
+    "yellow": "Жёлтый",
+    "brown": "Коричневый",
+    "gray": "Серый",
+    "purple": "Фиолетовый",
+    "pink": "Розовый",
+    "orange": "Оранжевый",
+    "silver": "Серебряный",
+    "gold": "Золотой"
 };
 
 async function loadInstrumentsFromApi() {
@@ -37,52 +54,44 @@ async function loadInstrumentsFromApi() {
         instrumentsData = data.map(item => {
             // 1. Переводим категорию. Если перевода нет, оставляем как есть из БД
             const translatedCategory = categoryTranslations[item.category] || item.category;
-
+            const translatedColor = colorTranslations[item.color?.toLowerCase()] || item.color || "Не указан";
+            const translatedHandedness = item.handedness === "lefty" ? "Левша" :
+                item.handedness === "righty" ? "Правша" : "";
             // 2. Определяем логику "Новизны" и "Состояния"
             // В вашей таблице current_condition это строки "good", "excellent", "unsignificant defects"
             // Нам нужно превратить их в красивые русские надписи
-            let conditionRus = "Хорошее";
-            let isNewBool = false;
+            let translatedCondition = "Хорошее";
 
-            if (item.currentCondition === "excellent") conditionRus = "Отличное состояние";
-            if (item.currentCondition === "good") conditionRus = "Хорошее состояние";
-            if (item.currentCondition === "unsignificant defects") conditionRus = "Незначительные дефекты";
-            if (item.currentCondition === "new") {
-                conditionRus = "Новое";
-                isNewBool = true;
-            }
-            if (item.currentCondition === "repairing") conditionRus = "В ремонте";
+            if (item.currentCondition === "excellent") translatedCondition = "Отличное состояние";
+            if (item.currentCondition === "good") translatedCondition = "Хорошее состояние";
+            if (item.currentCondition === "unsignificant defects") translatedCondition = "Незначительные дефекты";
+            if (item.currentCondition === "repairing") translatedCondition = "В ремонте";
 
             return {
                 id: item.equipmentId,
                 name: item.name,
                 price: item.rentalPrice || 0,
                 category: translatedCategory, // Используем переведенную категорию
-                condition: conditionRus,
+                condition: translatedCondition,
 
                 // Заглушки для полей, которых нет в БД
                 image: item.imageUrl || "img/file_not_found.png",
 
                 // 2. Цвет. Если в БД пусто, пишем "Не указан"
-                color: item.color || "Не указан",
+                color: translatedColor || "Не указан",
 
                 // 3. Левша/Правша. Если пусто - считаем Правша
-                handedness: item.handedness || "Правша",
-
-                // 4. Новизна. Берем напрямую из БД (true/false)
-                // Если в БД null, считаем false
-                isNew: item.isNew === true,
+                handedness: translatedHandedness || "Правша",
 
                 // Дополнительно сохраняем статус доступности из БД
                 isRentable: item.isRentable
             };
         });
 
-        // Фильтруем те, что в ремонте или недоступны (если нужно скрывать их)
-        // instrumentsData = instrumentsData.filter(i => i.isRentable); 
-
         // 1. Заполняем фильтр (теперь там будут русские названия)
         populateCategoryOptions();
+
+        populateColorOptions();
 
         // 2. Проверяем URL параметры
         handleUrlParams();
@@ -123,6 +132,36 @@ function populateCategoryOptions() {
     // Восстанавливаем выбор
     if (uniqueCategories.includes(currentValue)) {
         categorySelect.value = currentValue;
+    }
+}
+
+function populateColorOptions() {
+    const colorSelect = document.getElementById('colors');
+    if (!colorSelect) return;
+
+    // Сохраняем текущий выбор пользователя
+    const currentValue = colorSelect.value;
+
+    // Получаем список уникальных цветов из загруженных данных
+    const uniqueColors = [...new Set(instrumentsData.map(i => i.color))].filter(c => c);
+
+    // Сортируем цвета по алфавиту для красоты
+    uniqueColors.sort();
+
+    // Очищаем селект и добавляем опцию "Все"
+    colorSelect.innerHTML = '<option value="Все">Все цвета</option>';
+
+    // Создаем опции
+    uniqueColors.forEach(color => {
+        const option = document.createElement('option');
+        option.value = color;
+        option.textContent = color;
+        colorSelect.appendChild(option);
+    });
+
+    // Восстанавливаем выбор, если такой цвет всё еще существует в списке
+    if (uniqueColors.includes(currentValue)) {
+        colorSelect.value = currentValue;
     }
 }
 
@@ -170,6 +209,7 @@ function checkHandednessVisibility() {
 // 1. Инициализация фильтров
 function initFilters() {
     const categorySelect = document.getElementById('categories');
+    const conditionSelect = document.getElementById('condition')
     const colorSelect = document.getElementById('colors');
 
     if (categorySelect) {
@@ -180,6 +220,8 @@ function initFilters() {
             applyFilters();
         });
     }
+
+    if (conditionSelect) conditionSelect.addEventListener('change', applyFilters)
     if (colorSelect) colorSelect.addEventListener('change', applyFilters);
 
     document.querySelectorAll('input[name="current_status"]').forEach(checkbox => {
@@ -262,16 +304,17 @@ function updatePriceRange() {
 function applyFilters() {
     const categoryEl = document.getElementById('categories');
     const colorEl = document.getElementById('colors');
+    const conditionEl = document.getElementById('condition');
     const searchEl = document.getElementById('site-search');
     const priceRangeEl = document.getElementById('price-range');
 
     const selectedCategory = categoryEl ? categoryEl.value : "Все";
+    const selectedCondition = conditionEl ? conditionEl.value : "Все";
     const selectedColor = colorEl ? colorEl.value : "Все";
     const searchTerm = (searchEl ? searchEl.value : '').trim().toLowerCase();
     const maxPrice = priceRangeEl ? parseInt(priceRangeEl.value, 10) : Infinity;
 
-    const excellentCondition = !!document.querySelector('input[value="excellent"]') && document.querySelector('input[value="excellent"]').checked;
-    const newCondition = !!document.querySelector('input[value="new"]') && document.querySelector('input[value="new"]').checked;
+    const repairingCondition = !!document.querySelector('input[value="repairing"]') && document.querySelector('input[value="repairing"]').checked;
 
     const leftyChecked = !!document.querySelector('input[value="lefty"]') && document.querySelector('input[value="lefty"]').checked;
     const rightyChecked = !!document.querySelector('input[value="righty"]') && document.querySelector('input[value="righty"]').checked;
@@ -297,12 +340,32 @@ function applyFilters() {
             return false;
         }
 
-        // Состояние (Маппинг API условий на фильтры)
-        if (excellentCondition && instrument.condition !== "Отличное состояние" && instrument.condition !== "Хорошее") {
-            return false;
+        if (repairingCondition) {
+            // Если галочка "в ремонте" стоит - показываем ТОЛЬКО инструменты в ремонте
+            if (instrument.condition !== "В ремонте") {
+                return false;
+            }
+        } else {
+            // Если галочки нет - СКРЫВАЕМ инструменты в ремонте (по умолчанию)
+            if (instrument.condition === "В ремонте") {
+                return false;
+            }
         }
-        if (newCondition && !instrument.isNew) {
-            return false;
+
+        // Состояние
+        if (selectedCondition && selectedCondition !== "Все") {
+            // Маппинг значений из select в русские названия состояний
+            const conditionMap = {
+                'excellent': 'Отличное состояние',
+                'good': 'Хорошее состояние',
+                'unsignificant defects': 'Незначительные дефекты',
+                // 'repairing': 'В ремонте'
+            };
+
+            const targetCondition = conditionMap[selectedCondition];
+            if (targetCondition && instrument.condition !== targetCondition) {
+                return false;
+            }
         }
 
         // Удобство (левша/правша)
@@ -385,7 +448,10 @@ function createInstrumentCard(instrument) {
 
     switch (instrument.condition) {
         case 'Отличное состояние':
-            conditionColor = '#4CAF50'; // Зеленый
+            conditionColor = '#128816ff'; // Зеленый
+            break;
+        case 'Хорошее состояние':
+            conditionColor = '#07ce0eff'; // Зеленый
             break;
         case 'Незначительные дефекты':
             conditionColor = '#FFC107'; // Желтый (янтарный)
@@ -393,10 +459,8 @@ function createInstrumentCard(instrument) {
         case 'В ремонте':
             conditionColor = '#F44336'; // Красный
             break;
-        // case 'Новое':
-        // case 'Хорошее':
-        // default:
-        // Остается синий (#2196F3)
+        default:
+            conditionColor = '#2196F3'
     }
     // ---------------------------------------
 

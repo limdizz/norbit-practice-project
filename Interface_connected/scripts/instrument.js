@@ -24,6 +24,24 @@ const categoryTranslations = {
     "Drums": "Ударные установки"
 };
 
+const colorTranslations = {
+    "natural": "Натуральный",
+    "sunburst": "Санбёрст",
+    "black": "Чёрный",
+    "white": "Белый",
+    "red": "Красный",
+    "blue": "Синий",
+    "green": "Зелёный",
+    "yellow": "Жёлтый",
+    "brown": "Коричневый",
+    "gray": "Серый",
+    "purple": "Фиолетовый",
+    "pink": "Розовый",
+    "orange": "Оранжевый",
+    "silver": "Серебряный",
+    "gold": "Золотой"
+};
+
 function initializePage() {
     loadInstrumentData();
     initDateSelects();
@@ -75,23 +93,21 @@ async function loadInstrumentData() {
 function mapApiDataToUi(item) {
     // Перевод категории
     const translatedCategory = categoryTranslations[item.category] || item.category;
-
+    const translatedColor = colorTranslations[item.color?.toLowerCase()] || item.color || "Не указан";
+    const translatedHandedness = item.handedness === "lefty" ? "Левша" :
+        item.handedness === "righty" ? "Правша" : "Универсальный";
     // Перевод состояния
-    let conditionRus = "Хорошее";
-    let isNewBool = false;
+    let translatedCondition = "Хорошее";
 
-    if (item.currentCondition === "excellent") conditionRus = "Отличное состояние";
-    if (item.currentCondition === "good") conditionRus = "Хорошее состояние";
-    if (item.currentCondition === "unsignificant defects") conditionRus = "Незначительные дефекты";
-    if (item.currentCondition === "new") {
-        conditionRus = "Новое";
-        isNewBool = true;
-    }
+    if (item.currentCondition === "excellent") translatedCondition = "Отличное состояние";
+    if (item.currentCondition === "good") translatedCondition = "Хорошее состояние";
+    if (item.currentCondition === "unsignificant defects") translatedCondition = "Незначительные дефекты";
+    if (item.currentCondition === "repairing") translatedCondition = "В ремонте";
 
     // Заглушка для характеристик (features), так как их нет в этой таблице БД
     // Можно распарсить description или оставить стандартные
     const featuresList = [
-        item.color ? `Цвет: ${item.color}` : "Цвет не указан",
+        item.color ? `Цвет: ${translatedColor}` : "Цвет не указан",
         item.handedness ? `Ориентация: ${item.handedness}` : "Универсальный",
         item.isRentable ? "Доступен для аренды" : "Временно недоступен"
     ];
@@ -104,10 +120,10 @@ function mapApiDataToUi(item) {
         category: translatedCategory,
         description: item.description || "Описание отсутствует",
         features: featuresList,
-        condition: conditionRus,
-        color: item.color || "Не указан",
-        handedness: item.handedness || "Правша",
-        isNew: item.isNew === true
+        condition: translatedCondition,
+        color: translatedColor || "Не указан",
+        handedness: translatedHandedness || "Правша",
+        isRentable: item.isRentable
     };
 }
 
@@ -127,7 +143,6 @@ function addToBrowserHistory(instrumentId) {
 }
 
 // 4. Рендеринг деталей инструмента
-// Замените только функцию renderInstrumentDetails
 
 function renderInstrumentDetails(instrument) {
     // 1. Картинка
@@ -140,7 +155,7 @@ function renderInstrumentDetails(instrument) {
     // 2. Текстовые данные
     setText('inst-category', instrument.category);
     setText('inst-name', instrument.name);
-    setText('inst-desc', instrument.description);
+    // setText('inst-desc', instrument.description);
 
     // Цена в блоке справа
     const priceDisplay = document.getElementById('inst-price-display');
@@ -149,12 +164,12 @@ function renderInstrumentDetails(instrument) {
     }
 
     // 3. Характеристики (список)
-    const featuresList = document.getElementById('inst-features');
-    if (featuresList && instrument.features) {
-        featuresList.innerHTML = instrument.features
-            .map(f => `<li>${f}</li>`)
-            .join('');
-    }
+    // const featuresList = document.getElementById('inst-features');
+    // if (featuresList && instrument.features) {
+    //     featuresList.innerHTML = instrument.features
+    //         .map(f => `<li>${f}</li>`)
+    //         .join('');
+    // }
 
     // 4. Дополнительные детали (Цвет, Состояние)
     const extraInfo = document.getElementById('inst-details-extra');
@@ -162,7 +177,7 @@ function renderInstrumentDetails(instrument) {
         extraInfo.innerHTML = `
             <p><strong>Состояние:</strong> ${instrument.condition}</p>
             <p><strong>Цвет:</strong> ${instrument.color}</p>
-            <p><strong>Рука:</strong> ${instrument.handedness}</p>
+            <p><strong>Ориентация:</strong> ${instrument.handedness}</p>
         `;
     }
 
@@ -194,9 +209,6 @@ function setText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
 }
-
-// ВАЖНО: Удалите старые функции addPriceCalculator() и addInstrumentDetails(), 
-// так как теперь все элементы уже есть в HTML.
 
 // 5. Очистка динамических элементов
 function clearDynamicElements() {
