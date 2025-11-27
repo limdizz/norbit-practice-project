@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('Вход успешен:', userFromDb);
 
                 // 5. Сохраняем данные пользователя в localStorage для работы сайта
-                // (Используем поля, которые вернул сервер. Обычно они с маленькой буквы в JSON)
                 localStorage.setItem('userData', JSON.stringify({
                     firstName: userFromDb.name,     // Проверьте, как поля называются в вашей модели C#
                     lastName: userFromDb.surname,   // Скорее всего Name и Surname
@@ -63,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 localStorage.setItem('isLoggedIn', 'true');
 
                 alert(`Добро пожаловать, ${userFromDb.name}!`);
-                window.location.href = 'index_auth.html';
+                window.location.href = 'index.html';
             } else {
                 // Ошибка входа (401 или 404)
                 const errorText = await response.text();

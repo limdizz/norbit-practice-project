@@ -1,16 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Удаляем информацию о пользователе
-    localStorage.removeItem('currentUser');
-    sessionStorage.clear();
+    // 1. Очищаем ПРАВИЛЬНЫЕ ключи (те же, что задавали при входе)
+    localStorage.removeItem('userData');
+    localStorage.removeItem('isLoggedIn');
+    
+    sessionStorage.clear(); // Очищаем данные текущей сессии (текущий заказ и т.д.)
 
-    // Можно также очистить другие данные (например, токены)
-    localStorage.removeItem('authToken');
+    console.log('✅ Пользователь успешно вышел.');
 
-    // Сообщение в консоль
-    console.log('✅ Пользователь успешно вышел из профиля.');
-
-    // Перенаправляем через 3 секунды
+    // 2. Перенаправляем на главную страницу (или страницу входа)
     setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 3000);
+        window.location.href = 'index.html'; 
+    }, 1000);
 });

@@ -217,15 +217,13 @@ function handleBooking() {
     }
 
     // 2. Формируем объект бронирования
-    // Добавляем поле instrumentName, чтобы order.js мог его прочитать по старой логике,
-    // или используем itemName и дорабатываем order.js (сделаем второй вариант ниже)
     const bookingData = {
         bookingId: 'ROOM-' + Date.now(),
         itemId: currentRoom.id,
         // Сохраняем имя, цену и картинку
-        instrumentName: currentRoom.name, // Используем этот ключ для совместимости с order.js
-        itemName: currentRoom.name,       // Дублируем для ясности
-        itemType: 'Room',                 // МЕТКА: Это помещение
+        instrumentName: currentRoom.name, 
+        itemName: currentRoom.name,       
+        itemType: 'Room',                 
         image: currentRoom.image,
 
         // Специфичные поля для комнат
@@ -273,7 +271,6 @@ function initNavigation() {
             const href = this.getAttribute('href');
             if (href && href !== '#' && !href.startsWith('javascript')) return;
             e.preventDefault();
-            // Логика перехода, если используете SPA, иначе браузер сам перейдет
             if (href) window.location.href = href;
         });
     });

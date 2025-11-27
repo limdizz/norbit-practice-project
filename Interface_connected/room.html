@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали помещения</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
     <script src="scripts/room.js" defer></script>
-    <title>Детали помещения</title>
+    <script src="scripts/auth_state.js" defer></script>
 </head>
 <style>
     .instrument_card {
@@ -66,15 +67,22 @@
                 <img src="img/logo.png" alt="logo" width="100" height="100">
             </div>
             <nav class="menu">
-                <a class="menu__item" href="index_auth.html">Главная</a>
-                <a class="menu__item" href="index_auth.html">Бронирование</a>
-                <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
+                <a class="menu__item" href="index.html">Главная</a>
+                <a class="menu__item" href="index.html">Бронирование</a>
                 <a class="menu__item" href="subscription_plans.html">Абонементы</a>
                 <a class="menu__item" href="prices.html">Цены</a>
                 <a class="menu__item" href="contacts.html">Контакты</a>
 
-                <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</button>
-                <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</button>
+                <div id="user-controls" class="menu">
+                    <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
+                    <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</button>
+                    <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</button>
+                </div>
+
+                <div id="guest-controls" class="menu">
+                    <button class="menu__item__button" onclick="location.href='log_in.html'">Войти</button>
+                    <button class="menu__item__button" onclick="location.href='sign_up.html'">Регистрация</button>
+                </div>
             </nav>
         </header>
 

@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Инициализация всех модулей
     initFilters();
     initSearch();
-    // Загружаем данные с сервера вместо initInstrumentCards()
     loadInstrumentsFromApi();
     initPriceRange();
     handleUrlParams();
@@ -58,8 +57,6 @@ async function loadInstrumentsFromApi() {
             const translatedHandedness = item.handedness === "lefty" ? "Левша" :
                 item.handedness === "righty" ? "Правша" : "";
             // 2. Определяем логику "Новизны" и "Состояния"
-            // В вашей таблице current_condition это строки "good", "excellent", "unsignificant defects"
-            // Нам нужно превратить их в красивые русские надписи
             let translatedCondition = "Хорошее";
 
             if (item.currentCondition === "excellent") translatedCondition = "Отличное состояние";
@@ -71,10 +68,9 @@ async function loadInstrumentsFromApi() {
                 id: item.equipmentId,
                 name: item.name,
                 price: item.rentalPrice || 0,
-                category: translatedCategory, // Используем переведенную категорию
+                category: translatedCategory,
                 condition: translatedCondition,
 
-                // Заглушки для полей, которых нет в БД
                 image: item.imageUrl || "img/file_not_found.png",
 
                 // 2. Цвет. Если в БД пусто, пишем "Не указан"
@@ -88,7 +84,7 @@ async function loadInstrumentsFromApi() {
             };
         });
 
-        // 1. Заполняем фильтр (теперь там будут русские названия)
+        // 1. Заполняем фильтр 
         populateCategoryOptions();
 
         populateColorOptions();
@@ -443,8 +439,7 @@ function createInstrumentCard(instrument) {
         detailsText += ` • ${instrument.handedness}`;
     }
 
-    // --- НОВАЯ ЛОГИКА ДЛЯ ЦВЕТА СОСТОЯНИЯ ---
-    let conditionColor = '#2196F3'; // Синий по умолчанию (для "Хорошее" и "Новое")
+    let conditionColor = '#2196F3'; // Синий по умолчанию
 
     switch (instrument.condition) {
         case 'Отличное состояние':
@@ -537,8 +532,7 @@ function handleUrlParams() {
         const targetCategory = categoryMap[category];
 
         if (targetCategory) {
-            // Проверяем, есть ли такая категория в списке (она могла не загрузиться из БД)
-            // Для этого ищем option с таким value
+            // Проверяем, есть ли такая категория в списке
             const optionExists = Array.from(categorySelect.options).some(opt => opt.value === targetCategory);
 
             if (optionExists) {

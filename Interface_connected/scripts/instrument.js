@@ -315,7 +315,7 @@ function updatePriceCalculation() {
 
 // 13. Обновление кнопки бронирования
 function updateBookingButton() {
-    // Ищем кнопку. В HTML она может быть кнопкой или div'ом с классом card_item, который выглядит как кнопка
+    // Ищем кнопку
     const bookButton = document.getElementById('book_button') || document.querySelector('.card_item');
 
     if (bookButton) {
@@ -418,8 +418,8 @@ function initNavigation() {
 
 function navigateToPage(page) {
     const pageMap = {
-        'главная': 'index_auth.html',
-        'бронирование': 'index_auth.html',
+        'главная': 'index.html',
+        'бронирование': 'index.html',
         'мои бронирования': 'my_bookings.html',
         'абонементы': 'subscription_plans.html',
         'цены': 'prices.html',

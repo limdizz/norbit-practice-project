@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 localStorage.setItem('isLoggedIn', 'true');
 
                 alert('Регистрация прошла успешно!');
-                window.location.href = 'index_auth.html';
+                window.location.href = 'index.html';
 
             } catch (error) {
                 console.error('Ошибка при запросе к API:', error);

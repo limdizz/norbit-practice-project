@@ -215,7 +215,6 @@ function createRoomCard(room) {
     const statusColor = room.isFree ? '#4CAF50' : '#F44336';
     const statusText = room.isFree ? 'Свободно' : 'Занято';
 
-    // ОБРАТИТЕ ВНИМАНИЕ: исправлена ссылка в теге <a> на room.html
     cardContainer.innerHTML = `
                 <img src="${room.image}" alt="${room.name}" 
                      style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; background: #eee;">
@@ -245,7 +244,6 @@ function createRoomCard(room) {
     cardContainer.addEventListener('click', function (e) {
         // Если кликнули НЕ по ссылке (цене), то переходим скриптом
         if (e.target.tagName !== 'A') {
-            // РАСКОММЕНТИРОВАНО И ИСПРАВЛЕНО ИМЯ ФАЙЛА
             window.location.href = `room.html?id=${room.id}`;
         }
     });
