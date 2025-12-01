@@ -51,8 +51,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (b.itemType === 'Room') {
                 // ▶ Новая система — помещения
+                // ДОБАВЛЕНО: отображение времени начала (b.time)
                 detailsHTML = `
                     <p><strong>Дата:</strong> ${b.date}</p>
+                    <p><strong>Время начала:</strong> ${b.time || 'Не указано'}</p>
                     <p><strong>Длительность:</strong> ${b.hours} ч.</p>
                     <p><strong>Цена за час:</strong> ₽${b.pricePerHour}</p>
                 `;

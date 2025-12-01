@@ -93,12 +93,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const name = b.itemName || b.instrumentName || 'Без названия';
             const image = b.image || b.instrumentImage || 'img/no-image.png';
 
+            const pricePerHour = b.pricePerHour || b.price || 0;
+
             let detailsHTML = '';
 
             if (b.itemType === 'Room') {
-                // ШАБЛОН ДЛЯ ПОМЕЩЕНИЯ
+                // ▶ Новая система — помещения
+                // ДОБАВЛЕНО: отображение времени начала (b.time)
                 detailsHTML = `
                     <p><strong>Дата:</strong> ${b.date}</p>
+                    <p><strong>Время начала:</strong> ${b.time || 'Не указано'}</p>
                     <p><strong>Длительность:</strong> ${b.hours} ч.</p>
                     <p><strong>Цена за час:</strong> ₽${b.pricePerHour}</p>
                 `;

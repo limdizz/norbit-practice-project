@@ -31,6 +31,7 @@ const roomTypesMap = {
 function initializePage() {
     loadRoomData();
     initDateSelect();
+    initTimeSelect();
     initDurationSelect();
     initNavigation();
 }
@@ -164,6 +165,27 @@ function initDateSelect() {
     }
 }
 
+function initTimeSelect() {
+    const timeSelect = document.getElementById('booking_time');
+    if (!timeSelect) return;
+
+    timeSelect.innerHTML = '';
+
+    // Генерируем слоты времени с 10:00 до 22:00 (можно настроить под себя)
+    const startHour = 10;
+    const endHour = 22;
+
+    for (let i = startHour; i <= endHour; i++) {
+        const hourString = String(i).padStart(2, '0') + ':00';
+
+        const option = document.createElement('option');
+        option.value = hourString; // Значение, например "14:00"
+        option.textContent = hourString;
+
+        timeSelect.appendChild(option);
+    }
+}
+
 function initDurationSelect() {
     const hoursSelect = document.getElementById('booking_hours');
     if (hoursSelect) {
@@ -198,56 +220,105 @@ function updateBookingButton() {
     }
 }
 
-function handleBooking() {
+async function handleBooking() {
     if (!currentRoom) return;
 
-    const date = document.getElementById('booking_date').value;
+    // 1. Сбор данных из формы
+    const dateStr = document.getElementById('booking_date').value; // "DD.MM.YYYY"
+    const timeStr = document.getElementById('booking_time').value; // "HH:00"
     const hoursSelect = document.getElementById('booking_hours');
-    const hours = hoursSelect.value; // Получаем значение часов
-    const total = parseInt(document.getElementById('total-price').textContent);
+    const hours = parseInt(hoursSelect.value);
 
-    // 1. Получаем данные пользователя для уникального ключа истории
+    // Получение данных пользователя
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    const userEmail = userData.email;
+    const userUid = userData.userUid || userData.uid;
 
-    if (!userEmail) {
+    if (!userData.email) {
         alert("Пожалуйста, войдите в систему для бронирования.");
-        window.location.href = 'log_in.html';
+        window.location.href = 'log_in.html'; // Убедитесь, что путь верный
         return;
     }
 
-    // 2. Формируем объект бронирования
-    const bookingData = {
-        bookingId: 'ROOM-' + Date.now(),
-        itemId: currentRoom.id,
-        // Сохраняем имя, цену и картинку
-        instrumentName: currentRoom.name, 
-        itemName: currentRoom.name,       
-        itemType: 'Room',                 
-        image: currentRoom.image,
+    // 2. Парсинг даты и времени для создания объекта Date
+    const [day, month, year] = dateStr.split('.').map(Number);
+    const [bookingHour, bookingMinute] = timeStr.split(':').map(Number);
 
-        // Специфичные поля для комнат
-        date: date,
-        hours: hours,
+    // Создаем дату начала (месяц в JS начинается с 0, поэтому month - 1)
+    const startTime = new Date(year, month - 1, day, bookingHour, bookingMinute, 0);
 
-        // Общие поля цены
-        totalPrice: total,
-        pricePerHour: currentRoom.price,
+    // Рассчитываем дату окончания
+    const endTime = new Date(startTime);
+    endTime.setHours(startTime.getHours() + hours);
 
-        bookingDate: new Date().toISOString()
+    // Валидация: Нельзя забронировать на прошедшее время
+    if (startTime < new Date()) {
+        alert("Нельзя забронировать помещение на прошедшее время.");
+        return;
+    }
+
+    // 3. Формируем объект для API
+    // Важно: toISOString() переводит время в UTC. Если сервер ожидает локальное время,
+    // логика может потребовать корректировки (зависит от настроек БД PostgeSQL/MSSQL).
+    // Для базового варианта используем ISO.
+    const bookingRequest = {
+        UserUid: userUid,
+        RoomId: currentRoom.id,
+        StartTime: startTime.toISOString(),
+        EndTime: endTime.toISOString(),
+        // Статус и StaffUid заполняются на сервере
     };
 
-    // 3. Сохраняем текущее бронирование для страницы order.html
-    sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
+    try {
+        const response = await fetch('https://localhost:7123/api/BookingsAdvanced', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookingRequest)
+        });
 
-    // 4. Сохраняем в историю пользователя (изолированно)
-    const storageKey = `bookingHistory_${userEmail}`;
-    let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    history.push(bookingData);
-    localStorage.setItem(storageKey, JSON.stringify(history));
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Ошибка сервера: ${response.status} ${errorText}`);
+        }
 
-    // 5. Переход на страницу заказа
-    window.location.href = 'order.html';
+        const result = await response.json();
+        console.log('Бронь создана:', result);
+
+        // 4. Сохранение данных для отображения (frontend history)
+        const displayData = {
+            bookingId: result.bookingUid,
+            itemId: currentRoom.id,
+            instrumentName: currentRoom.name,
+            itemName: currentRoom.name,
+            itemType: 'Room',
+            image: currentRoom.image,
+
+            // Сохраняем красивые строки для вывода
+            date: dateStr,
+            time: timeStr, // Добавили время для отображения
+            hours: hours,
+            pricePerHour: currentRoom.price,
+            totalPrice: parseInt(document.getElementById('total-price').textContent),
+            bookingDate: new Date().toISOString()
+        };
+
+        // Сохраняем в SessionStorage для страницы "Заказ"
+        sessionStorage.setItem('currentBooking', JSON.stringify(displayData));
+
+        // Сохраняем в историю пользователя
+        const storageKey = `bookingHistory_${userData.email}`;
+        let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        history.push(displayData);
+        localStorage.setItem(storageKey, JSON.stringify(history));
+
+        // Переход
+        window.location.href = 'order.html';
+
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Ошибка при бронировании. Проверьте соединение или авторизацию.');
+    }
 }
 
 // Вспомогательные функции

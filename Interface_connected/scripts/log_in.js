@@ -56,7 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     firstName: userFromDb.name,     // Проверьте, как поля называются в вашей модели C#
                     lastName: userFromDb.surname,   // Скорее всего Name и Surname
                     email: userFromDb.email,
-                    id: userFromDb.userUid
+                    id: userFromDb.userUid,
+                    userUid: userFromDb.userUid
                 }));
 
                 localStorage.setItem('isLoggedIn', 'true');

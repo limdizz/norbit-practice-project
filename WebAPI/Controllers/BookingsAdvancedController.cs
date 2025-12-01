@@ -76,12 +76,78 @@ namespace WebAPI.Controllers
         // POST: api/BookingsAdvanced
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<BookingsAdvanced>> PostBookingsAdvanced(BookingsAdvanced bookingsAdvanced)
+        public async Task<ActionResult<object>> PostBookingsAdvanced(BookingsAdvanced bookingsAdvanced)
         {
-            _context.BookingsAdvanceds.Add(bookingsAdvanced);
-            await _context.SaveChangesAsync();
+            // Генерируем новый GUID
+            bookingsAdvanced.BookingUid = Guid.NewGuid();
+            bookingsAdvanced.CreationDate = DateTime.Now;
 
-            return CreatedAtAction("GetBookingsAdvanced", new { id = bookingsAdvanced.BookingUid }, bookingsAdvanced);
+            // Конвертируем UTC время в локальное для PostgreSQL
+            if (bookingsAdvanced.StartTime.HasValue)
+            {
+                bookingsAdvanced.StartTime = bookingsAdvanced.StartTime.Value.ToLocalTime();
+            }
+
+            if (bookingsAdvanced.EndTime.HasValue)
+            {
+                bookingsAdvanced.EndTime = bookingsAdvanced.EndTime.Value.ToLocalTime();
+            }
+
+            // Логика статуса
+            if (bookingsAdvanced.StartTime.HasValue && bookingsAdvanced.StartTime.Value > DateTime.Now)
+            {
+                bookingsAdvanced.Status = "in progress";
+            }
+            else
+            {
+                bookingsAdvanced.Status = "completed";
+            }
+
+            // Назначение случайного сотрудника
+            if (bookingsAdvanced.StaffUid == null)
+            {
+                var randomStaff = await _context.StaffAdvanceds
+                    .Select(s => new { s.StaffUid })
+                    .FirstOrDefaultAsync();
+
+                if (randomStaff != null)
+                {
+                    bookingsAdvanced.StaffUid = randomStaff.StaffUid;
+                }
+            }
+
+            _context.BookingsAdvanceds.Add(bookingsAdvanced);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (BookingsAdvancedExists(bookingsAdvanced.BookingUid))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            // Возвращаем только необходимые поля, избегая циклических ссылок
+            var result = new
+            {
+                bookingsAdvanced.BookingUid,
+                bookingsAdvanced.UserUid,
+                bookingsAdvanced.RoomId,
+                bookingsAdvanced.StaffUid,
+                bookingsAdvanced.StartTime,
+                bookingsAdvanced.EndTime,
+                bookingsAdvanced.Status,
+                bookingsAdvanced.CreationDate
+            };
+
+            return CreatedAtAction("GetBookingsAdvanced", new { id = bookingsAdvanced.BookingUid }, result);
         }
 
         // DELETE: api/BookingsAdvanced/5
