@@ -93,12 +93,37 @@ document.addEventListener('DOMContentLoaded', function () {
             bookingContainer.appendChild(card);
 
             // --- Удаление бронирования ---
-            card.querySelector('.delete-booking').addEventListener('click', () => {
-                if (confirm('Отменить это бронирование?')) {
-                    bookingHistory = bookingHistory.filter(x => String(x.bookingId) !== String(b.bookingId));
+            const deleteBtn = card.querySelector('.delete-booking');
+            
+            deleteBtn.addEventListener('click', async () => {
+                if (!confirm('Вы точно хотите удалить это бронирование?')) return;
+
+                const bookingId = b.bookingId;
+
+                try {
+                    // 1. Если пользователь авторизован, удаляем из БД
+                    if (isLoggedIn && bookingId) {
+                        const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/${bookingId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Ошибка при удалении из базы данных');
+                        }
+                    }
+
+                    // 2. Если успех (или гость), удаляем из LocalStorage
+                    bookingHistory = bookingHistory.filter(x => String(x.bookingId) !== String(bookingId));
                     localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
+                    
+                    // 3. Обновляем UI
                     renderBookings();
                     updateClearButtonVisibility();
+                    console.log(`Бронирование ${bookingId} удалено.`);
+
+                } catch (error) {
+                    console.error('Ошибка удаления:', error);
+                    alert('Не удалось удалить бронирование. Попробуйте позже.');
                 }
             });
         });
@@ -116,19 +141,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- ОЧИСТКА ВСЕЙ ИСТОРИИ ---
     if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            if (confirm('Удалить всю историю бронирований?')) {
+        clearBtn.addEventListener('click', async () => {
+            if (!confirm('Вы уверены, что хотите удалить ВСЮ историю бронирований? Это действие необратимо.')) return;
+
+            try {
+                // 1. Если авторизован, удаляем всё из БД по ID пользователя
+                if (isLoggedIn) {
+                    // Берем userUid из userData (убедитесь, что он там есть при логине)
+                    const userUid = userData.userUid || userData.uid; 
+                    
+                    if (userUid) {
+                        const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/byUser/${userUid}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (!response.ok && response.status !== 404) { 
+                             // 404 игнорируем, если в базе пусто, а в сторадже есть мусор
+                            throw new Error('Ошибка при очистке базы данных');
+                        }
+                    } else {
+                        console.warn('User UID не найден, удаляем только локально.');
+                    }
+                }
+
+                // 2. Очищаем LocalStorage
                 bookingHistory = [];
                 localStorage.removeItem(storageKey);
+                
+                // 3. Обновляем UI
                 renderBookings();
                 updateClearButtonVisibility();
 
+                // Показываем заглушку
                 bookingContainer.innerHTML = `
                     <div class="no-bookings">
-                        <h2>У вас больше нет бронирований</h2>
+                        <h2>История очищена</h2>
                         <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
                     </div>
                 `;
+
+            } catch (error) {
+                console.error('Ошибка полной очистки:', error);
+                alert('Не удалось очистить историю на сервере.');
             }
         });
     }

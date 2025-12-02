@@ -166,6 +166,26 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
+        // DELETE: api/BookingsAdvanced/byUser/5
+        [HttpDelete("byUser/{userUid}")]
+        public async Task<IActionResult> DeleteBookingsByUser(Guid userUid)
+        {
+            // Находим все бронирования этого пользователя
+            var userBookings = await _context.BookingsAdvanceds
+                .Where(b => b.UserUid == userUid)
+                .ToListAsync();
+
+            if (userBookings == null || !userBookings.Any())
+            {
+                return NotFound("Бронирования для этого пользователя не найдены.");
+            }
+
+            _context.BookingsAdvanceds.RemoveRange(userBookings);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         private bool BookingsAdvancedExists(Guid id)
         {
             return _context.BookingsAdvanceds.Any(e => e.BookingUid == id);
