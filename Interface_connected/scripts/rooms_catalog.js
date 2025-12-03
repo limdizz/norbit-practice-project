@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     initFilters();
     initSearch();
+    initSorting();
     loadRoomsFromApi();
     initPriceRange();
     initNavigation();
@@ -16,6 +17,28 @@ const roomTypesMap = {
     3: { name: "Репетиционный зал", price: 750, desc: "Для подготовки к выступлениям" }
 };
 
+function naturalCompare(a, b) {
+    const ax = [], bx = [];
+
+    // Разбиваем строки на числовые и текстовые части
+    a.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
+        ax.push([$1 || Infinity, $2 || ""]);
+    });
+
+    b.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
+        bx.push([$1 || Infinity, $2 || ""]);
+    });
+
+    while (ax.length && bx.length) {
+        const an = ax.shift();
+        const bn = bx.shift();
+        const nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1], 'ru');
+        if (nn) return nn;
+    }
+
+    return ax.length - bx.length;
+}
+
 async function loadRoomsFromApi() {
     const productList = document.querySelector('.product-list');
     productList.innerHTML = '<p style="text-align:center;">Загрузка помещений...</p>';
@@ -29,6 +52,11 @@ async function loadRoomsFromApi() {
         }
 
         const data = await response.json();
+        console.log('Получены данные:', data);
+
+        if (!Array.isArray(data)) {
+            throw new Error('API вернул не массив данных');
+        }
 
         roomsData = data.map(item => {
             // Получаем данные о типе по ID (1, 2 или 3)
@@ -36,17 +64,26 @@ async function loadRoomsFromApi() {
 
             return {
                 id: item.roomId,
-                name: item.name,
-                // Маппим данные из таблицы RoomTypes
+                name: item.name || 'Без названия',
                 category: typeInfo.name,
                 price: typeInfo.price,
                 description: typeInfo.desc,
-                // Свойство isFree приходит как boolean (true/false)
                 isFree: item.isFree,
-                // Заглушка для изображения в зависимости от типа
-                image: getRoomImage(item.roomTypeId)
+                image: getRoomImage(item.roomTypeId),
+                roomTypeId: item.roomTypeId
             };
         });
+
+        roomsData.sort((a, b) => {
+            // Сначала по типу комнаты
+            if (a.roomTypeId !== b.roomTypeId) {
+                return a.roomTypeId - b.roomTypeId;
+            }
+            // Затем по имени с натуральной сортировкой
+            return naturalCompare(a.name, b.name);
+        });
+
+        console.log('Обработанные данные:', roomsData);
 
         // Обработка URL параметров (если перешли из футера)
         handleUrlParams();
@@ -63,15 +100,50 @@ async function loadRoomsFromApi() {
     }
 }
 
+const roomImageCollections = {
+    1: [ // Лаунж-зона
+        "img/rooms/lounge/lounge.jpeg",
+        "img/rooms/lounge/lounge_2.jpeg",
+        "img/rooms/lounge/lounge_3.jpeg"
+    ],
+    2: [ // Студия звукозаписи
+        "img/rooms/studios/studio.jpeg",
+        "img/rooms/studios/studio_2.jpeg",
+        "img/rooms/studios/studio_3.jpeg",
+    ],
+    3: [ // Репетиционный зал
+        "img/rooms/rehearsal_rooms/rehearsal_room.jpeg",
+        "img/rooms/rehearsal_rooms/rehearsal_room_2.jpeg",
+        "img/rooms/rehearsal_rooms/rehearsal_room_3.jpeg"
+    ]
+};
+
+// Счетчики для каждого типа комнат
+let roomCounters = {
+    1: 0, // Лаунж-зона
+    2: 0, // Студия
+    3: 0  // Репетиционный зал
+};
+
 function getRoomImage(typeId) {
-    // Возвращаем разные заглушки в зависимости от типа комнаты
-    switch (typeId) {
-        case 1: return "img/file_not_found.png"; // Лаунж
-        case 2: return "img/file_not_found.png"; // Студия
-        case 3: return "img/file_not_found.png"; // Репетиционная
-        default: return "img/room_default.png";
+    const images = roomImageCollections[typeId];
+
+    if (!images || images.length === 0) {
+        return getDefaultImage(typeId);
     }
+
+    // Получаем текущий счетчик для этого типа
+    const currentIndex = roomCounters[typeId] || 0;
+
+    // Выбираем изображение по порядку
+    const selectedImage = images[currentIndex % images.length];
+
+    // Увеличиваем счетчик для следующей комнаты этого типа
+    roomCounters[typeId] = currentIndex + 1;
+
+    return selectedImage;
 }
+
 
 function initFilters() {
     const categorySelect = document.getElementById('categories');
@@ -138,6 +210,34 @@ function updatePriceRange() {
     }
 }
 
+function initSorting() {
+    const sortContainer = document.getElementById('sort-container');
+    if (!sortContainer) {
+        // Создаем контейнер, если его нет
+        const filterSection = document.querySelector('.filters-section');
+        if (filterSection) {
+            sortContainer = document.createElement('div');
+            sortContainer.id = 'sort-container';
+            sortContainer.style.cssText = 'margin: 15px 0; text-align: right;';
+            filterSection.appendChild(sortContainer);
+        } else {
+            return;
+        }
+    }
+
+    sortContainer.innerHTML = `
+        <select id="sort-select" style="padding:5px 10px; border-radius:4px; border:1px solid #ddd;">
+            <option value="name-asc">По имени (А-Я)</option>
+            <option value="name-desc">По имени (Я-А)</option>
+            <option value="price-asc">По цене (возр.)</option>
+            <option value="price-desc">По цене (убыв.)</option>
+            <option value="category">По категории</option>
+        </select>
+    `;
+
+    document.getElementById('sort-select').addEventListener('change', applyFilters);
+}
+
 function applyFilters() {
     const categoryEl = document.getElementById('categories');
     const searchEl = document.getElementById('site-search');
@@ -174,6 +274,37 @@ function applyFilters() {
     });
 
     renderRooms(filteredRooms);
+
+    const sortSelect = document.getElementById('sort-select');
+    const sortValue = sortSelect ? sortSelect.value : 'name-asc';
+
+    // СОРТИРОВКА
+    let sortedRooms = [...filteredRooms];
+
+    switch (sortValue) {
+        case 'name-asc':
+            sortedRooms.sort((a, b) => naturalCompare(a.name, b.name));
+            break;
+        case 'name-desc':
+            sortedRooms.sort((a, b) => naturalCompare(b.name, a.name));
+            break;
+        case 'price-asc':
+            sortedRooms.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-desc':
+            sortedRooms.sort((a, b) => b.price - a.price);
+            break;
+        case 'category':
+            sortedRooms.sort((a, b) => {
+                const catOrder = { "Лаунж-зона": 1, "Студия звукозаписи": 2, "Репетиционный зал": 3 };
+                const catA = catOrder[a.category] || 99;
+                const catB = catOrder[b.category] || 99;
+                return catA - catB || naturalCompare(a.name, b.name);
+            });
+            break;
+    }
+
+    renderRooms(sortedRooms);
 }
 
 function renderRooms(rooms) {
@@ -216,38 +347,41 @@ function createRoomCard(room) {
     const statusText = room.isFree ? 'Свободно' : 'Занято';
 
     cardContainer.innerHTML = `
-                <img src="${room.image}" alt="${room.name}" 
-                     style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; background: #eee;">
-                
-                <h3 style="margin: 10px 0 5px 0; font-size: 1.1em;">${room.name}</h3>
-                
-                <div style="color: #666; font-size: 0.9em; margin-bottom: 5px; font-weight:bold;">
-                    ${room.category}
-                </div>
+        <div style="position: relative; height: 120px; overflow: hidden; border-radius: 4px; background: #f5f5f5;">
+            <img src="${room.image}" alt="${room.name}" 
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.src='img/room_default.png'">
+            <div style="position: absolute; top: 8px; right: 8px; background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold;">
+                ${statusText}
+            </div>
+        </div>
+        
+        <h3 style="margin: 10px 0 5px 0; font-size: 1.1em; height: 40px; overflow: hidden;">${room.name}</h3>
+        
+        <div style="color: #666; font-size: 0.9em; margin-bottom: 5px; font-weight:bold;">
+            ${room.category}
+        </div>
 
-                <div style="margin-bottom: 10px;">
-                    <span style="background: ${statusColor}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8em;">
-                        ${statusText}
-                    </span>
-                </div>
+        <p style="font-size: 0.75em; color: #666; height: 40px; overflow: hidden; margin-bottom:10px; line-height:1.4;">
+            ${room.description}
+        </p>
 
-                <p style="font-size: 0.75em; color: #888; height: 40px; overflow: hidden; margin-bottom:10px;">
-                    ${room.description}
-                </p>
-
-                <a href="room.html?id=${room.id}" 
-                   style="color: #e44d26; font-weight: bold; font-size: 1.1em; text-decoration: none;">
-                    ${room.price} ₽/час
-                </a>
-            `;
+        <div style="margin-top: auto;">
+            <a href="room.html?id=${room.id}" 
+               style="color: #e44d26; font-weight: bold; font-size: 1.1em; text-decoration: none; display: block; padding: 8px 0;">
+                ${room.price} ₽/час
+            </a>
+            <small style="color: #888; font-size: 0.8em;">Нажмите для бронирования</small>
+        </div>
+    `;
 
     cardContainer.addEventListener('click', function (e) {
-        // Если кликнули НЕ по ссылке (цене), то переходим скриптом
         if (e.target.tagName !== 'A') {
+            // Сохраняем выбранное изображение
+            sessionStorage.setItem('selectedRoomImage', room.image);
             window.location.href = `room.html?id=${room.id}`;
         }
     });
-
     return cardContainer;
 }
 
@@ -259,9 +393,9 @@ function handleUrlParams() {
     if (!categorySelect || !type) return;
 
     const map = {
+        'lounge': 'Лаунж-зона',
         'recording': 'Студия звукозаписи',
-        'rehearsal': 'Репетиционный зал',
-        'lounge': 'Лаунж-зона'
+        'rehearsal': 'Репетиционный зал'
     };
 
     const target = map[type];

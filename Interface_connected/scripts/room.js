@@ -16,7 +16,7 @@ const roomTypesMap = {
     },
     2: {
         name: "Студия звукозаписи",
-        price: 1500, // Цена может отличаться, проверьте БД
+        price: 1000, // Цена может отличаться, проверьте БД
         desc: "Профессионально акустически подготовленное помещение для записи вокала и инструментов. Топовое оборудование.",
         features: ["Звукоизоляция", "Микрофонный парк", "Мониторная линия", "Кондиционер"]
     },
@@ -73,6 +73,9 @@ function mapApiDataToUi(item) {
         name: "Помещение", price: 0, desc: "Нет описания", features: []
     };
 
+    const savedImage = sessionStorage.getItem('selectedRoomImage');
+    sessionStorage.removeItem('selectedRoomImage'); 
+
     return {
         id: item.roomId,
         name: item.name,
@@ -83,16 +86,16 @@ function mapApiDataToUi(item) {
         features: typeInfo.features,
         isFree: item.isFree,
         // Выбор картинки заглушки
-        image: getRoomImage(item.roomTypeId)
+        image: savedImage || getRoomImage(item.roomTypeId)
     };
 }
 
 function getRoomImage(typeId) {
     switch (typeId) {
-        case 1: return "img/file_not_found.png";
-        case 2: return "img/file_not_found.png";
-        case 3: return "img/file_not_found.png";
-        default: return "img/room_default.png";
+        case 1: return "img/rooms/lounge/lounge.jpeg";
+        case 2: return "img/rooms/studios/studio.jpeg";
+        case 3: return "img/rooms/rehearsal_rooms/rehearsal_room.jpeg";
+        default: return "img/file_not_found.png";
     }
 }
 
