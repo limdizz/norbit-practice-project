@@ -10,55 +10,6 @@
     <script src="scripts/room.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
-<style>
-    .instrument_card {
-        display: grid;
-        grid-template-columns: 350px 1fr 300px;
-        gap: 30px;
-        align-items: start;
-        text-align: left;
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 0 15px;
-    }
-
-    .card_column_image img {
-        width: 100%;
-        border-radius: 10px;
-        border: 1px solid #eee;
-    }
-
-    .card_column_buy {
-        background: #fff;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        border: 1px solid #f0f0f0;
-        position: sticky;
-        top: 20px;
-    }
-
-    @media (max-width: 900px) {
-        .instrument_card {
-            grid-template-columns: 1fr;
-        }
-
-        .card_column_image {
-            order: 1;
-            margin-bottom: 15px;
-        }
-
-        .card_column_buy {
-            order: 2;
-            position: static;
-            margin-bottom: 25px;
-        }
-
-        .card_column_info {
-            order: 3;
-        }
-    }
-</style>
 
 <body>
     <div class="wrapper">
@@ -68,7 +19,7 @@
             </div>
             <nav class="menu">
                 <a class="menu__item" href="index.html">Главная</a>
-                <a class="menu__item" href="index.html">Бронирование</a>
+                <!-- <a class="menu__item" href="index.html">Бронирование</a> -->
                 <a class="menu__item" href="subscription_plans.html">Абонементы</a>
                 <a class="menu__item" href="prices.html">Цены</a>
                 <a class="menu__item" href="contacts.html">Контакты</a>
@@ -88,20 +39,17 @@
 
         <main class="main">
             <section class="instrument_card">
-
                 <div class="card_column_image">
                     <img id="room-image" src="" alt="Помещение">
                 </div>
 
                 <div class="card_column_info">
-                    <span id="room-category" style="color: #999; font-size: 0.9em;"></span>
-
-                    <h2 id="room-name" style="margin-top: 5px;"></h2>
+                    <span id="room-category"></span>
+                    <h2 id="room-name"></h2>
 
                     <div class="specs_block">
                         <h3>Особенности:</h3>
-                        <ul id="room-features">
-                        </ul>
+                        <ul id="room-features"></ul>
                     </div>
 
                     <div class="desc_block">
@@ -109,13 +57,13 @@
                         <p id="room-desc"></p>
                     </div>
 
-                    <div id="room-details-extra" style="margin-top: 15px; color: #555;"></div>
+                    <div id="room-details-extra"></div>
                 </div>
 
                 <div class="card_column_buy">
                     <div class="price_block">
-                        <span style="color: #666; font-size: 0.9em;">Цена аренды:</span>
-                        <h2 id="room-price-display" style="color: #e44d26; margin: 5px 0;">0 ₽ / час</h2>
+                        <span>Цена аренды:</span>
+                        <h2 id="room-price-display">0 ₽ / час</h2>
                     </div>
 
                     <div class="date_selector">
@@ -124,13 +72,11 @@
 
                         <div class="booking-field">
                             <label for="booking_time">Время начала:</label>
-                            <select id="booking_time" class="booking-select">
-                            </select>
+                            <select id="booking_time" class="booking-select"></select>
                         </div>
 
-                        <label style="margin-top: 10px; display:block;">Количество часов:</label>
-                        <select id="booking_hours"
-                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        <label>Количество часов:</label>
+                        <select id="booking_hours">
                             <option value="1">1 час</option>
                             <option value="2" selected>2 часа</option>
                             <option value="3">3 часа</option>
@@ -140,38 +86,35 @@
                         </select>
                     </div>
 
-                    <div class="total_calc" style="margin: 15px 0; font-weight: bold;">
-                        Итого: <span id="total-price" style="color: #e44d26;">0 ₽</span>
+                    <div class="total_calc">
+                        Итого: <span id="total-price">0 ₽</span>
                     </div>
 
-                    <button id="book_button" class="card_item"
-                        style="width: 100%; text-align: center; margin-top: 10px; cursor: pointer;">
+                    <button id="book_button" class="card_item">
                         Забронировать
                     </button>
 
-                    <div id="room-status" style="text-align: center; margin-top: 10px; font-size: 0.8em;"></div>
+                    <div id="room-status"></div>
                 </div>
             </section>
         </main>
 
         <footer class="footer">
             <section class="instruments">
-                <a class="footer_menu__item" href="instruments_catalog.html">Каталог инструментов</a><br><br>
+                <a class="footer_menu__item_h" href="instruments_catalog.html">Каталог инструментов</a><br><br>
                 <a class="footer_menu__item"
                     href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
                 <a class="footer_menu__item" href="instruments_catalog.html?category=synths">Синтезаторы</a><br>
             </section>
             <section class="rooms">
-                <a class="footer_menu__item" href="rooms_catalog.html">Помещения</a><br><br>
+                <a class="footer_menu__item_h" href="rooms_catalog.html">Помещения</a><br><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=recording">Студия звукозаписи</a><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=rehearsal">Репетиционные залы</a><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=lounge">Лаунж-зоны</a><br><br>
             </section>
             <section class="contacts">
-                <a class="footer_menu__item" href="#">Студия</a><br><br>
+                <a class="footer_menu__item_h" href="#">Студия</a><br><br>
                 <a class="footer_menu__item" href="contacts.html">О нас</a><br>
-                <!-- <a class="footer_menu__item" href="#">Новости</a><br>
-                <a class="footer_menu__item" href="#">Отзывы</a><br> -->
             </section>
         </footer>
     </div>

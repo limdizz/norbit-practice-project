@@ -55,14 +55,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 detailsHTML = `
                     <p><strong>Дата:</strong> ${b.date}</p>
                     <p><strong>Время начала:</strong> ${b.time || 'Не указано'}</p>
-                    <p><strong>Длительность:</strong> ${b.hours} ч.</p>
                     <p><strong>Цена за час:</strong> ₽${b.pricePerHour}</p>
+                    <p><strong>Длительность:</strong> ${b.hours} ч.</p>
                 `;
             } else {
                 // ▶ Старая система — инструменты
                 detailsHTML = `
-                    <p><strong>Период:</strong> ${b.startDate} – ${b.endDate} (${b.days} дн.)</p>
+                    <p><strong>Период:</strong> ${b.startDate} – ${b.endDate}</p>
                     <p><strong>Цена за день:</strong> ₽${b.dailyPrice}</p>
+                    <p><strong>Количество дней:</strong> ${b.days}</p>
                 `;
             }
 
@@ -94,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // --- Удаление бронирования ---
             const deleteBtn = card.querySelector('.delete-booking');
-            
+
             deleteBtn.addEventListener('click', async () => {
                 if (!confirm('Вы точно хотите удалить это бронирование?')) return;
 
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     // 2. Если успех (или гость), удаляем из LocalStorage
                     bookingHistory = bookingHistory.filter(x => String(x.bookingId) !== String(bookingId));
                     localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
-                    
+
                     // 3. Обновляем UI
                     renderBookings();
                     updateClearButtonVisibility();
@@ -148,15 +149,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 // 1. Если авторизован, удаляем всё из БД по ID пользователя
                 if (isLoggedIn) {
                     // Берем userUid из userData (убедитесь, что он там есть при логине)
-                    const userUid = userData.userUid || userData.uid; 
-                    
+                    const userUid = userData.userUid || userData.uid;
+
                     if (userUid) {
                         const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/byUser/${userUid}`, {
                             method: 'DELETE'
                         });
 
-                        if (!response.ok && response.status !== 404) { 
-                             // 404 игнорируем, если в базе пусто, а в сторадже есть мусор
+                        if (!response.ok && response.status !== 404) {
+                            // 404 игнорируем, если в базе пусто, а в сторадже есть мусор
                             throw new Error('Ошибка при очистке базы данных');
                         }
                     } else {
@@ -167,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // 2. Очищаем LocalStorage
                 bookingHistory = [];
                 localStorage.removeItem(storageKey);
-                
+
                 // 3. Обновляем UI
                 renderBookings();
                 updateClearButtonVisibility();

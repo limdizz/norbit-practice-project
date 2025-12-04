@@ -6,101 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Контакты</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .main {
-            padding: 30px;
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        h1,
-        h2 {
-            color: #333;
-            text-align: center;
-        }
-
-        .contacts-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .contact-info,
-        .contact-form {
-            flex: 1 1 45%;
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .contact-info p {
-            margin: 10px 0;
-            font-size: 16px;
-        }
-
-        .contact-info a {
-            color: black;
-            text-decoration: none;
-        }
-
-        .contact-info a:hover {
-            text-decoration: underline;
-        }
-
-        .contact-form label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .contact-form input,
-        .contact-form textarea {
-            width: 100%;
-            margin-top: 5px;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 15px;
-        }
-
-        .contact-form button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: black;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .contact-form button:hover {
-            background: white;
-            color: black;
-        }
-
-        .map-container {
-            margin-top: 40px;
-            text-align: center;
-        }
-
-        iframe {
-            width: 100%;
-            height: 400px;
-            border: 0;
-            border-radius: 12px;
-        }
-
-        @media (max-width: 800px) {
-            .contacts-container {
-                flex-direction: column;
-            }
-        }
-    </style>
     <script src="scripts/contacts.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
@@ -113,7 +18,7 @@
             </div>
             <nav class="menu">
                 <a class="menu__item" href="index.html">Главная</a>
-                <a class="menu__item" href="index.html">Бронирование</a>
+                <!-- <a class="menu__item" href="index.html">Бронирование</a> -->
                 <a class="menu__item" href="subscription_plans.html">Абонементы</a>
                 <a class="menu__item" href="prices.html">Цены</a>
                 <a class="menu__item active" href="contacts.html">Контакты</a>
@@ -131,7 +36,7 @@
             </nav>
         </header>
 
-        <main class="main">
+        <main class="main main--contacts">
             <h1>Контакты</h1>
             <p style="text-align:center; color:#555;">Свяжитесь с нами удобным для вас способом — мы всегда на связи!
             </p>
@@ -148,8 +53,9 @@
                         Сб–Вс: 11:00–21:00
                     </p>
                     <p><strong>Социальные сети:</strong><br>
-                        <a href="https://github.com/limdizz">GitHub</a> | <a href="https://vk.com/limdizz">VK</a> | <a
-                            href="https://www.youtube.com/@Limdizz">YouTube</a>
+                        <a href="https://github.com/limdizz">GitHub</a> |
+                        <a href="https://vk.com/limdizz">VK</a> |
+                        <a href="https://www.youtube.com/@Limdizz">YouTube</a>
                     </p>
                 </div>
 
@@ -175,36 +81,31 @@
                 <h2>Как нас найти</h2>
                 <iframe
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8855.240797179602!2d43.96211388715822!3d56.2985891!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x414e2ac44b88fbf5%3A0x508aa54a2d0b6235!2z0KPQvdC40LLQtdGA0YHQuNGC0LXRgiDQm9C-0LHQsNGH0LXQstGB0LrQvtCz0L4!5e0!3m2!1sru!2sru!4v1762978927144!5m2!1sru!2sru"
-                    width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
         </main>
 
         <footer class="footer">
             <section class="instruments">
-                <a class="footer_menu__item" href="instruments_catalog.html">Каталог инструментов</a><br><br>
+                <a class="footer_menu__item_h" href="instruments_catalog.html">Каталог инструментов</a><br><br>
                 <a class="footer_menu__item"
                     href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
                 <a class="footer_menu__item" href="instruments_catalog.html?category=classicguitars">Классические
                     гитары</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=bassguitars">Бас-гитары</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=synths">Синтезаторы</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=drums">Ударные установки</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=microphones">Микрофоны</a><br><br>
             </section>
 
             <section class="rooms">
-                <a class="footer_menu__item" href="rooms_catalog.html">Помещения</a><br><br>
+                <a class="footer_menu__item_h" href="rooms_catalog.html">Помещения</a><br><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=recording">Студия звукозаписи</a><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=rehearsal">Репетиционные залы</a><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=lounge">Лаунж-зоны</a><br><br>
             </section>
 
             <section class="contacts">
-                <a class="footer_menu__item" href="#">Студия</a><br><br>
+                <a class="footer_menu__item_h" href="#">Студия</a><br><br>
                 <a class="footer_menu__item" href="contacts.html">О нас</a><br>
-                <!-- <a class="footer_menu__item" href="#">Новости</a><br>
-                <a class="footer_menu__item" href="#">Отзывы</a><br> -->
             </section>
         </footer>
     </div>

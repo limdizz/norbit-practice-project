@@ -408,6 +408,7 @@ function createInstrumentCard(instrument) {
     cardContainer.style.cssText = `
         border: 1px solid #ddd;
         border-radius: 8px;
+        font-family: Inter;
         padding: 15px;
         margin: 10px;
         text-align: center;

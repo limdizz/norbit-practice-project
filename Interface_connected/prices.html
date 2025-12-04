@@ -8,49 +8,6 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="scripts/prices.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
-    <style>
-        .main {
-            padding: 20px;
-            text-align: center;
-        }
-
-        h1,
-        h2 {
-            color: #333;
-        }
-
-        .price-section {
-            margin-bottom: 40px;
-        }
-
-        .price-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .price-card {
-            border: 1px solid #ccc;
-            border-radius: 12px;
-            background-color: #f9f9f9;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            transition: 0.3s;
-        }
-
-        .price-card:hover {
-            transform: scale(1.03);
-            background-color: #fff;
-        }
-
-        .price {
-            font-size: 20px;
-            color: red;
-            font-weight: bold;
-        }
-    </style>
 </head>
 
 <body>
@@ -61,7 +18,7 @@
             </div>
             <nav class="menu">
                 <a class="menu__item" href="index.html">Главная</a>
-                <a class="menu__item" href="index.html">Бронирование</a>
+                <!-- <a class="menu__item" href="index.html">Бронирование</a> -->
                 <a class="menu__item" href="subscription_plans.html">Абонементы</a>
                 <a class="menu__item active" href="prices.html">Цены</a>
                 <a class="menu__item" href="contacts.html">Контакты</a>
@@ -79,7 +36,7 @@
             </nav>
         </header>
 
-        <main class="main">
+        <main class="main main--prices">
             <h1>Цены на аренду</h1>
 
             <section class="price-section">
@@ -95,29 +52,25 @@
 
         <footer class="footer">
             <section class="instruments">
-                <a class="footer_menu__item" href="instruments_catalog.html">Каталог инструментов</a><br><br>
+                <a class="footer_menu__item_h" href="instruments_catalog.html">Каталог инструментов</a><br><br>
                 <a class="footer_menu__item"
                     href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
                 <a class="footer_menu__item" href="instruments_catalog.html?category=classicguitars">Классические
                     гитары</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=bassguitars">Бас-гитары</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=synths">Синтезаторы</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=drums">Ударные установки</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=microphones">Микрофоны</a><br><br>
             </section>
 
             <section class="rooms">
-                <a class="footer_menu__item" href="rooms_catalog.html">Помещения</a><br><br>
+                <a class="footer_menu__item_h" href="rooms_catalog.html">Помещения</a><br><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=recording">Студия звукозаписи</a><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=rehearsal">Репетиционные залы</a><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=lounge">Лаунж-зоны</a><br><br>
             </section>
 
             <section class="contacts">
-                <a class="footer_menu__item" href="#">Студия</a><br><br>
+                <a class="footer_menu__item_h" href="#">Студия</a><br><br>
                 <a class="footer_menu__item" href="contacts.html">О нас</a><br>
-                <!-- <a class="footer_menu__item" href="#">Новости</a><br>
-                <a class="footer_menu__item" href="#">Отзывы</a><br> -->
             </section>
         </footer>
     </div>

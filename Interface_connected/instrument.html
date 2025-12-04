@@ -5,110 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Детали инструмента</title>
-    <link rel="stylesheet" href="css\style.css">
+    <link rel="stylesheet" href="css/style.css">
     <script src="scripts/instrument.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
-<style>
-    .instrument_card {
-        display: grid;
-        /* 3 колонки: Фото (350px) | Инфо (растягивается) | Покупка (300px) */
-        grid-template-columns: 350px 1fr 300px;
-        gap: 30px;
-        align-items: start;
-
-        /* Сброс старых стилей, если они мешают (например, text-align: center) */
-        text-align: left;
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 0 15px;
-        border: none;
-        /* Убираем рамку вокруг всего, если она была */
-        background: transparent;
-        /* Убираем фон общего контейнера */
-        box-shadow: none;
-    }
-
-    /* Стили для картинки */
-    .card_column_image img {
-        width: 100%;
-        height: 500px;
-        border-radius: 10px;
-        border: 1px solid white;
-        object-fit: contain;
-    }
-
-    /* Стили для центральной части */
-    .card_column_info h2 {
-        font-size: 24px;
-        color: #333;
-    }
-
-    .card_column_info h3 {
-        font-size: 16px;
-        margin-bottom: 5px;
-        color: #333;
-    }
-
-    .card_column_info ul {
-        padding-left: 20px;
-        color: #666;
-    }
-
-    /* Стили для правой колонки (аналог Buy Box) */
-    .card_column_buy {
-        background: #fff;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        /* Тень для выделения блока */
-        border: 1px solid #f0f0f0;
-
-        /* Липкое позиционирование */
-        position: sticky;
-        top: 20px;
-    }
-
-    /* Стили для селектов дат внутри правой колонки */
-    .card_column_buy select {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-
-    @media (max-width: 900px) {
-        .instrument_card {
-            grid-template-columns: 1fr;
-            /* Одна колонка */
-        }
-
-        /* 1. Сначала идет Фотография */
-        .card_column_image {
-            order: 1;
-            margin-bottom: 15px;
-        }
-
-        /* 2. Потом идет Цена и Кнопка (Buy Box) */
-        .card_column_buy {
-            order: 2;
-            position: static;
-            /* Отключаем "липкость", чтобы блок не плавал */
-            margin-bottom: 25px;
-            /* Отступ до описания */
-            box-shadow: none;
-            /* Можно убрать тень, чтобы выглядело чище */
-            border: 1px solid #eee;
-            /* Легкая рамка */
-        }
-
-        /* 3. В конце идет Описание и Характеристики */
-        .card_column_info {
-            order: 3;
-        }
-    }
-</style>
 
 <body>
     <div class="wrapper">
@@ -118,7 +18,7 @@
             </div>
             <nav class="menu">
                 <a class="menu__item" href="index.html">Главная</a>
-                <a class="menu__item" href="index.html">Бронирование</a>
+                <!-- <a class="menu__item" href="index.html">Бронирование</a> -->
                 <a class="menu__item" href="subscription_plans.html">Абонементы</a>
                 <a class="menu__item" href="prices.html">Цены</a>
                 <a class="menu__item" href="contacts.html">Контакты</a>
@@ -142,74 +42,63 @@
                 </div>
 
                 <div class="card_column_info">
-                    <span id="inst-category" style="color: #999; font-size: 0.9em;"></span>
-
-                    <h2 id="inst-name" style="margin-top: 5px;"></h2>
+                    <span id="inst-category"></span>
+                    <h2 id="inst-name"></h2>
 
                     <div class="specs_block">
                         <h3>Характеристики:</h3>
                         <p id="inst-features"></p>
                     </div>
 
-                    <!-- <div class="desc_block">
-                        <h3>Описание:</h3>
-                        <p id="inst-desc"></p>
-                    </div> -->
-
-                    <div id="inst-details-extra" style="margin-top: 15px; color: #555;"></div>
+                    <div id="inst-details-extra"></div>
                 </div>
 
                 <div class="card_column_buy">
                     <div class="price_block">
-                        <span style="color: #666; font-size: 0.9em;">Цена аренды:</span>
-                        <h2 id="inst-price-display" style="color: #e44d26; margin: 5px 0;">0 ₽</h2>
+                        <span>Цена аренды:</span>
+                        <h2 id="inst-price-display">0 ₽</h2>
                     </div>
 
                     <div class="date_selector">
-                        <label>С:</label>
+                        <label>Дата начала бронирования:</label>
                         <select id="start_date"></select>
 
-                        <label>По:</label>
+                        <label>Дата конца бронирования:</label>
                         <select id="end_date"></select>
                     </div>
 
-                    <div class="total_calc" style="margin: 15px 0; font-weight: bold;">
+                    <div class="total_calc">
                         Итого (<span id="days-count">1</span> дн.):
-                        <span id="total-price" style="color: #e44d26;">0 ₽</span>
+                        <span id="total-price">0 ₽</span>
                     </div>
 
-                    <button id="book_button" class="card_item"
-                        style="width: 100%; text-align: center; margin-top: 10px; cursor: pointer;">
+                    <button id="book_button" class="card_item">
                         Забронировать
                     </button>
 
-                    <div id="inst-status" style="text-align: center; margin-top: 10px; font-size: 0.8em;"></div>
+                    <div id="inst-status"></div>
                 </div>
             </section>
         </main>
         <footer class="footer">
             <section class="instruments">
-                <a class="footer_menu__item" href="instruments_catalog.html">Каталог инструментов</a><br><br>
+                <a class="footer_menu__item_h" href="instruments_catalog.html">Каталог инструментов</a><br><br>
                 <a class="footer_menu__item"
                     href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
                 <a class="footer_menu__item" href="instruments_catalog.html?category=classicguitars">Классические
                     гитары</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=bassguitars">Бас-гитары</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=synths">Синтезаторы</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=drums">Ударные установки</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=microphones">Микрофоны</a><br><br>
             </section>
             <section class="rooms">
-                <a class="footer_menu__item" href="rooms_catalog.html">Помещения</a><br><br>
+                <a class="footer_menu__item_h" href="rooms_catalog.html">Помещения</a><br><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=recording">Студия звукозаписи</a><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=rehearsal">Репетиционные залы</a><br>
                 <a class="footer_menu__item" href="rooms_catalog.html?type=lounge">Лаунж-зоны</a><br><br>
             </section>
             <section class="contacts">
-                <a class="footer_menu__item" href="#">Студия</a><br><br>
+                <a class="footer_menu__item_h" href="#">Студия</a><br><br>
                 <a class="footer_menu__item" href="contacts.html">О нас</a><br>
-                <!-- <a class="footer_menu__item" href="#">Новости</a><br>
-                <a class="footer_menu__item" href="#">Отзывы</a><br> -->
             </section>
         </footer>
     </div>
