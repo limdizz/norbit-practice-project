@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 3. Находим элементы на странице
-    const lastNameInput = document.querySelector('input[placeholder="Иванов"]');
-    const firstNameInput = document.querySelector('input[placeholder="Иван"]');
+    const lastNameInput = document.querySelector('register_placeholder_ln');
+    const firstNameInput = document.querySelector('register_placeholder_fn');
 
     // Элементы, которые нужно найти (добавьте им ID в HTML)
     const orderTitle = document.getElementById('order-title');

@@ -74,7 +74,7 @@ function mapApiDataToUi(item) {
     };
 
     const savedImage = sessionStorage.getItem('selectedRoomImage');
-    sessionStorage.removeItem('selectedRoomImage'); 
+    sessionStorage.removeItem('selectedRoomImage');
 
     return {
         id: item.roomId,
@@ -259,10 +259,6 @@ async function handleBooking() {
         return;
     }
 
-    // 3. Формируем объект для API
-    // Важно: toISOString() переводит время в UTC. Если сервер ожидает локальное время,
-    // логика может потребовать корректировки (зависит от настроек БД PostgeSQL/MSSQL).
-    // Для базового варианта используем ISO.
     const bookingRequest = {
         UserUid: userUid,
         RoomId: currentRoom.id,

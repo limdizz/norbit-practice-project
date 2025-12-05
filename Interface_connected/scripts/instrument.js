@@ -335,7 +335,6 @@ function updateBookingButton() {
 
 // 14. Обработка бронирования
 function handleBooking() {
-    // Используем currentInstrument
     if (!currentInstrument) {
         alert("Ошибка: Инструмент не загружен");
         return;
