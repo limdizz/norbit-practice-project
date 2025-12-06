@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (bookingData) {
         // Заголовок заказа
         if (orderTitle) {
-            orderTitle.textContent = `Заказ №${bookingData.bookingId}`;
+            orderTitle.textContent = `Заказ №${bookingData.orderId}`;
         }
 
         // Название (для помещений и инструментов)

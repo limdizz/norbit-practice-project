@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="no-bookings">
                 <h2>У вас пока нет бронирований</h2>
                 <p>Перейдите в каталог и выберите инструмент или помещение.</p>
-                <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
+                <a href="index.html" class="button">Перейти в каталог</a>
             </div>
         `;
         return;
@@ -41,7 +41,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- РЕНДЕР КАРТОЧЕК ДЛЯ ОБОИХ ТИПОВ ---
     function renderBookings() {
+        if (!bookingContainer) return;
+
         bookingContainer.innerHTML = '';
+
+        if (!bookingHistory.length) {
+            bookingContainer.innerHTML = `
+                    <div class="no-bookings">
+                        <p>У вас нет активных бронирований.</p>
+                        <a href="index.html" class="button">Перейти в каталог</a>
+                    </div>`;
+            if (clearBtn) clearBtn.style.display = 'none';
+            return;
+        }
 
         bookingHistory.forEach(b => {
             const name = b.itemName || b.instrumentName || 'Без названия';
@@ -53,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // ▶ Новая система — помещения
                 // ДОБАВЛЕНО: отображение времени начала (b.time)
                 detailsHTML = `
+                    <p><strong>Номер заказа:</strong> ${b.orderId}</p>
                     <p><strong>Дата:</strong> ${b.date}</p>
                     <p><strong>Время начала:</strong> ${b.time || 'Не указано'}</p>
                     <p><strong>Цена за час:</strong> ₽${b.pricePerHour}</p>
@@ -101,31 +114,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const bookingId = b.bookingId;
 
-                try {
-                    // 1. Если пользователь авторизован, удаляем из БД
-                    if (isLoggedIn && bookingId) {
-                        const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/${bookingId}`, {
-                            method: 'DELETE'
-                        });
+                // 1. Если это помещение — удаляем из базы
+                if (isLoggedIn && b.itemType === "Room") {
+                    const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/${bookingId}`, {
+                        method: 'DELETE'
+                    });
 
-                        if (!response.ok) {
-                            throw new Error('Ошибка при удалении из базы данных');
-                        }
+                    if (!response.ok && response.status !== 404) {
+                        throw new Error('Ошибка при удалении из базы данных');
                     }
-
-                    // 2. Если успех (или гость), удаляем из LocalStorage
-                    bookingHistory = bookingHistory.filter(x => String(x.bookingId) !== String(bookingId));
-                    localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
-
-                    // 3. Обновляем UI
-                    renderBookings();
-                    updateClearButtonVisibility();
-                    console.log(`Бронирование ${bookingId} удалено.`);
-
-                } catch (error) {
-                    console.error('Ошибка удаления:', error);
-                    alert('Не удалось удалить бронирование. Попробуйте позже.');
                 }
+
+                // 2. Удаляем из LocalStorage
+                bookingHistory = bookingHistory.filter(x => String(x.bookingId) !== String(bookingId));
+                localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
+
+                // 3. Обновляем страницу
+                renderBookings();
+                updateClearButtonVisibility();
+
+                console.log(`Бронирование ${bookingId} удалено.`);
             });
         });
     }
@@ -177,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 bookingContainer.innerHTML = `
                     <div class="no-bookings">
                         <h2>История очищена</h2>
-                        <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
+                        <a href="index.html" class="button">Перейти в каталог</a>
                     </div>
                 `;
 

@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
             bookingContainer.innerHTML = `
                     <div class="no-bookings">
                         <p>У вас нет активных бронирований.</p>
-                        <a href="catalog_instruments.html" class="button">Перейти в каталог</a>
+                        <a href="index.html" class="button">Перейти в каталог</a>
                     </div>`;
             if (clearBtn) clearBtn.style.display = 'none';
             return;
@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // ▶ Новая система — помещения
                 // ДОБАВЛЕНО: отображение времени начала (b.time)
                 detailsHTML = `
+                    <p><strong>Номер заказа:</strong> ${b.orderId}</p>
                     <p><strong>Дата:</strong> ${b.date}</p>
                     <p><strong>Время начала:</strong> ${b.time || 'Не указано'}</p>
                     <p><strong>Длительность:</strong> ${b.hours} ч.</p>
@@ -142,26 +143,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 const bookingId = b.bookingId;
 
                 try {
-                    // 1. Если пользователь авторизован, удаляем из БД
-                    if (isLoggedIn && bookingId) {
+                    // 1. Если это помещение — удаляем из базы
+                    if (isLoggedIn && b.itemType === "Room") {
                         const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/${bookingId}`, {
                             method: 'DELETE'
                         });
 
-                        if (!response.ok) {
+                        if (!response.ok && response.status !== 404) {
                             throw new Error('Ошибка при удалении из базы данных');
                         }
                     }
 
-                    // 2. Если успех (или гость), удаляем из LocalStorage
+                    // 2. Удаляем из LocalStorage
                     bookingHistory = bookingHistory.filter(x => String(x.bookingId) !== String(bookingId));
                     localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
 
-                    // 3. Обновляем UI
+                    // 3. Обновляем страницу
                     renderBookings();
                     updateClearButtonVisibility();
-                    console.log(`Бронирование ${bookingId} удалено.`);
 
+                    console.log(`Бронирование ${bookingId} удалено.`);
                 } catch (error) {
                     console.error('Ошибка удаления:', error);
                     alert('Не удалось удалить бронирование. Попробуйте позже.');
@@ -209,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 bookingContainer.innerHTML = `
                     <div class="no-bookings">
                         <h2>История очищена</h2>
-                        <a href="instruments_catalog.html" class="button">Перейти в каталог</a>
+                        <a href="index.html" class="button">Перейти в каталог</a>
                     </div>
                 `;
 

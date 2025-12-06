@@ -145,13 +145,13 @@ function renderRoomDetails(room) {
     }
 }
 
-// 4. Логика выбора даты (только Start Date, так как бронь часовая)
 function initDateSelect() {
     const dateSelect = document.getElementById('booking_date');
     if (!dateSelect) return;
 
     dateSelect.innerHTML = '';
-    const today = new Date();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     for (let i = 0; i < 30; i++) {
         const date = new Date(today);
@@ -164,36 +164,168 @@ function initDateSelect() {
         const option = document.createElement('option');
         option.value = dateString;
         option.textContent = dateString;
+
+        if (i === 0) {
+            option.selected = true;
+        }
+
         dateSelect.appendChild(option);
     }
+
+    dateSelect.addEventListener('change', function () {
+        updateTimeSelect(this.value);
+    });
+
+    updateTimeSelect(dateSelect.value);
 }
 
 function initTimeSelect() {
+    const timeSelect = document.getElementById('booking_time');
+    if (timeSelect) {
+        timeSelect.addEventListener('change', validateDuration);
+    }
+}
+
+function updateTimeSelect(selectedDate) {
     const timeSelect = document.getElementById('booking_time');
     if (!timeSelect) return;
 
     timeSelect.innerHTML = '';
 
-    // Генерируем слоты времени с 10:00 до 22:00 (можно настроить под себя)
+    const now = new Date();
+    const [day, month, year] = selectedDate.split('.').map(Number);
+    const selectedDateObj = new Date(year, month - 1, day);
+
+    const isToday = isSameDate(selectedDateObj, now);
     const startHour = 10;
-    const endHour = 22;
+    const endHour = 20; // Закрывается в 21:00
 
-    for (let i = startHour; i <= endHour; i++) {
-        const hourString = String(i).padStart(2, '0') + ':00';
+    let hasAvailableTime = false;
+    const bookBtn = document.getElementById('book_button');
 
+    for (let hour = startHour; hour <= endHour; hour++) {
+        if (isToday && hour <= now.getHours()) {
+            continue;
+        }
+
+        const hourString = String(hour).padStart(2, '0') + ':00';
         const option = document.createElement('option');
-        option.value = hourString; // Значение, например "14:00"
+        option.value = hourString;
         option.textContent = hourString;
+
+        if (!hasAvailableTime) {
+            option.selected = true;
+            hasAvailableTime = true;
+        }
 
         timeSelect.appendChild(option);
     }
+
+    if (!hasAvailableTime && isToday) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'На сегодня времени нет';
+        option.disabled = true;
+        timeSelect.appendChild(option);
+
+        if (bookBtn) {
+            bookBtn.disabled = true;
+            bookBtn.style.opacity = '0.5';
+            bookBtn.style.cursor = 'not-allowed';
+        }
+    } else {
+        if (bookBtn) {
+            bookBtn.disabled = false;
+            bookBtn.style.opacity = '1';
+            bookBtn.style.cursor = 'pointer';
+        }
+        validateDuration();
+    }
+}
+
+function isSameDate(date1, date2) {
+    return date1.getFullYear() === date2.getFullYear() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getDate() === date2.getDate();
 }
 
 function initDurationSelect() {
     const hoursSelect = document.getElementById('booking_hours');
     if (hoursSelect) {
-        hoursSelect.addEventListener('change', calculatePrice);
+        hoursSelect.addEventListener('change', function () {
+            validateDuration();
+            calculatePrice();
+        });
+
+        // Инициализируем валидацию при загрузке
+        validateDuration();
     }
+}
+
+function validateDuration() {
+    const dateStr = document.getElementById('booking_date').value;
+    const timeStr = document.getElementById('booking_time').value;
+    const hoursSelect = document.getElementById('booking_hours');
+
+    if (!dateStr || !timeStr || !hoursSelect) return;
+
+    // Парсим выбранное время
+    const [day, month, year] = dateStr.split('.').map(Number);
+    const [bookingHour, bookingMinute] = timeStr.split(':').map(Number);
+
+    // Время закрытия студии (21:00)
+    const closingHour = 21;
+    const closingMinute = 0;
+
+    // Максимально доступная длительность
+    let maxHours = closingHour - bookingHour;
+
+    // Если минуты начального времени больше 0, уменьшаем на 1 час
+    if (bookingMinute > 0) {
+        maxHours--;
+    }
+
+    // Ограничиваем максимум 5 часами (по умолчанию из select)
+    maxHours = Math.min(maxHours, 5);
+
+    // Ограничиваем минимум 1 часом
+    maxHours = Math.max(maxHours, 1);
+
+    // Обновляем опции в select
+    updateHoursOptions(maxHours, parseInt(hoursSelect.value));
+}
+
+function updateHoursOptions(maxHours, currentValue) {
+    const hoursSelect = document.getElementById('booking_hours');
+    if (!hoursSelect) return;
+
+    // Сохраняем текущее значение
+    const oldValue = currentValue || parseInt(hoursSelect.value);
+
+    // Очищаем опции
+    hoursSelect.innerHTML = '';
+
+    // Создаем новые опции от 1 до maxHours
+    for (let i = 1; i <= maxHours; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `${i} час${getHoursTextEnding(i)}`;
+        hoursSelect.appendChild(option);
+    }
+
+    // Устанавливаем значение: если старое значение в пределах, оставляем его
+    if (oldValue <= maxHours) {
+        hoursSelect.value = oldValue;
+    } else {
+        hoursSelect.value = maxHours;
+    }
+}
+
+// Функция для правильного окончания слова "час"
+function getHoursTextEnding(hours) {
+    if (hours === 1) return '';
+    if (hours >= 2 && hours <= 4) return 'а';
+    return 'ов';
 }
 
 // 5. Калькулятор цены
@@ -287,6 +419,7 @@ async function handleBooking() {
         // 4. Сохранение данных для отображения (frontend history)
         const displayData = {
             bookingId: result.bookingUid,
+            orderId: 'ORDR' + Date.now(),
             itemId: currentRoom.id,
             instrumentName: currentRoom.name,
             itemName: currentRoom.name,

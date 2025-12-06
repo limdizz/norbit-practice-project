@@ -352,7 +352,7 @@ function handleBooking() {
     const totalPrice = days * currentInstrument.price;
 
     const bookingData = {
-        bookingId: 'ORD' + Date.now(),
+        bookingId: 'ORDIN' + Date.now(),
         instrumentId: currentInstrument.id,
         instrumentName: currentInstrument.name,
         instrumentImage: currentInstrument.image,
@@ -388,11 +388,12 @@ function saveBookingData(bookingData) {
     // 3. Загружаем историю ЭТОГО пользователя
     let bookingHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
+    if (!bookingData.bookingId) {
+        bookingData.bookingId = 'ORDIN' + Date.now();
+    }
+
     // 4. Добавляем новое бронирование
-    bookingHistory.push({
-        ...bookingData,
-        bookingId: Date.now()
-    });
+    bookingHistory.push(bookingData);
 
     // 5. Сохраняем обратно под УНИКАЛЬНЫМ ключом
     localStorage.setItem(storageKey, JSON.stringify(bookingHistory));
