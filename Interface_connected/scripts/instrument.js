@@ -353,6 +353,7 @@ function handleBooking() {
 
     const bookingData = {
         bookingId: 'ORDIN' + Date.now(),
+        orderId: 'ORDIN' + Date.now(),
         instrumentId: currentInstrument.id,
         instrumentName: currentInstrument.name,
         instrumentImage: currentInstrument.image,
