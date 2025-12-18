@@ -149,8 +149,8 @@
 
 #to-catalog.button:hover {
     background: white;
-    color: #007bff;
-    border: 1px solid #007bff;
+    color: black;
+    border: 1px solid black;
 }
 
 #clear-history.button.logout {

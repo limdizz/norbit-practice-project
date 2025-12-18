@@ -334,43 +334,99 @@ function updateBookingButton() {
 }
 
 // 14. Обработка бронирования
-function handleBooking() {
+async function handleBooking() {
     if (!currentInstrument) {
         alert("Ошибка: Инструмент не загружен");
         return;
     }
 
-    const startDate = document.getElementById('start_date')?.value;
-    const endDate = document.getElementById('end_date')?.value;
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userUid = userData.userUid || userData.uid;
 
-    if (!startDate || !endDate) {
-        alert('Пожалуйста, выберите даты бронирования');
+    if (!userUid) {
+        alert("Пожалуйста, войдите в систему");
+        window.location.href = 'log_in.html';
         return;
     }
+    
+    const startDateStr = document.getElementById('start_date').value;
+    const endDateStr = document.getElementById('end_date').value;
 
-    const days = calculateDaysDifference(startDate, endDate);
-    const totalPrice = days * currentInstrument.price;
+    const now = new Date();
+    const localDateTime = formatDateTimeToMoscowISO(now);
 
-    const bookingData = {
-        bookingId: 'ORDIN' + Date.now(),
-        orderId: 'ORDIN' + Date.now(),
-        instrumentId: currentInstrument.id,
-        instrumentName: currentInstrument.name,
-        instrumentImage: currentInstrument.image,
-        startDate,
-        endDate,
-        days,
-        totalPrice,
-        dailyPrice: currentInstrument.price,
-        bookingDate: new Date().toISOString()
+    // Вычисляем дату окончания с временем создания
+    const days = calculateDaysDifference(startDateStr, endDateStr);
+    const endDateTime = new Date(now);
+    endDateTime.setDate(endDateTime.getDate() + days);
+    const endLocalDateTime = formatDateTimeToMoscowISO(endDateTime);
+
+    const bookingRequest = {
+        UserUid: userUid,
+        InstrumentId: currentInstrument.id,
+        RoomId: null,
+        // Время начала = текущее время
+        StartTime: localDateTime,
+        // Время окончания = текущее время + количество дней
+        EndTime: endLocalDateTime,
     };
 
-    saveBookingData(bookingData);
+    console.log("Отправляемые данные бронирования:", bookingRequest);
 
-    sessionStorage.setItem('currentBooking', JSON.stringify(bookingData));
+    try {
+        const response = await fetch('https://localhost:7123/api/BookingsAdvanced', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookingRequest)
+        });
 
-    // Переход на страницу заказа
-    window.location.href = 'order.html';
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`HTTP ${response.status}: ${text}`);
+        }
+
+        const result = await response.json();
+        console.log("Ответ от сервера:", result);
+
+        const orderId = generateOrderId(result.bookingUid);
+
+        // Форматируем даты для отображения
+        const startDisplay = formatDateTimeForDisplay(localDateTime);
+        const endDisplay = formatDateTimeForDisplay(endLocalDateTime);
+
+        // Данные для отображения
+        const displayData = {
+            bookingId: result.bookingUid,
+            orderId: orderId,
+            itemType: "Instrument",
+            instrumentId: currentInstrument.id,
+            instrumentName: currentInstrument.name,
+            image: currentInstrument.image,
+            startDate: startDisplay.date,
+            startTime: startDisplay.time,
+            endDate: endDisplay.date,
+            endTime: endDisplay.time,
+            bookingDate: new Date().toISOString(),
+            days: days,
+            dailyPrice: currentInstrument.price,
+            totalPrice: days * currentInstrument.price
+        };
+
+        sessionStorage.setItem('currentBooking', JSON.stringify(displayData));
+
+        // Сохраняем в историю пользователя
+        const storageKey = `bookingHistory_${userData.email}`;
+        const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        history.push(displayData);
+        localStorage.setItem(storageKey, JSON.stringify(history));
+
+        // Переходим на страницу заказа
+        window.location.href = 'order.html';
+
+    } catch (err) {
+        console.error("Ошибка при бронировании:", err);
+        alert("Ошибка при бронировании инструмента. Проверьте консоль для деталей.");
+    }
 }
 
 function saveBookingData(bookingData) {
@@ -388,10 +444,6 @@ function saveBookingData(bookingData) {
 
     // 3. Загружаем историю ЭТОГО пользователя
     let bookingHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
-
-    if (!bookingData.bookingId) {
-        bookingData.bookingId = 'ORDIN' + Date.now();
-    }
 
     // 4. Добавляем новое бронирование
     bookingHistory.push(bookingData);
@@ -437,6 +489,46 @@ function formatDate(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
+}
+
+function formatDateTimeToMoscowISO(date) {
+    // Сдвиг на московское время (UTC+3)
+    const tzOffset = 3 * 60; // 3 часа в минутах
+    const utc = date.getTime() + (date.getTimezoneOffset() * 60000); // время в UTC
+    const moscowTime = new Date(utc + tzOffset * 60000);
+
+    const year = moscowTime.getFullYear();
+    const month = String(moscowTime.getMonth() + 1).padStart(2, '0');
+    const day = String(moscowTime.getDate()).padStart(2, '0');
+    const hours = String(moscowTime.getHours()).padStart(2, '0');
+    const minutes = String(moscowTime.getMinutes()).padStart(2, '0');
+    const seconds = String(moscowTime.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}+03:00`;
+}
+
+function formatDateTimeForDisplay(isoString) {
+    const date = new Date(isoString);
+
+    // Форматируем дату
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    // Форматируем время
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return {
+        date: `${day}.${month}.${year}`,
+        time: `${hours}:${minutes}`
+    };
+}
+
+function generateOrderId(bookingUuid) {
+    const cleanUuid = bookingUuid.replace(/-/g, '');
+    const shortId = cleanUuid.substring(0, 4).toUpperCase();
+    return `${shortId}`;
 }
 
 function parseDate(dateString) {

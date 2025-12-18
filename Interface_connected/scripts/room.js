@@ -394,9 +394,9 @@ async function handleBooking() {
     const bookingRequest = {
         UserUid: userUid,
         RoomId: currentRoom.id,
+        InstrumentId: null,
         StartTime: startTime.toISOString(),
         EndTime: endTime.toISOString(),
-        // Статус и StaffUid заполняются на сервере
     };
 
     try {
@@ -416,10 +416,12 @@ async function handleBooking() {
         const result = await response.json();
         console.log('Бронь создана:', result);
 
+        const orderId = generateOrderId(result.bookingUid);
+
         // 4. Сохранение данных для отображения (frontend history)
         const displayData = {
             bookingId: result.bookingUid,
-            orderId: 'ORDR' + Date.now(),
+            orderId: orderId,
             itemId: currentRoom.id,
             instrumentName: currentRoom.name,
             itemName: currentRoom.name,
@@ -451,6 +453,12 @@ async function handleBooking() {
         console.error('Ошибка:', error);
         alert('Ошибка при бронировании. Проверьте соединение или авторизацию.');
     }
+}
+
+function generateOrderId(bookingUuid) {
+    const cleanUuid = bookingUuid.replace(/-/g, '');
+    const shortId = cleanUuid.substring(0, 4).toUpperCase();
+    return `${shortId}`;
 }
 
 // Вспомогательные функции

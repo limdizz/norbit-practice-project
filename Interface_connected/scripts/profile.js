@@ -115,7 +115,9 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 // ШАБЛОН ДЛЯ ИНСТРУМЕНТА (Старый)
                 detailsHTML = `
-                    <p><strong>Период:</strong> ${b.startDate} – ${b.endDate} (${b.days} дн.)</p>
+                <p><strong>Номер заказа:</strong> ${b.orderId}</p>
+                    <p><strong>Период:</strong> ${b.startDate} – ${b.endDate}</p>
+                    <p><strong>Длительность:</strong> ${b.days} дн.</p>
                     <p><strong>Цена за день:</strong> ₽${b.dailyPrice}</p>
                 `;
             }
@@ -144,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 try {
                     // 1. Если это помещение — удаляем из базы
-                    if (isLoggedIn && b.itemType === "Room") {
+                    if (isLoggedIn) {
                         const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/${bookingId}`, {
                             method: 'DELETE'
                         });

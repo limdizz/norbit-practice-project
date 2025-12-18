@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebAPI.Models;
 
@@ -20,6 +21,9 @@ public partial class BookingsAdvanced
     public string? Status { get; set; }
 
     public DateTime? CreationDate { get; set; }
+
+    [Column("instrument_id")]
+    public int? InstrumentId { get; set; }
 
     public virtual ICollection<BillsAdvanced> BillsAdvanceds { get; set; } = new List<BillsAdvanced>();
 
