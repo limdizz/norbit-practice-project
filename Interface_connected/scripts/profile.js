@@ -223,3 +223,102 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+const API_BASE_URL = "https://localhost:7123/api";
+
+document.addEventListener('DOMContentLoaded', function () {
+    renderUserProfile();
+    // renderBookings(); // Если это файл с бронированиями, раскомментируйте
+});
+
+async function renderUserProfile() {
+    const userInfoDiv = document.getElementById('user-info');
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userId = userData.userUid || userData.uid;
+
+    if (!userInfoDiv) return;
+
+    if (!userId) {
+        userInfoDiv.innerHTML = '<p>Вы не авторизованы. <a href="log_in.html">Войти</a></p>';
+        return;
+    }
+
+    let userHTML = `
+        <p><strong>Имя:</strong> ${userData.firstName || 'Пользователь'}</p>
+        <p><strong>Фамилия:</strong> ${userData.lastName || 'Пользователь'}</p>
+        <p><strong>Email:</strong> ${userData.email || 'Не указан'}</p>
+    `;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/UserSubscriptionsAdvanced/active/${userId}`);
+
+        if (response.ok) {
+            const sub = await response.json();
+
+            // Учитываем разный регистр свойств
+            const validDateRaw = sub.validUntil || sub.ValidUntil;
+            const validDate = new Date(validDateRaw).toLocaleDateString('ru-RU');
+
+            const sessions = sub.sessionsRemaining !== undefined ? sub.sessionsRemaining : sub.SessionsRemaining;
+
+            // Безопасный доступ к вложенному объекту Plan
+            const planObj = sub.plan || sub.Plan;
+            const planName = sub.planName || sub.PlanName || (sub.plan ? (sub.plan.planName || sub.plan.PlanName) : 'Тариф');
+
+            userHTML += `
+                <div style="margin-top: 20px; padding: 15px; border: 1px solid #4CAF50; border-radius: 8px; background-color: #f9fff9;">
+                    <h3 style="color: #2E7D32; margin-top:0;">Ваш абонемент: ${planName}</h3>
+                    <p><strong>Статус:</strong> <span style="color: #4CAF50; font-weight: bold;">АКТИВЕН</span></p>
+                    <p><strong>Осталось сеансов:</strong> ${sessions}</p>
+                    <p><strong>Действует до:</strong> ${validDate}</p>
+                    
+                    <button id="cancel-sub-btn" class="button logout" style="background:#dc3545; margin-top: 10px;">
+                        Отменить подписку
+                    </button>
+                    <p style="font-size: 0.8em; color: #666; margin-top: 5px;">
+                        *Отмена позволит вам выбрать новый тариф.
+                    </p>
+                </div>
+            `;
+        } else {
+            userHTML += `
+                <hr>
+                <p>У вас нет активного абонемента.</p>
+                <a href="subscription_plans.html" class="button" style="background: black; color: white; text-decoration: none; padding: 10px 20px; display: inline-block;">Купить абонемент</a>
+            `;
+        }
+    } catch (e) {
+        console.error("Ошибка загрузки профиля", e);
+        userHTML += `<p style="color:red">Не удалось загрузить данные подписки.</p>`;
+    }
+
+    userHTML += `<br><a href="log_out.html" class="button logout" style="margin-top:20px;">Выйти</a>`;
+    userInfoDiv.innerHTML = userHTML;
+
+    // Обработчик кнопки отмены
+    const cancelBtn = document.getElementById('cancel-sub-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => cancelSubscription(userId));
+    }
+}
+
+async function cancelSubscription(userId) {
+    if (!confirm('Вы уверены, что хотите отменить подписку? Оставшиеся сеансы могут сгореть.')) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/UserSubscriptionsAdvanced/cancel/${userId}`, {
+            method: 'POST'
+        });
+
+        if (response.ok) {
+            alert('Подписка успешно отменена.');
+            window.location.reload();
+        } else {
+            const msg = await response.text();
+            alert('Ошибка: ' + msg);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Ошибка соединения.');
+    }
+}
