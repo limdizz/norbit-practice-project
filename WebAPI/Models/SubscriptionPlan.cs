@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using WebAPI.Models;
 
 namespace WebAPI;
@@ -15,6 +16,9 @@ public partial class SubscriptionPlan
     public decimal? TotalPrice { get; set; }
 
     public int? ValidityDays { get; set; }
+
+    [Column("description")]
+    public string? Description { get; set; }
 
     public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
 

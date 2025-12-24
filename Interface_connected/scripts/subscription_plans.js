@@ -18,7 +18,6 @@ async function loadPlans() {
         container.innerHTML = '';
 
         plans.forEach(plan => {
-            // Учитываем разный регистр (PlanId или planId)
             const pId = plan.planId || plan.PlanId;
             const pName = plan.planName || plan.PlanName;
             const pPrice = plan.totalPrice || plan.TotalPrice;
@@ -28,10 +27,10 @@ async function loadPlans() {
 
             const card = document.createElement('div');
             card.className = 'plan-card';
-            card.dataset.planId = pId; // Сохраняем ID
+            card.dataset.planId = pId; 
 
-            let icon = '✨';
-            if (pName.includes('Dark')) icon = '🔥';
+            let icon = '💀';
+            if (pName.includes('Dark')) icon = '☠';
             if (pName.includes('Lord')) icon = '👑';
 
             card.innerHTML = `
@@ -149,7 +148,6 @@ async function checkActiveSubscription() {
 
 // --- 4. Update UI ---
 function updateButtonsUI(activePlanId) {
-    // Если ID не передан или undefined, не блокируем всё подряд, а сбрасываем
     if (!activePlanId) {
         resetButtonsUI();
         return;
