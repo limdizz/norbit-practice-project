@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     } else {
         console.error('Данные о бронировании не найдены в sessionStorage!');
-        // Можно попробовать загрузить из localStorage как резервный вариант
+
         const lastBookingString = localStorage.getItem('lastBooking');
         if (lastBookingString) {
             console.warn('Загружаем резервные данные из localStorage');
@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const lastNameInput = document.querySelector('.register_placeholder_ln');
     const firstNameInput = document.querySelector('.register_placeholder_fn');
 
-    // Элементы, которые нужно найти (добавьте им ID в HTML)
     const orderTitle = document.getElementById('order-title');
     const orderInstrument = document.getElementById('order-instrument');
     const orderDates = document.getElementById('order-dates');
@@ -63,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Название (для помещений и инструментов)
-        // Мы сохранили instrumentName в room.js для совместимости, но проверим оба поля
         const nameText = bookingData.instrumentName || bookingData.itemName || 'Неизвестно';
 
         if (orderInstrument) {
@@ -75,14 +73,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Даты и время (Самое важное отличие)
+        // Даты и время 
         if (orderDates) {
             if (bookingData.itemType === 'Room') {
                 // ЛОГИКА ДЛЯ ПОМЕЩЕНИЙ
                 // Выводим конкретную дату и количество часов
-                orderDates.textContent = `Дата: ${bookingData.date}, Длительность: ${bookingData.hours} ч.`;
+                orderDates.textContent = `Дата: ${bookingData.date}, Время: ${bookingData.time}, Длительность: ${bookingData.hours} ч.`;
             } else {
-                // ЛОГИКА ДЛЯ ИНСТРУМЕНТОВ (Старая)
+                // ЛОГИКА ДЛЯ ИНСТРУМЕНТОВ 
                 orderDates.textContent = `Срок бронирования: ${bookingData.startDate} - ${bookingData.endDate}`;
             }
         }

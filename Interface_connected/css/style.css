@@ -1045,6 +1045,7 @@ h1, h2 {
 .register_button {
     font-size: 20px;
     font-family: Inter;
+    font-weight: bold;
 }
 
 .register_button {
@@ -1236,6 +1237,5 @@ input[type="range"] {
 }
 
 .register_placeholder_ln, .register_placeholder_fn {
-    font-weight: bold;
     font-size: 20px;
 }

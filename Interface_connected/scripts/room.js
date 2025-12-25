@@ -134,10 +134,10 @@ function renderRoomDetails(room) {
     if (statusEl) {
         if (!room.isFree) {
             statusEl.innerHTML = '<span style="color:red">Временно занято</span>';
-            // Можно заблокировать кнопку, если логика API запрещает бронь занятых
+
             if (btn) {
-                // btn.disabled = true; 
-                // btn.style.background = '#ccc';
+                btn.disabled = true; 
+                btn.style.background = '#ccc';
             }
         } else {
             statusEl.innerHTML = '<span style="color:green">Свободно для бронирования</span>';
@@ -275,7 +275,6 @@ function validateDuration() {
 
     // Время закрытия студии (21:00)
     const closingHour = 21;
-    const closingMinute = 0;
 
     // Максимально доступная длительность
     let maxHours = closingHour - bookingHour;
@@ -347,7 +346,6 @@ function calculatePrice() {
 function updateBookingButton() {
     const btn = document.getElementById('book_button');
     if (btn) {
-        // Удаляем старые листенеры через клонирование
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
 
@@ -370,7 +368,7 @@ async function handleBooking() {
 
     if (!userData.email) {
         alert("Пожалуйста, войдите в систему для бронирования.");
-        window.location.href = 'log_in.html'; // Убедитесь, что путь верный
+        window.location.href = 'log_in.html';
         return;
     }
 
@@ -428,9 +426,8 @@ async function handleBooking() {
             itemType: 'Room',
             image: currentRoom.image,
 
-            // Сохраняем красивые строки для вывода
             date: dateStr,
-            time: timeStr, // Добавили время для отображения
+            time: timeStr, 
             hours: hours,
             pricePerHour: currentRoom.price,
             totalPrice: parseInt(document.getElementById('total-price').textContent),
