@@ -631,7 +631,8 @@
     margin: auto;
 }
 
-h1, h2 {
+h1,
+h2 {
     color: #333;
     text-align: center;
 }
@@ -846,53 +847,53 @@ h1, h2 {
         align-items: center;
         text-align: center;
     }
-    
+
     .booking-card img {
         width: 100%;
         height: auto;
         max-height: 200px;
     }
-    
+
     .booking-info strong {
         min-width: auto;
         display: block;
         margin-top: 5px;
     }
-    
+
     .plans-container {
         margin: 30px auto;
         padding: 10px;
         gap: 20px;
     }
-    
+
     .plan-card {
         width: 100%;
         max-width: 350px;
         padding: 25px;
     }
-    
+
     .plan-card h2 {
         font-size: 20px;
         min-height: auto;
     }
-    
+
     .plan-card ul {
         min-height: auto;
     }
-    
+
     .instrument_card {
         grid-template-columns: 1fr;
     }
-    
+
     .card_column_image {
         order: 1;
         margin-bottom: 15px;
     }
-    
+
     .card_column_image img {
         height: 300px;
     }
-    
+
     .card_column_buy {
         order: 2;
         position: static;
@@ -900,40 +901,40 @@ h1, h2 {
         box-shadow: none;
         border: 1px solid #eee;
     }
-    
+
     .card_column_info {
         order: 3;
     }
-    
+
     .contacts-container {
         flex-direction: column;
     }
-    
+
     .logout-box {
         padding: 30px 20px;
         margin: 20px;
     }
-    
+
     .price-grid {
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 20px;
         padding: 10px;
     }
-    
+
     .price-section {
         padding: 10px;
     }
-    
+
     .price-card {
         padding: 20px;
         width: 100%;
     }
-    
+
     .container {
         margin: 20px;
         padding: 20px;
     }
-    
+
     .delete-booking {
         position: absolute;
         top: 10px;
@@ -1236,6 +1237,40 @@ input[type="range"] {
     text-decoration: underline;
 }
 
-.register_placeholder_ln, .register_placeholder_fn {
+.register_placeholder_ln,
+.register_placeholder_fn {
     font-size: 20px;
+}
+
+.login-type-selector {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.login-type-selector label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.login-type-selector label:hover {
+    background-color: #e0e0e0;
+}
+
+.login-type-selector input[type="radio"] {
+    cursor: pointer;
+    margin: 0;
+}
+
+.login-field {
+    transition: all 0.3s ease;
 }

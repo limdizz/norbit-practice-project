@@ -132,17 +132,35 @@ namespace WebAPI.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UsersAdvanced>> Login([FromBody] LoginRequest loginRequest)
         {
-            if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
+            if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Password))
             {
-                return BadRequest("Не указан email или пароль.");
+                return BadRequest("Не указан пароль.");
             }
 
-            var user = await _context.UsersAdvanceds
-                .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
+            UsersAdvanced? user = null;
+
+            // Поиск по email, если он указан
+            if (!string.IsNullOrEmpty(loginRequest.Email))
+            {
+                user = await _context.UsersAdvanceds
+                    .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
+            }
+            // Поиск по телефону, если он указан
+            else if (!string.IsNullOrEmpty(loginRequest.Phone))
+            {
+                // Очищаем телефон от лишних символов для поиска
+                string cleanPhone = new string(loginRequest.Phone.Where(c => char.IsDigit(c) || c == '+').ToArray());
+                user = await _context.UsersAdvanceds
+                    .FirstOrDefaultAsync(u => u.Phone != null && u.Phone.Replace(" ", "").Replace("-", "") == cleanPhone);
+            }
+            else
+            {
+                return BadRequest("Не указан email или номер телефона.");
+            }
 
             if (user == null)
             {
-                return Unauthorized("Пользователь с таким email не найден.");
+                return Unauthorized("Пользователь с такими данными не найден.");
             }
 
             var computedHash = await _context.Database
@@ -161,9 +179,11 @@ namespace WebAPI.Controllers
             return Ok(user);
         }
 
+        // Обновленная модель LoginRequest
         public class LoginRequest
         {
-            public required string Email { get; set; }
+            public string? Email { get; set; }
+            public string? Phone { get; set; }
             public required string Password { get; set; }
         }
     }

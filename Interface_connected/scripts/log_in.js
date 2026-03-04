@@ -1,74 +1,95 @@
 document.addEventListener('DOMContentLoaded', function () {
-
-    // Находим форму и ее элементы
     const loginForm = document.getElementById('loginForm');
-    const emailInput = document.getElementById('loginEmail');
     const passwordInput = document.getElementById('loginPassword');
     const loginButton = document.getElementById('loginButton');
 
-    // Проверяем, что все элементы найдены
-    if (!loginForm || !emailInput || !passwordInput || !loginButton) {
-        console.error('Не все элементы формы входа были найдены!');
-        return;
-    }
+    // Элементы для переключения
+    const emailField = document.getElementById('email-field');
+    const phoneField = document.getElementById('phone-field');
+    const emailInput = document.getElementById('loginEmail');
+    const phoneInput = document.getElementById('loginPhone');
+    const radioButtons = document.querySelectorAll('input[name="loginType"]');
 
-    // 1. Убираем встроенный onclick, чтобы он не мешал скрипту
+    // Убираем встроенный onclick
     loginButton.removeAttribute('onclick');
 
-    // 2. Вешаем обработчик на 'submit' (отправку) формы
-    loginForm.addEventListener('submit', async function (event) {
+    // Переключение между способами входа
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function () {
+            if (this.value === 'email') {
+                emailField.style.display = 'block';
+                phoneField.style.display = 'none';
+                emailInput.required = true;
+                phoneInput.required = false;
+                phoneInput.value = ''; // Очищаем поле телефона
+            } else {
+                emailField.style.display = 'none';
+                phoneField.style.display = 'block';
+                emailInput.required = false;
+                phoneInput.required = true;
+                emailInput.value = ''; // Очищаем поле email
+            }
+        });
+    });
 
-        // 3. Предотвращаем стандартное поведение формы (перезагрузку страницы)
+    loginForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        // 4. Собираем введённые данные
-        const email = emailInput.value.trim();
         const password = passwordInput.value.trim();
 
-        if (!email || !password) {
-            alert('Пожалуйста, заполните поля Email и Пароль.');
-            return;
+        // Определяем, какой способ входа выбран
+        const loginType = document.querySelector('input[name="loginType"]:checked').value;
+
+        let loginData = { password: password };
+
+        if (loginType === 'email') {
+            const email = emailInput.value.trim();
+            if (!email) {
+                alert('Пожалуйста, введите email.');
+                return;
+            }
+            loginData.email = email;
+        } else {
+            const phone = phoneInput.value.trim();
+            if (!phone) {
+                alert('Пожалуйста, введите номер телефона.');
+                return;
+            }
+            // Очищаем телефон от лишних символов для поиска в БД
+            loginData.phone = phone.replace(/[^\d+]/g, '');
         }
 
-        console.log(`Попытка входа через API для: ${email}`);
+        console.log(`Попытка входа через ${loginType}`);
 
         try {
-            // 3. Отправляем запрос на сервер (Backend)
-            // Убедитесь, что порт (7123) совпадает с вашим запуском API
             const response = await fetch('https://localhost:7123/api/UsersAdvanced/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
+                body: JSON.stringify(loginData)
             });
 
-            // 4. Обрабатываем ответ
             if (response.ok) {
                 const userFromDb = await response.json();
                 console.log('Вход успешен:', userFromDb);
 
-                // 5. Сохраняем данные пользователя в localStorage для работы сайта
                 localStorage.setItem('userData', JSON.stringify({
-                    firstName: userFromDb.name,     // Проверьте, как поля называются в вашей модели C#
-                    lastName: userFromDb.surname,   // Скорее всего Name и Surname
+                    firstName: userFromDb.name,
+                    lastName: userFromDb.surname,
                     email: userFromDb.email,
-                    id: userFromDb.userUid,
+                    phone: userFromDb.phone,
                     userUid: userFromDb.userUid
                 }));
 
                 localStorage.setItem('isLoggedIn', 'true');
 
-                alert(`Добро пожаловать, ${userFromDb.name}!`);
+                alert(`Добро пожаловать, ${userFromDb.name || userFromDb.surname || 'пользователь'}!`);
                 window.location.href = 'index.html';
             } else {
-                // Ошибка входа (401 или 404)
                 const errorText = await response.text();
                 console.warn('Ошибка входа:', response.status, errorText);
-                alert(errorText || 'Неверный email или пароль.');
+                alert(errorText || 'Неверный email/телефон или пароль.');
             }
 
         } catch (error) {
