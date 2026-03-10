@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Контакты</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="scripts/contacts.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
 
@@ -59,21 +58,23 @@
                     </p>
                 </div>
 
-                <div class="contact-form">
-                    <h2>Форма обратной связи</h2>
-                    <form id="feedback-form">
-                        <label for="name">Ваше имя:</label>
-                        <input type="text" id="name" name="name" placeholder="Введите имя" required>
+                <div class="faq-info">
+                    <h2>Часто задаваемые вопросы</h2>
 
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" placeholder="Введите email" required>
+                    <div class="faq-item">
+                        <h4>Как забронировать помещение?</h4>
+                        <p>Перейдите в раздел "Помещения", выберите подходящий зал и нажмите "Забронировать".</p>
+                    </div>
 
-                        <label for="message">Сообщение:</label>
-                        <textarea id="message" name="message" rows="5" placeholder="Введите сообщение"
-                            required></textarea>
+                    <div class="faq-item">
+                        <h4>Как отменить бронирование?</h4>
+                        <p>Отменить бронирование можно в разделе "Мои бронирования" в личном кабинете.</p>
+                    </div>
 
-                        <button type="submit">Отправить</button>
-                    </form>
+                    <div class="faq-item">
+                        <h4>Работаете ли вы в праздники?</h4>
+                        <p>В праздничные дни студия работает по сокращенному графику. Уточняйте по телефону.</p>
+                    </div>
                 </div>
             </div>
 
@@ -109,6 +110,13 @@
             </section>
         </footer>
     </div>
+    <script>
+        document.querySelectorAll(".faq-item").forEach(item => {
+            item.addEventListener("click", () => {
+                item.classList.toggle("active");
+            });
+        });
+    </script>
 </body>
 
 </html>
