@@ -1340,6 +1340,70 @@ input[type="range"] {
     margin-top: 30px;
 }
 
+/* Стили для таблицы и кнопок на админской странице бронирований */
+.bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Inter;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bookings-table th,
+.bookings-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    font-size: 14px;
+}
+
+.bookings-table th {
+    background-color: #f7f7f7;
+    font-weight: 600;
+    color: #333;
+}
+
+.bookings-table tr:hover {
+    background-color: #fafafa;
+}
+
+.admin-cancel-btn,
+.admin-reschedule-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: Inter;
+    transition: all 0.2s ease;
+    margin-right: 6px;
+}
+
+.admin-cancel-btn {
+    background-color: #e44d26;
+    color: #fff;
+}
+
+.admin-cancel-btn:hover {
+    background-color: #fff;
+    color: #e44d26;
+    border: 1px solid #e44d26;
+}
+
+.admin-reschedule-btn {
+    background-color: #000;
+    color: #fff;
+}
+
+.admin-reschedule-btn:hover {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
+}
+
 .contacts-container {
     display: flex;
     flex-direction: column;

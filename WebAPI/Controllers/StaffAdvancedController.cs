@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +26,23 @@ namespace WebAPI.Controllers
         public async Task<ActionResult<IEnumerable<StaffAdvanced>>> GetStaffAdvanceds()
         {
             return await _context.StaffAdvanceds.ToListAsync();
+        }
+
+        // GET: api/StaffAdvanced/byUser/{userUid}
+        // Проверка, является ли пользователь сотрудником (есть ли запись в staff_advanced)
+        [HttpGet("byUser/{userUid}")]
+        public async Task<ActionResult<StaffAdvanced>> GetByUser(Guid userUid)
+        {
+            var staff = await _context.StaffAdvanceds
+                .Include(s => s.UserU)
+                .FirstOrDefaultAsync(s => s.UserUid == userUid);
+
+            if (staff == null)
+            {
+                return NotFound();
+            }
+
+            return staff;
         }
 
         // GET: api/StaffAdvanced/5

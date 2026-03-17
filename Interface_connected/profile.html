@@ -25,6 +25,8 @@
 
                 <div id="user-controls" class="menu">
                     <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
+                    <button id="admin-panel-btn" class="menu__item__button" style="display: none;"
+                        onclick="location.href='admin_bookings.html'">Админ-панель</button>
                     <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</button>
                     <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</button>
                 </div>
@@ -40,14 +42,16 @@
             <h2>Профиль пользователя</h2>
             <div id="user-info" class="user-info">Загрузка информации о пользователе...</div>
 
-            <h3>Мои бронирования</h3>
-            <div id="booking-content">
-                <p>Загрузка бронирований...</p>
-            </div>
+            <div id="profile-bookings-section">
+                <h3 id="profile-bookings-title">Мои бронирования</h3>
+                <div id="booking-content">
+                    <p>Загрузка бронирований...</p>
+                </div>
 
-            <button id="clear-history" class="button logout">Очистить историю бронирований</button>
-            <button id="to-catalog" class="button logout" onclick="location.href='index.html'">Бронировать
-                ещё</button>
+                <button id="clear-history" class="button logout">Очистить историю бронирований</button>
+                <button id="to-catalog" class="button logout" onclick="location.href='index.html'">Бронировать
+                    ещё</button>
+            </div>
         </main>
 
         <footer class="footer">

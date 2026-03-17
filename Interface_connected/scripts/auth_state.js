@@ -6,10 +6,12 @@ function updateHeaderState() {
     // 1. Проверяем статус входа
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const isStaff = localStorage.getItem('isStaff') === 'true';
 
     // 2. Находим блоки кнопок
     const userControls = document.getElementById('user-controls');
     const guestControls = document.getElementById('guest-controls');
+    const adminBtn = document.getElementById('admin-panel-btn');
 
     // 3. Переключаем видимость
     if (isLoggedIn) {
@@ -19,9 +21,26 @@ function updateHeaderState() {
         if (userControls) {
             userControls.style.display = 'flex';
         }
+
+        // Показываем кнопку админ-панели только для сотрудников
+        if (adminBtn) {
+            adminBtn.style.display = isStaff ? 'inline-block' : 'none';
+        }
+
+        // Для сотрудников скрываем пункт "Мои бронирования" в хедере
+        if (userControls) {
+            const myBookingsLinks = userControls.querySelectorAll('a[href="my_bookings.html"]');
+            myBookingsLinks.forEach(a => {
+                a.style.display = isStaff ? 'none' : '';
+            });
+        }
     } else {
         // Гость
         if (userControls) userControls.style.display = 'none';
         if (guestControls) guestControls.style.display = 'flex';
+
+        if (adminBtn) {
+            adminBtn.style.display = 'none';
+        }
     }
 }

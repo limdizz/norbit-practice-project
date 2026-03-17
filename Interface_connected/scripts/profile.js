@@ -2,9 +2,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const userInfoDiv = document.getElementById('user-info');
     const bookingContainer = document.getElementById('booking-content');
     const clearBtn = document.getElementById('clear-history');
+    const profileBookingsSection = document.getElementById('profile-bookings-section');
 
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const isStaff = localStorage.getItem('isStaff') === 'true';
+
+    // Для администратора скрываем блоки, связанные с бронированиями
+    if (isStaff && profileBookingsSection) {
+        profileBookingsSection.style.display = 'none';
+    }
 
     // 1. Определяем уникальный ключ хранилища для пользователя
     const userEmail = userData.email;
@@ -30,6 +37,17 @@ document.addEventListener('DOMContentLoaded', function () {
             <p><strong>Фамилия:</strong> ${userData.lastName || ''}</p>
             <p><strong>Email:</strong> ${userData.email || ''}</p>
         `;
+
+        if (isStaff) {
+            userHTML += `
+                <hr>
+                <p><strong>Режим:</strong> Администратор</p>
+                <button class="button" onclick="location.href='admin_bookings.html'">Админ-панель</button>
+            `;
+            userHTML += `<a href="log_out.html" class="button logout">Выйти</a>`;
+            userInfoDiv.innerHTML = userHTML;
+            return;
+        }
 
         if (subscription) {
             userHTML += `
@@ -173,7 +191,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    renderBookings();
+    if (!isStaff) {
+        renderBookings();
+    }
 
     // Очистка всей истории
     if (clearBtn) {
@@ -235,6 +255,7 @@ async function renderUserProfile() {
     const userInfoDiv = document.getElementById('user-info');
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const userId = userData.userUid || userData.uid;
+    const isStaff = localStorage.getItem('isStaff') === 'true';
 
     if (!userInfoDiv) return;
 
@@ -248,6 +269,17 @@ async function renderUserProfile() {
         <p><strong>Фамилия:</strong> ${userData.lastName || 'Пользователь'}</p>
         <p><strong>Email:</strong> ${userData.email || 'Не указан'}</p>
     `;
+
+    if (isStaff) {
+        userHTML += `
+            <hr>
+            <p><strong>Режим:</strong> Администратор</p>
+            <a href="admin_bookings.html" class="button">Админ-панель</a>
+        `;
+        userHTML += `<br><a href="log_out.html" class="button logout" style="margin-top:20px;">Выйти</a>`;
+        userInfoDiv.innerHTML = userHTML;
+        return;
+    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/UserSubscriptionsAdvanced/active/${userId}`);

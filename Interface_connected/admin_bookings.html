@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Black Circle</title>
-    <link rel="stylesheet" href="css\style.css">
+    <title>Админ-панель бронирований</title>
+    <link rel="stylesheet" href="css/style.css">
     <script src="scripts/auth_state.js" defer></script>
+    <script src="scripts/admin_bookings.js" defer></script>
 </head>
 
 <body>
@@ -16,8 +16,7 @@
                 <img src="img/logo.png" alt="logo" width="100" height="90">
             </div>
             <nav class="menu">
-                <a class="menu__item active" href="index.html">Главная</a>
-                <!-- <a class="menu__item" href="index.html">Бронирование</a> -->
+                <a class="menu__item" href="index.html">Главная</a>
                 <a class="menu__item" href="subscription_plans.html">Абонементы</a>
                 <a class="menu__item" href="prices.html">Цены</a>
                 <a class="menu__item" href="contacts.html">Контакты</a>
@@ -36,30 +35,48 @@
                 </div>
             </nav>
         </header>
+
         <main class="main">
             <section class="about">
-                <h1 class="about_h">Музыкальная студия «Black Circle»</h1>
+                <h1 class="about_h">Административная панель бронирований</h1>
                 <p class="about_p">
-                    Бронируйте помещения для записи,
-                    арендуйте инструменты на нужное время
-                    и просто приятно проводите время!
+                    Здесь сотрудники студии управляют бронированиями пользователей: просматривают, отменяют и переносят.
                 </p>
-                <button class="about_button" onclick="location.href='rooms_catalog.html'">Бронировать студийное
-                    помещение</button>
-                <button class="about_button" onclick="location.href='instruments_catalog.html'">Бронировать
-                    инструменты</button>
+            </section>
+
+            <section id="access-message" style="display:none;" class="no-bookings">
+            </section>
+
+            <section id="bookings-section" style="display:none;">
+                <h2 class="about_h" style="margin-top: 30px;">Все бронирования</h2>
+                <div class="table-wrapper">
+                    <table id="bookings-table" class="bookings-table">
+                        <thead>
+                            <tr>
+                                <th>ID брони</th>
+                                <th>Пользователь</th>
+                                <th>Помещение / инструмент</th>
+                                <th>Начало</th>
+                                <th>Окончание</th>
+                                <th>Статус</th>
+                                <th>Сотрудник</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookings-tbody">
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </main>
+
         <footer class="footer">
             <section class="instruments">
                 <a class="footer_menu__item_h" href="instruments_catalog.html">Каталог инструментов</a><br><br>
-                <a class="footer_menu__item"
-                    href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
+                <a class="footer_menu__item" href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
                 <a class="footer_menu__item" href="instruments_catalog.html?category=classicguitars">Классические
                     гитары</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=bassguitars">Бас-гитары</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=synths">Синтезаторы</a><br>
-                <!-- <a class="footer_menu__item" href="instruments_catalog.html?category=drums">Ударные установки</a><br> -->
                 <a class="footer_menu__item" href="instruments_catalog.html?category=microphones">Микрофоны</a><br><br>
             </section>
             <section class="rooms">
@@ -71,11 +88,9 @@
             <section class="contacts">
                 <a class="footer_menu__item_h" href="#">Студия</a><br><br>
                 <a class="footer_menu__item" href="contacts.html">О нас</a><br>
-                <!-- <a class="footer_menu__item" href="#">Новости</a><br>
-                <a class="footer_menu__item" href="#">Отзывы</a><br> -->
             </section>
         </footer>
     </div>
 </body>
-
 </html>
+

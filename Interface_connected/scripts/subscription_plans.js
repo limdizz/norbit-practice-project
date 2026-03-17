@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 async function loadPlans() {
     const container = document.getElementById('plans-container');
     container.innerHTML = '<p>Загрузка тарифов...</p>';
+    const isStaff = localStorage.getItem('isStaff') === 'true';
 
     try {
         const response = await fetch(`${API_BASE_URL}/SubscriptionPlans`);
@@ -33,6 +34,10 @@ async function loadPlans() {
             if (pName.includes('Dark')) icon = '☠';
             if (pName.includes('Lord')) icon = '👑';
 
+            const buttonHtml = isStaff
+                ? `<button class="subscribe-btn" onclick="location.href='admin_bookings.html'">Админ-панель</button>`
+                : `<button class="subscribe-btn" onclick="buySubscription(${pId}, '${pName}', ${pDays}, ${pSessions})">Выбрать</button>`;
+
             card.innerHTML = `
                 <h2>${icon} ${pName}</h2>
                 <p class="price">₽${pPrice} / ${pDays} дн.</p>
@@ -41,9 +46,7 @@ async function loadPlans() {
                     <li>Сеансов: ${pSessions}</li>
                     <li>Действует: ${pDays} дней</li>
                 </ul>
-                <button class="subscribe-btn" onclick="buySubscription(${pId}, '${pName}', ${pDays}, ${pSessions})">
-                    Выбрать
-                </button>
+                ${buttonHtml}
             `;
             container.appendChild(card);
         });
@@ -114,8 +117,10 @@ async function buySubscription(planId, planName, validityDays, sessionsCount) {
 async function checkActiveSubscription() {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const userId = userData.userUid || userData.uid;
+    const isStaff = localStorage.getItem('isStaff') === 'true';
 
     if (!userId) return;
+    if (isStaff) return;
 
     try {
         const response = await fetch(`${API_BASE_URL}/UserSubscriptionsAdvanced/active/${userId}`);

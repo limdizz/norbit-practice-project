@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +26,43 @@ namespace WebAPI.Controllers
         public async Task<ActionResult<IEnumerable<BookingsAdvanced>>> GetBookingsAdvanceds()
         {
             return await _context.BookingsAdvanceds.ToListAsync();
+        }
+
+        // GET: api/BookingsAdvanced/admin?staffUserUid={userUid}
+        // Возвращает список бронирований для административной панели
+        [HttpGet("admin")]
+        public async Task<ActionResult<IEnumerable<object>>> GetBookingsForAdmin([FromQuery] Guid staffUserUid)
+        {
+            var isStaff = await _context.StaffAdvanceds
+                .AnyAsync(s => s.UserUid == staffUserUid);
+
+            if (!isStaff)
+            {
+                return Forbid();
+            }
+
+            var bookings = await _context.BookingsAdvanceds
+                .Include(b => b.UserU)
+                .Include(b => b.Room)
+                .Include(b => b.StaffU)
+                .Select(b => new
+                {
+                    b.BookingUid,
+                    b.UserUid,
+                    userName = b.UserU != null ? b.UserU.Name : null,
+                    userSurname = b.UserU != null ? b.UserU.Surname : null,
+                    userEmail = b.UserU != null ? b.UserU.Email : null,
+                    b.RoomId,
+                    roomName = b.Room != null ? b.Room.Name : null,
+                    b.StaffUid,
+                    staffName = b.StaffU != null ? b.StaffU.StaffPosition : null,
+                    b.StartTime,
+                    b.EndTime,
+                    b.Status
+                })
+                .ToListAsync();
+
+            return bookings;
         }
 
         // GET: api/BookingsAdvanced/5
@@ -69,6 +106,81 @@ namespace WebAPI.Controllers
                     throw;
                 }
             }
+
+            return NoContent();
+        }
+
+        public class AdminBookingUpdateRequest
+        {
+            public Guid StaffUserUid { get; set; }
+            public DateTime? StartTime { get; set; }
+            public DateTime? EndTime { get; set; }
+        }
+
+        // PUT: api/BookingsAdvanced/{id}/cancel
+        // Отмена бронирования сотрудником
+        [HttpPut("{id}/cancel")]
+        public async Task<IActionResult> CancelBooking(Guid id, [FromBody] AdminBookingUpdateRequest request)
+        {
+            var isStaff = await _context.StaffAdvanceds
+                .AnyAsync(s => s.UserUid == request.StaffUserUid);
+
+            if (!isStaff)
+            {
+                return Forbid();
+            }
+
+            var booking = await _context.BookingsAdvanceds.FindAsync(id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            booking.Status = "cancelled";
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // PUT: api/BookingsAdvanced/{id}/reschedule
+        // Перенос бронирования сотрудником
+        [HttpPut("{id}/reschedule")]
+        public async Task<IActionResult> RescheduleBooking(Guid id, [FromBody] AdminBookingUpdateRequest request)
+        {
+            var isStaff = await _context.StaffAdvanceds
+                .AnyAsync(s => s.UserUid == request.StaffUserUid);
+
+            if (!isStaff)
+            {
+                return Forbid();
+            }
+
+            var booking = await _context.BookingsAdvanceds.FindAsync(id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            if (request.StartTime.HasValue)
+            {
+                booking.StartTime = request.StartTime.Value.ToLocalTime();
+            }
+
+            if (request.EndTime.HasValue)
+            {
+                booking.EndTime = request.EndTime.Value.ToLocalTime();
+            }
+
+            if (booking.StartTime.HasValue && booking.StartTime.Value > DateTime.Now)
+            {
+                booking.Status = "in progress";
+            }
+            else
+            {
+                booking.Status = "completed";
+            }
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }

@@ -83,7 +83,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 }));
 
                 localStorage.setItem('isLoggedIn', 'true');
+                localStorage.removeItem('isStaff');
 
+                try {
+                    // Проверяем, является ли пользователь сотрудником (есть ли запись в staff_advanced)
+                    const staffResp = await fetch(`https://localhost:7123/api/StaffAdvanced/byUser/${userFromDb.userUid}`);
+                    if (staffResp.ok) {
+                        // Помечаем в localStorage, что это сотрудник
+                        localStorage.setItem('isStaff', 'true');
+                        alert(`Добро пожаловать в админ-панель, ${userFromDb.name || userFromDb.surname || 'пользователь'}!`);
+                        window.location.href = 'admin_bookings.html';
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Не удалось проверить статус сотрудника:', e);
+                }
+
+                // Обычный пользователь
                 alert(`Добро пожаловать, ${userFromDb.name || userFromDb.surname || 'пользователь'}!`);
                 window.location.href = 'index.html';
             } else {
