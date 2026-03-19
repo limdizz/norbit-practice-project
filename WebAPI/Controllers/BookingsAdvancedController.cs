@@ -21,6 +21,33 @@ namespace WebAPI.Controllers
             _context = context;
         }
 
+        private async Task<bool> HasConflictAsync(Guid bookingUidToIgnore, int? roomId, int? instrumentId, DateTime startTime, DateTime endTime)
+        {
+            // Исключаем отмененные бронирования и бронирование, которое переносим/обновляем
+            var baseQuery = _context.BookingsAdvanceds
+                .Where(b =>
+                    b.BookingUid != bookingUidToIgnore &&
+                    b.Status != "cancelled" &&
+                    b.StartTime.HasValue &&
+                    b.EndTime.HasValue);
+
+            if (roomId.HasValue)
+            {
+                baseQuery = baseQuery.Where(b => b.RoomId == roomId.Value);
+            }
+
+            if (instrumentId.HasValue)
+            {
+                baseQuery = baseQuery.Where(b => b.InstrumentId == instrumentId.Value);
+            }
+
+            // Пересечение интервалов: [startTime, endTime) и [b.StartTime, b.EndTime)
+            // => startA < endB && endA > startB
+            return await baseQuery.AnyAsync(b =>
+                startTime < b.EndTime!.Value &&
+                endTime > b.StartTime!.Value);
+        }
+
         // GET: api/BookingsAdvanced
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookingsAdvanced>>> GetBookingsAdvanceds()
@@ -187,6 +214,29 @@ namespace WebAPI.Controllers
                 return BadRequest("Время начала должно быть строго раньше времени окончания.");
             }
 
+            // Проверка пересечения: нельзя переносить в занятое время
+            if (booking.StartTime.HasValue &&
+                booking.EndTime.HasValue &&
+                (booking.RoomId.HasValue || booking.InstrumentId.HasValue))
+            {
+                var conflicts = await HasConflictAsync(
+                    bookingUidToIgnore: booking.BookingUid,
+                    roomId: booking.RoomId,
+                    instrumentId: booking.InstrumentId,
+                    startTime: booking.StartTime.Value,
+                    endTime: booking.EndTime.Value);
+
+                if (conflicts)
+                {
+                    if (booking.RoomId.HasValue)
+                    {
+                        return Conflict("Помещение уже занято на выбранное время.");
+                    }
+
+                    return Conflict("Инструмент уже занят на выбранное время.");
+                }
+            }
+
             if (booking.StartTime.HasValue && booking.StartTime.Value > DateTime.Now)
             {
                 booking.Status = "in progress";
@@ -227,6 +277,29 @@ namespace WebAPI.Controllers
                 bookingsAdvanced.StartTime.Value >= bookingsAdvanced.EndTime.Value)
             {
                 return BadRequest("Время начала должно быть строго раньше времени окончания.");
+            }
+
+            // Проверка пересечения: нельзя бронировать уже занятое помещение/инструмент
+            if (bookingsAdvanced.StartTime.HasValue &&
+                bookingsAdvanced.EndTime.HasValue &&
+                (bookingsAdvanced.RoomId.HasValue || bookingsAdvanced.InstrumentId.HasValue))
+            {
+                var conflicts = await HasConflictAsync(
+                    bookingUidToIgnore: bookingsAdvanced.BookingUid,
+                    roomId: bookingsAdvanced.RoomId,
+                    instrumentId: bookingsAdvanced.InstrumentId,
+                    startTime: bookingsAdvanced.StartTime.Value,
+                    endTime: bookingsAdvanced.EndTime.Value);
+
+                if (conflicts)
+                {
+                    if (bookingsAdvanced.RoomId.HasValue)
+                    {
+                        return Conflict("Помещение уже занято на выбранное время.");
+                    }
+
+                    return Conflict("Инструмент уже занят на выбранное время.");
+                }
             }
 
             // Логика статуса

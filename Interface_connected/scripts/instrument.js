@@ -352,23 +352,25 @@ async function handleBooking() {
     const startDateStr = document.getElementById('start_date').value;
     const endDateStr = document.getElementById('end_date').value;
 
-    const now = new Date();
-    const localDateTime = formatDateTimeToMoscowISO(now);
-
-    // Вычисляем дату окончания с временем создания
     const days = calculateDaysDifference(startDateStr, endDateStr);
-    const endDateTime = new Date(now);
-    endDateTime.setDate(endDateTime.getDate() + days);
-    const endLocalDateTime = formatDateTimeToMoscowISO(endDateTime);
+
+    // ВАЖНО:
+    // Раньше StartTime/EndTime формировались от текущего времени (now),
+    // из-за чего на сервер уходил неверный интервал и появлялись "ложные" конфликты.
+    // Теперь StartTime/EndTime строим строго по выбранным датам.
+    const startDateObj = parseDate(startDateStr);
+    const endDateObj = parseDate(endDateStr);
+
+    const startIsoMoscow = toMoscowOffsetISO(startDateObj);
+    const endIsoMoscow = toMoscowOffsetISO(endDateObj);
 
     const bookingRequest = {
         UserUid: userUid,
         InstrumentId: currentInstrument.id,
         RoomId: null,
-        // Время начала = текущее время
-        StartTime: localDateTime,
-        // Время окончания = текущее время + количество дней
-        EndTime: endLocalDateTime,
+        // Интервал бронирования по выбранным датам (конец считаем как начало следующего дня)
+        StartTime: startIsoMoscow,
+        EndTime: endIsoMoscow,
     };
 
     console.log("Отправляемые данные бронирования:", bookingRequest);
@@ -391,8 +393,9 @@ async function handleBooking() {
         const orderId = generateOrderId(result.bookingUid);
 
         // Форматируем даты для отображения
-        const startDisplay = formatDateTimeForDisplay(localDateTime);
-        const endDisplay = formatDateTimeForDisplay(endLocalDateTime);
+        // Для отображения показываем выбранные календарные даты
+        const startDisplay = { date: startDateStr, time: '00:00' };
+        const endDisplay = { date: endDateStr, time: '00:00' };
 
         // Данные для отображения
         const displayData = {
@@ -425,8 +428,17 @@ async function handleBooking() {
 
     } catch (err) {
         console.error("Ошибка при бронировании:", err);
-        alert("Ошибка при бронировании инструмента. Проверьте консоль для деталей.");
+        alert(`Ошибка при бронировании инструмента: ${err?.message || 'проверьте консоль для деталей'}`);
     }
+}
+
+function toMoscowOffsetISO(dateObj) {
+    // Строим ISO строку с фиксированным оффсетом +03:00,
+    // чтобы выбранные пользователем даты интерпретировались как московские календарные даты.
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}T00:00:00+03:00`;
 }
 
 function saveBookingData(bookingData) {

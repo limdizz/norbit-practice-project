@@ -448,7 +448,7 @@ async function handleBooking() {
 
     } catch (error) {
         console.error('Ошибка:', error);
-        alert('Ошибка при бронировании. Проверьте соединение или авторизацию.');
+        alert(`Ошибка при бронировании: ${error?.message || 'проверьте соединение или авторизацию'}`);
     }
 }
 
