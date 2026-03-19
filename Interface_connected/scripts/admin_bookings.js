@@ -114,8 +114,21 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const newEnd = prompt('Введите новое время окончания (в формате ГГГГ-ММ-ДД ЧЧ:ММ):');
                 if (!newEnd) return;
 
-                const startIso = new Date(newStart.replace(' ', 'T')).toISOString();
-                const endIso = new Date(newEnd.replace(' ', 'T')).toISOString();
+                const startDate = new Date(newStart.replace(' ', 'T'));
+                const endDate = new Date(newEnd.replace(' ', 'T'));
+
+                if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+                    alert('Неверный формат даты/времени. Проверьте ввод.');
+                    return;
+                }
+
+                if (startDate >= endDate) {
+                    alert('Время начала должно быть строго раньше времени окончания.');
+                    return;
+                }
+
+                const startIso = startDate.toISOString();
+                const endIso = endDate.toISOString();
 
                 try {
                     const resp = await fetch(`https://localhost:7123/api/BookingsAdvanced/${bookingId}/reschedule`, {

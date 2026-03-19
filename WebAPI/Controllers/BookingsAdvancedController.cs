@@ -89,6 +89,14 @@ namespace WebAPI.Controllers
                 return BadRequest();
             }
 
+            // Валидация: время начала не должно быть позже или равно времени окончания
+            if (bookingsAdvanced.StartTime.HasValue &&
+                bookingsAdvanced.EndTime.HasValue &&
+                bookingsAdvanced.StartTime.Value >= bookingsAdvanced.EndTime.Value)
+            {
+                return BadRequest("Время начала должно быть строго раньше времени окончания.");
+            }
+
             _context.Entry(bookingsAdvanced).State = EntityState.Modified;
 
             try
@@ -171,6 +179,14 @@ namespace WebAPI.Controllers
                 booking.EndTime = request.EndTime.Value.ToLocalTime();
             }
 
+            // Валидация после обновления временных полей
+            if (booking.StartTime.HasValue &&
+                booking.EndTime.HasValue &&
+                booking.StartTime.Value >= booking.EndTime.Value)
+            {
+                return BadRequest("Время начала должно быть строго раньше времени окончания.");
+            }
+
             if (booking.StartTime.HasValue && booking.StartTime.Value > DateTime.Now)
             {
                 booking.Status = "in progress";
@@ -203,6 +219,14 @@ namespace WebAPI.Controllers
             if (bookingsAdvanced.EndTime.HasValue)
             {
                 bookingsAdvanced.EndTime = bookingsAdvanced.EndTime.Value.ToLocalTime();
+            }
+
+            // Валидация после конвертации во внутренний формат (локальное время)
+            if (bookingsAdvanced.StartTime.HasValue &&
+                bookingsAdvanced.EndTime.HasValue &&
+                bookingsAdvanced.StartTime.Value >= bookingsAdvanced.EndTime.Value)
+            {
+                return BadRequest("Время начала должно быть строго раньше времени окончания.");
             }
 
             // Логика статуса
