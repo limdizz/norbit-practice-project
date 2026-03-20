@@ -27,6 +27,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
+        // Однократно обновляем статусы в БД, чтобы старые брони стали "completed"
+        try {
+            await fetch(
+                `https://localhost:7123/api/BookingsAdvanced/admin/refresh-expired-statuses?staffUserUid=${userUid}`,
+                { method: 'POST' }
+            );
+        } catch (e) {
+            console.warn('Не удалось обновить статусы бронирований:', e);
+        }
+
         // Загрузка всех бронирований
         const bookingsResponse = await fetch(`https://localhost:7123/api/BookingsAdvanced/admin?staffUserUid=${userUid}`);
         if (!bookingsResponse.ok) {

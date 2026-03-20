@@ -21,6 +21,39 @@ namespace WebAPI.Controllers
             _context = context;
         }
 
+        private async Task<int> RefreshBookingStatusesByEndTimeAsync()
+        {
+            // Нормализация статуса по времени окончания:
+            // - EndTime < now  => completed
+            // - EndTime >= now => in progress
+            // cancel/cancelled не трогаем.
+            var now = DateTime.Now;
+
+            var bookings = await _context.BookingsAdvanceds
+                .Where(b =>
+                    b.Status != "cancelled" &&
+                    b.EndTime.HasValue)
+                .ToListAsync();
+
+            int updatedCount = 0;
+            foreach (var booking in bookings)
+            {
+                var shouldStatus = booking.EndTime!.Value < now ? "completed" : "in progress";
+                if (!string.Equals(booking.Status, shouldStatus, StringComparison.Ordinal))
+                {
+                    booking.Status = shouldStatus;
+                    updatedCount++;
+                }
+            }
+
+            if (updatedCount > 0)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            return updatedCount;
+        }
+
         private async Task<bool> HasConflictAsync(Guid bookingUidToIgnore, int? roomId, int? instrumentId, DateTime startTime, DateTime endTime)
         {
             // Исключаем отмененные бронирования и бронирование, которое переносим/обновляем
@@ -52,6 +85,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookingsAdvanced>>> GetBookingsAdvanceds()
         {
+            await RefreshBookingStatusesByEndTimeAsync();
             return await _context.BookingsAdvanceds.ToListAsync();
         }
 
@@ -60,6 +94,8 @@ namespace WebAPI.Controllers
         [HttpGet("admin")]
         public async Task<ActionResult<IEnumerable<object>>> GetBookingsForAdmin([FromQuery] Guid staffUserUid)
         {
+            await RefreshBookingStatusesByEndTimeAsync();
+
             var isStaff = await _context.StaffAdvanceds
                 .AnyAsync(s => s.UserUid == staffUserUid);
 
@@ -142,6 +178,7 @@ namespace WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<BookingsAdvanced>> GetBookingsAdvanced(Guid id)
         {
+            await RefreshBookingStatusesByEndTimeAsync();
             var bookingsAdvanced = await _context.BookingsAdvanceds.FindAsync(id);
 
             if (bookingsAdvanced == null)
@@ -168,6 +205,16 @@ namespace WebAPI.Controllers
                 bookingsAdvanced.StartTime.Value >= bookingsAdvanced.EndTime.Value)
             {
                 return BadRequest("Время начала должно быть строго раньше времени окончания.");
+            }
+
+            // Пересчет статуса: считаем актуальным, пока EndTime не прошел
+            if (bookingsAdvanced.EndTime.HasValue && bookingsAdvanced.EndTime.Value >= DateTime.Now)
+            {
+                bookingsAdvanced.Status = "in progress";
+            }
+            else if (bookingsAdvanced.EndTime.HasValue)
+            {
+                bookingsAdvanced.Status = "completed";
             }
 
             _context.Entry(bookingsAdvanced).State = EntityState.Modified;
@@ -283,7 +330,7 @@ namespace WebAPI.Controllers
                 }
             }
 
-            if (booking.StartTime.HasValue && booking.StartTime.Value > DateTime.Now)
+            if (booking.EndTime.HasValue && booking.EndTime.Value >= DateTime.Now)
             {
                 booking.Status = "in progress";
             }
@@ -348,8 +395,8 @@ namespace WebAPI.Controllers
                 }
             }
 
-            // Логика статуса
-            if (bookingsAdvanced.StartTime.HasValue && bookingsAdvanced.StartTime.Value > DateTime.Now)
+            // Логика статуса: считаем бронирование актуальным, пока EndTime не прошел
+            if (bookingsAdvanced.EndTime.HasValue && bookingsAdvanced.EndTime.Value >= DateTime.Now)
             {
                 bookingsAdvanced.Status = "in progress";
             }
@@ -444,6 +491,21 @@ namespace WebAPI.Controllers
         private bool BookingsAdvancedExists(Guid id)
         {
             return _context.BookingsAdvanceds.Any(e => e.BookingUid == id);
+        }
+
+        // POST: api/BookingsAdvanced/admin/refresh-expired-statuses?staffUserUid={userUid}
+        // Массовое обновление статусов "in progress" -> "completed", если EndTime уже прошел
+        [HttpPost("admin/refresh-expired-statuses")]
+        public async Task<ActionResult<object>> RefreshExpiredStatusesForAdmin([FromQuery] Guid staffUserUid)
+        {
+            var isStaff = await _context.StaffAdvanceds.AnyAsync(s => s.UserUid == staffUserUid);
+            if (!isStaff)
+            {
+                return Forbid();
+            }
+
+            var updated = await RefreshBookingStatusesByEndTimeAsync();
+            return Ok(new { updated });
         }
     }
 }
