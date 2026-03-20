@@ -68,6 +68,15 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const itemInfo = b.roomName || b.instrumentName || (b.roomId ? `Комната #${b.roomId}` : '');
 
+            const status = String(b.status || '').toLowerCase();
+            const canEdit = status !== 'completed' && status !== 'cancelled';
+            const actionsHtml = canEdit
+                ? `
+                    <button class="admin-cancel-btn" data-id="${b.bookingUid}">Отменить</button>
+                    <button class="admin-reschedule-btn" data-id="${b.bookingUid}">Перенести</button>
+                `
+                : '<span style="color:#777;">Действия недоступны</span>';
+
             tr.innerHTML = `
                 <td>${b.bookingUid}</td>
                 <td>${userInfo}</td>
@@ -77,8 +86,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 <td>${b.status || ''}</td>
                 <td>${b.staffName ? b.staffName : (b.staffUid || '')}</td>
                 <td>
-                    <button class="admin-cancel-btn" data-id="${b.bookingUid}">Отменить</button>
-                    <button class="admin-reschedule-btn" data-id="${b.bookingUid}">Перенести</button>
+                    ${actionsHtml}
                 </td>
             `;
 
