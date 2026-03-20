@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const userInfoDiv = document.getElementById('user-info');
-    const bookingContainer = document.getElementById('booking-content');
+    const bookingContainerCurrent = document.getElementById('booking-content-current');
+    const bookingContainerArchive = document.getElementById('booking-content-archive');
     const clearBtn = document.getElementById('clear-history');
     const profileBookingsSection = document.getElementById('profile-bookings-section');
 
@@ -25,7 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!isLoggedIn) {
         if (userInfoDiv) userInfoDiv.innerHTML = '<p>Вы не авторизованы. <a href="log_in.html">Войти</a></p>';
-        if (bookingContainer) bookingContainer.innerHTML = '';
+        if (bookingContainerCurrent) bookingContainerCurrent.innerHTML = '';
+        if (bookingContainerArchive) bookingContainerArchive.innerHTML = '';
         if (clearBtn) clearBtn.style.display = 'none';
         return;
     }
@@ -89,15 +91,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 3. ===== ОТОБРАЖЕНИЕ БРОНИРОВАНИЙ (УНИВЕРСАЛЬНОЕ) =====
     function renderBookings() {
-        if (!bookingContainer) return;
+        if (!bookingContainerCurrent || !bookingContainerArchive) return;
 
-        bookingContainer.innerHTML = '';
+        bookingContainerCurrent.innerHTML = '';
+        bookingContainerArchive.innerHTML = '';
 
         if (!bookingHistory.length) {
-            bookingContainer.innerHTML = `
+            bookingContainerCurrent.innerHTML = `
                     <div class="no-bookings">
                         <p>У вас нет активных бронирований.</p>
                         <a href="index.html" class="button">Перейти в каталог</a>
+                    </div>`;
+            bookingContainerArchive.innerHTML = `
+                    <div class="no-bookings">
+                        <p>Архив пока пуст.</p>
                     </div>`;
             if (clearBtn) clearBtn.style.display = 'none';
             return;
@@ -105,7 +112,70 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (clearBtn) clearBtn.style.display = 'inline-block';
 
+        const nowMs = Date.now();
+
+        function getRoomEndMs(b) {
+            if (!b?.date || !b?.time || !b?.hours) return null;
+            const parts = String(b.date).split('.');
+            if (parts.length !== 3) return null;
+            const [day, month, year] = parts.map(Number);
+            const [hour, minute] = String(b.time).split(':').map(Number);
+            const hours = parseInt(b.hours, 10);
+            if ([day, month, year, hour, minute, hours].some(x => Number.isNaN(x))) return null;
+            const start = new Date(year, month - 1, day, hour, minute, 0);
+            const end = new Date(start);
+            end.setHours(end.getHours() + hours);
+            return end.getTime();
+        }
+
+        function getInstrumentEndMs(b) {
+            if (!b?.endDate) return null;
+            const parts = String(b.endDate).split('.');
+            if (parts.length !== 3) return null;
+            const [day, month, year] = parts.map(Number);
+            const timeStr = b.endTime || '00:00';
+            const [hour, minute] = String(timeStr).split(':').map(Number);
+            if ([day, month, year, hour, minute].some(x => Number.isNaN(x))) return null;
+            const end = new Date(year, month - 1, day, hour, minute, 0);
+            return end.getTime();
+        }
+
+        function isCurrentBooking(b) {
+            if (b?.itemType === 'Room') {
+                const endMs = getRoomEndMs(b);
+                if (endMs === null) return false;
+                return endMs > nowMs;
+            }
+
+            const endMs = getInstrumentEndMs(b);
+            if (endMs === null) return false;
+            return endMs > nowMs;
+        }
+
+        // сначала раскидываем по контейнерам, чтобы можно было корректно показывать пустые состояния
+        const currentBookings = [];
+        const archiveBookings = [];
         bookingHistory.forEach(b => {
+            if (isCurrentBooking(b)) currentBookings.push(b);
+            else archiveBookings.push(b);
+        });
+
+        if (currentBookings.length === 0) {
+            bookingContainerCurrent.innerHTML = `
+                    <div class="no-bookings">
+                        <p>Текущих бронирований нет.</p>
+                    </div>`;
+        }
+
+        if (archiveBookings.length === 0) {
+            bookingContainerArchive.innerHTML = `
+                    <div class="no-bookings">
+                        <p>Архив пока пуст.</p>
+                    </div>`;
+        }
+
+        function renderCards(list, container) {
+            list.forEach(b => {
             const card = document.createElement('div');
             card.className = 'booking-card';
             card.dataset.id = b.bookingId;
@@ -152,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         ${detailsHTML} <p style="margin-top: 10px; font-size: 1.1em;"><strong>Итого:</strong> <span style="color:#e44d26">₽${b.totalPrice}</span></p>
                     </div>`;
 
-            bookingContainer.appendChild(card);
+            container.appendChild(card);
 
             // Обработчик удаления
             const deleteBtn = card.querySelector('.delete-booking');
@@ -188,7 +258,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert('Не удалось удалить бронирование. Попробуйте позже.');
                 }
             });
-        });
+            });
+        }
+
+        renderCards(currentBookings, bookingContainerCurrent);
+        renderCards(archiveBookings, bookingContainerArchive);
     }
 
     if (!isStaff) {
@@ -229,12 +303,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateClearButtonVisibility();
 
                 // Показываем заглушку
-                bookingContainer.innerHTML = `
-                    <div class="no-bookings">
-                        <h2>История очищена</h2>
-                        <a href="index.html" class="button">Перейти в каталог</a>
-                    </div>
-                `;
+                if (bookingContainerCurrent) {
+                    bookingContainerCurrent.innerHTML = `
+                        <div class="no-bookings">
+                            <h2>История очищена</h2>
+                            <a href="index.html" class="button">Перейти в каталог</a>
+                        </div>
+                    `;
+                }
+                if (bookingContainerArchive) {
+                    bookingContainerArchive.innerHTML = `
+                        <div class="no-bookings">
+                            <p>Архив пуст.</p>
+                        </div>
+                    `;
+                }
 
             } catch (error) {
                 console.error('Ошибка полной очистки:', error);
