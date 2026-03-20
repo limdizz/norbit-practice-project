@@ -510,61 +510,33 @@ async function handleBooking() {
 
     console.log("Отправляемые данные бронирования:", bookingRequest);
 
-    try {
-        const response = await fetch('https://localhost:7123/api/BookingsAdvanced', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bookingRequest)
-        });
+    // Двухшаговое бронирование:
+    // 1) Сохраняем pending-заявку в sessionStorage и переходим на order.html
+    // 2) Фактический POST в БД выполняем только после нажатия "Подтвердить бронирование" на order.html
 
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${text}`);
-        }
+    const startDisplay = { date: startDateStr, time: '00:00' };
+    const endDisplay = { date: endDateStr, time: '00:00' };
 
-        const result = await response.json();
-        console.log("Ответ от сервера:", result);
+    const displayData = {
+        bookingId: null,
+        orderId: null,
+        itemType: "Instrument",
+        instrumentId: currentInstrument.id,
+        instrumentName: currentInstrument.name,
+        image: currentInstrument.image,
+        startDate: startDisplay.date,
+        startTime: startDisplay.time,
+        endDate: endDisplay.date,
+        endTime: endDisplay.time,
+        bookingDate: new Date().toISOString(),
+        days: days,
+        dailyPrice: currentInstrument.price,
+        totalPrice: days * currentInstrument.price
+    };
 
-        const orderId = generateOrderId(result.bookingUid);
-
-        // Форматируем даты для отображения
-        // Для отображения показываем выбранные календарные даты
-        const startDisplay = { date: startDateStr, time: '00:00' };
-        const endDisplay = { date: endDateStr, time: '00:00' };
-
-        // Данные для отображения
-        const displayData = {
-            bookingId: result.bookingUid,
-            orderId: orderId,
-            itemType: "Instrument",
-            instrumentId: currentInstrument.id,
-            instrumentName: currentInstrument.name,
-            image: currentInstrument.image,
-            startDate: startDisplay.date,
-            startTime: startDisplay.time,
-            endDate: endDisplay.date,
-            endTime: endDisplay.time,
-            bookingDate: new Date().toISOString(),
-            days: days,
-            dailyPrice: currentInstrument.price,
-            totalPrice: days * currentInstrument.price
-        };
-
-        sessionStorage.setItem('currentBooking', JSON.stringify(displayData));
-
-        // Сохраняем в историю пользователя
-        const storageKey = `bookingHistory_${userData.email}`;
-        const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        history.push(displayData);
-        localStorage.setItem(storageKey, JSON.stringify(history));
-
-        // Переходим на страницу заказа
-        window.location.href = 'order.html';
-
-    } catch (err) {
-        console.error("Ошибка при бронировании:", err);
-        alert(`Ошибка при бронировании инструмента: ${err?.message || 'проверьте консоль для деталей'}`);
-    }
+    sessionStorage.setItem('pendingBookingRequest', JSON.stringify(bookingRequest));
+    sessionStorage.setItem('currentBooking', JSON.stringify(displayData));
+    window.location.href = 'order.html';
 }
 
 function toMoscowOffsetISO(dateObj) {

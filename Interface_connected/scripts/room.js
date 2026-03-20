@@ -588,59 +588,31 @@ async function handleBooking() {
         EndTime: endTime.toISOString(),
     };
 
-    try {
-        const response = await fetch('https://localhost:7123/api/BookingsAdvanced', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(bookingRequest)
-        });
+    // Двухшаговое бронирование:
+    // 1) Здесь сохраняем pending-заявку в sessionStorage и переходим на order.html
+    // 2) Фактический POST в БД выполняем только после нажатия "Подтвердить бронирование" на order.html
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Ошибка сервера: ${response.status} ${errorText}`);
-        }
+    const displayData = {
+        // bookingId/orderId будут известны только после POST на order.html
+        bookingId: null,
+        orderId: null,
+        itemId: currentRoom.id,
+        instrumentName: currentRoom.name,
+        itemName: currentRoom.name,
+        itemType: 'Room',
+        image: currentRoom.image,
 
-        const result = await response.json();
-        console.log('Бронь создана:', result);
+        date: dateStr,
+        time: timeStr,
+        hours: hours,
+        pricePerHour: currentRoom.price,
+        totalPrice: parseInt(document.getElementById('total-price').textContent),
+        bookingDate: new Date().toISOString()
+    };
 
-        const orderId = generateOrderId(result.bookingUid);
-
-        // 4. Сохранение данных для отображения (frontend history)
-        const displayData = {
-            bookingId: result.bookingUid,
-            orderId: orderId,
-            itemId: currentRoom.id,
-            instrumentName: currentRoom.name,
-            itemName: currentRoom.name,
-            itemType: 'Room',
-            image: currentRoom.image,
-
-            date: dateStr,
-            time: timeStr, 
-            hours: hours,
-            pricePerHour: currentRoom.price,
-            totalPrice: parseInt(document.getElementById('total-price').textContent),
-            bookingDate: new Date().toISOString()
-        };
-
-        // Сохраняем в SessionStorage для страницы "Заказ"
-        sessionStorage.setItem('currentBooking', JSON.stringify(displayData));
-
-        // Сохраняем в историю пользователя
-        const storageKey = `bookingHistory_${userData.email}`;
-        let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        history.push(displayData);
-        localStorage.setItem(storageKey, JSON.stringify(history));
-
-        // Переход
-        window.location.href = 'order.html';
-
-    } catch (error) {
-        console.error('Ошибка:', error);
-        alert(`Ошибка при бронировании: ${error?.message || 'проверьте соединение или авторизацию'}`);
-    }
+    sessionStorage.setItem('pendingBookingRequest', JSON.stringify(bookingRequest));
+    sessionStorage.setItem('currentBooking', JSON.stringify(displayData));
+    window.location.href = 'order.html';
 }
 
 function generateOrderId(bookingUuid) {
