@@ -92,6 +92,52 @@ namespace WebAPI.Controllers
             return bookings;
         }
 
+        // GET: api/BookingsAdvanced/byRoom/{roomId}
+        // Используется фронтендом для отключения занятых временных слотов
+        [HttpGet("byRoom/{roomId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetBookingsByRoom([FromRoute] int roomId)
+        {
+            var bookings = await _context.BookingsAdvanceds
+                .Where(b =>
+                    b.RoomId == roomId &&
+                    b.Status != "cancelled" &&
+                    b.StartTime.HasValue &&
+                    b.EndTime.HasValue)
+                .Select(b => new
+                {
+                    b.BookingUid,
+                    b.StartTime,
+                    b.EndTime,
+                    b.Status
+                })
+                .ToListAsync();
+
+            return bookings;
+        }
+
+        // GET: api/BookingsAdvanced/byInstrument/{instrumentId}
+        // Используется фронтендом для отключения занятых дат
+        [HttpGet("byInstrument/{instrumentId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetBookingsByInstrument([FromRoute] int instrumentId)
+        {
+            var bookings = await _context.BookingsAdvanceds
+                .Where(b =>
+                    b.InstrumentId == instrumentId &&
+                    b.Status != "cancelled" &&
+                    b.StartTime.HasValue &&
+                    b.EndTime.HasValue)
+                .Select(b => new
+                {
+                    b.BookingUid,
+                    b.StartTime,
+                    b.EndTime,
+                    b.Status
+                })
+                .ToListAsync();
+
+            return bookings;
+        }
+
         // GET: api/BookingsAdvanced/5
         [HttpGet("{id}")]
         public async Task<ActionResult<BookingsAdvanced>> GetBookingsAdvanced(Guid id)

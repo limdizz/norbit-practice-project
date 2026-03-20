@@ -5,6 +5,95 @@ document.addEventListener('DOMContentLoaded', function () {
 
 let currentRoom = null;
 
+// Занятые интервалы для текущего помещения (для отключения конфликтных слотов)
+let roomBookings = [];
+let roomBookingsLoaded = false;
+let isUpdatingTimeSelect = false;
+let roomBaseStatusHTML = '';
+
+function setRoomBookButtonState(enabled, statusText) {
+    const btn = document.getElementById('book_button');
+    if (!btn) return;
+
+    if (!enabled) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        const statusEl = document.getElementById('room-status');
+        if (statusEl) {
+            statusEl.innerHTML = statusText || '<span style="color:#e44d26">Занято на выбранное время</span>';
+        }
+    } else {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        const statusEl = document.getElementById('room-status');
+        if (statusEl) {
+            // Возвращаем исходный статус помещения (свободно/временно занято)
+            statusEl.innerHTML = roomBaseStatusHTML || '';
+        }
+    }
+}
+
+function isRoomSelectionConflicting() {
+    if (!roomBookingsLoaded) return false;
+    if (!Array.isArray(roomBookings) || roomBookings.length === 0) return false;
+
+    const dateStr = document.getElementById('booking_date')?.value;
+    const timeStr = document.getElementById('booking_time')?.value;
+    const hoursStr = document.getElementById('booking_hours')?.value;
+
+    if (!dateStr || !timeStr || !hoursStr) return true;
+
+    const [day, month, year] = dateStr.split('.').map(Number);
+    const [bookingHour, bookingMinute] = timeStr.split(':').map(Number);
+    const hours = parseInt(hoursStr);
+    if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year)) return true;
+    if (Number.isNaN(bookingHour) || Number.isNaN(bookingMinute)) return true;
+    if (Number.isNaN(hours) || hours <= 0) return true;
+
+    const startCandidate = new Date(year, month - 1, day, bookingHour, bookingMinute, 0);
+    const endCandidate = new Date(startCandidate);
+    endCandidate.setHours(startCandidate.getHours() + hours);
+
+    if (startCandidate >= endCandidate) return true;
+
+    return roomBookings.some(b => {
+        const bStart = new Date(b.startTime ?? b.StartTime);
+        const bEnd = new Date(b.endTime ?? b.EndTime);
+        if (Number.isNaN(bStart.getTime()) || Number.isNaN(bEnd.getTime())) return false;
+        return startCandidate < bEnd && endCandidate > bStart;
+    });
+}
+
+function updateRoomBookButtonBySelection() {
+    const dateStr = document.getElementById('booking_date')?.value;
+    const timeStr = document.getElementById('booking_time')?.value;
+    const hoursStr = document.getElementById('booking_hours')?.value;
+
+    if (!dateStr || !timeStr || !hoursStr) {
+        setRoomBookButtonState(false, 'Выберите дату и время');
+        return;
+    }
+
+    // Если текущий выбранный option отключен — сразу блокируем кнопку
+    const timeSelect = document.getElementById('booking_time');
+    if (timeSelect && timeSelect.selectedOptions && timeSelect.selectedOptions.length > 0) {
+        const opt = timeSelect.selectedOptions[0];
+        if (opt && opt.disabled) {
+            setRoomBookButtonState(false, 'Выбранное время занято');
+            return;
+        }
+    }
+
+    const conflicts = isRoomSelectionConflicting();
+    if (conflicts) {
+        setRoomBookButtonState(false, 'Занято на выбранное время');
+    } else {
+        setRoomBookButtonState(true);
+    }
+}
+
 // Данные типов помещений (так как API возвращает только RoomTypeId)
 // Эти данные должны совпадать с SQL таблицей RoomType
 const roomTypesMap = {
@@ -59,6 +148,22 @@ async function loadRoomData() {
         // Обновляем кнопку и цену
         updateBookingButton();
         calculatePrice();
+
+        // Загружаем бронирования для отключения занятых слотов по времени
+        try {
+            const bookingsResp = await fetch(`https://localhost:7123/api/BookingsAdvanced/byRoom/${currentRoom.id}`);
+            if (bookingsResp.ok) {
+                roomBookings = await bookingsResp.json();
+                roomBookingsLoaded = true;
+            }
+        } catch (e) {
+            console.warn('Не удалось загрузить бронирования для проверки слотов:', e);
+        }
+
+        const dateSelect = document.getElementById('booking_date');
+        if (dateSelect && dateSelect.value) {
+            updateTimeSelect(dateSelect.value);
+        }
 
     } catch (error) {
         console.error('Ошибка:', error);
@@ -134,6 +239,7 @@ function renderRoomDetails(room) {
     if (statusEl) {
         if (!room.isFree) {
             statusEl.innerHTML = '<span style="color:red">Временно занято</span>';
+            roomBaseStatusHTML = statusEl.innerHTML;
 
             if (btn) {
                 btn.disabled = true; 
@@ -141,6 +247,7 @@ function renderRoomDetails(room) {
             }
         } else {
             statusEl.innerHTML = '<span style="color:green">Свободно для бронирования</span>';
+            roomBaseStatusHTML = statusEl.innerHTML;
         }
     }
 }
@@ -182,7 +289,18 @@ function initDateSelect() {
 function initTimeSelect() {
     const timeSelect = document.getElementById('booking_time');
     if (timeSelect) {
-        timeSelect.addEventListener('change', validateDuration);
+        timeSelect.addEventListener('change', function () {
+            if (isUpdatingTimeSelect) return;
+            validateDuration();
+            calculatePrice();
+
+            const dateSelect = document.getElementById('booking_date');
+            if (dateSelect && dateSelect.value) {
+                isUpdatingTimeSelect = true;
+                updateTimeSelect(dateSelect.value);
+                isUpdatingTimeSelect = false;
+            }
+        });
     }
 }
 
@@ -190,57 +308,119 @@ function updateTimeSelect(selectedDate) {
     const timeSelect = document.getElementById('booking_time');
     if (!timeSelect) return;
 
-    timeSelect.innerHTML = '';
-
     const now = new Date();
     const [day, month, year] = selectedDate.split('.').map(Number);
     const selectedDateObj = new Date(year, month - 1, day);
-
     const isToday = isSameDate(selectedDateObj, now);
     const startHour = 10;
     const endHour = 20; // Закрывается в 21:00
+    const closingHour = 21;
 
-    let hasAvailableTime = false;
     const bookBtn = document.getElementById('book_button');
+    const preserveValue = timeSelect.value;
 
-    for (let hour = startHour; hour <= endHour; hour++) {
-        if (isToday && hour <= now.getHours()) {
-            continue;
+    // Быстро строим список вариантов, выбираем валидный вариант и подгоняем booking_hours
+    function buildTimeOptions({ disableConflicts }) {
+        timeSelect.innerHTML = '';
+
+        let firstEnabledValue = null;
+        let selectedValue = null;
+
+        for (let hour = startHour; hour <= endHour; hour++) {
+            if (isToday && hour <= now.getHours()) {
+                continue; // Паст-слоты не показываем
+            }
+
+            const hourString = String(hour).padStart(2, '0') + ':00';
+            const option = document.createElement('option');
+            option.value = hourString;
+            option.textContent = hourString;
+
+            // Длительность для проверки конфликтов: учитываем ограничение по закрытию для конкретного часа
+            const rawSelectedDuration = parseInt(document.getElementById('booking_hours')?.value) || 1;
+            const maxHoursForThisStart = Math.min(Math.max(closingHour - hour, 1), 5);
+            const durationForThisStart = Math.min(rawSelectedDuration, maxHoursForThisStart);
+
+            let disabledByConflict = false;
+            if (disableConflicts && roomBookingsLoaded && Array.isArray(roomBookings) && roomBookings.length > 0) {
+                const startCandidate = new Date(year, month - 1, day, hour, 0, 0, 0);
+                const endCandidate = new Date(startCandidate);
+                endCandidate.setHours(endCandidate.getHours() + durationForThisStart);
+
+                disabledByConflict = roomBookings.some(b => {
+                    const bStart = new Date(b.startTime ?? b.StartTime);
+                    const bEnd = new Date(b.endTime ?? b.EndTime);
+                    if (Number.isNaN(bStart.getTime()) || Number.isNaN(bEnd.getTime())) return false;
+                    return startCandidate < bEnd && endCandidate > bStart;
+                });
+            }
+
+            if (disabledByConflict) {
+                option.disabled = true;
+                option.textContent = `${hourString} (занято)`;
+            } else {
+                if (firstEnabledValue === null) firstEnabledValue = hourString;
+                if (preserveValue && preserveValue === hourString) selectedValue = hourString;
+            }
+
+            timeSelect.appendChild(option);
         }
 
-        const hourString = String(hour).padStart(2, '0') + ':00';
-        const option = document.createElement('option');
-        option.value = hourString;
-        option.textContent = hourString;
-
-        if (!hasAvailableTime) {
+        // Если все слоты недоступны
+        if (firstEnabledValue === null) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = isToday ? 'На сегодня времени нет' : 'На выбранную дату нет свободных слотов';
+            option.disabled = true;
             option.selected = true;
-            hasAvailableTime = true;
+            timeSelect.appendChild(option);
+
+            if (bookBtn) {
+                bookBtn.disabled = true;
+                bookBtn.style.opacity = '0.5';
+                bookBtn.style.cursor = 'not-allowed';
+            }
+            return false;
         }
 
-        timeSelect.appendChild(option);
-    }
-
-    if (!hasAvailableTime && isToday) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'На сегодня времени нет';
-        option.disabled = true;
-        timeSelect.appendChild(option);
-
-        if (bookBtn) {
-            bookBtn.disabled = true;
-            bookBtn.style.opacity = '0.5';
-            bookBtn.style.cursor = 'not-allowed';
+        if (selectedValue) {
+            timeSelect.value = selectedValue;
+        } else {
+            timeSelect.value = firstEnabledValue;
         }
-    } else {
+
+        // Включаем кнопку, пока не проверили длительность/конфликты
         if (bookBtn) {
             bookBtn.disabled = false;
             bookBtn.style.opacity = '1';
             bookBtn.style.cursor = 'pointer';
         }
+
+        return true;
+    }
+
+    // Пасс 1: без конфликтов (чтобы booking_hours точно соответствовали выбранному времени)
+    if (!buildTimeOptions({ disableConflicts: false })) return;
+    validateDuration();
+
+    // Пасс 2: с отключением конфликтных слотов
+    const chosenAfterPass1 = timeSelect.value;
+    const success = buildTimeOptions({ disableConflicts: true });
+    if (!success) return;
+
+    // Если после отключения конфликтов выбранное время поменялось — пересчитаем booking_hours
+    if (timeSelect.value !== chosenAfterPass1) {
+        validateDuration();
+
+        // Пасс 3: пересобираем конфликты с учётом обновлённой booking_hours
+        const chosenAfterPass2 = timeSelect.value;
+        buildTimeOptions({ disableConflicts: true });
+        timeSelect.value = chosenAfterPass2;
         validateDuration();
     }
+
+    // Финальная проверка: выключаем кнопку, если выбранный интервал конфликтный
+    updateRoomBookButtonBySelection();
 }
 
 function isSameDate(date1, date2) {
@@ -253,8 +433,16 @@ function initDurationSelect() {
     const hoursSelect = document.getElementById('booking_hours');
     if (hoursSelect) {
         hoursSelect.addEventListener('change', function () {
+            if (isUpdatingTimeSelect) return;
             validateDuration();
             calculatePrice();
+
+            const dateSelect = document.getElementById('booking_date');
+            if (dateSelect && dateSelect.value) {
+                isUpdatingTimeSelect = true;
+                updateTimeSelect(dateSelect.value);
+                isUpdatingTimeSelect = false;
+            }
         });
 
         // Инициализируем валидацию при загрузке
@@ -292,6 +480,9 @@ function validateDuration() {
 
     // Обновляем опции в select
     updateHoursOptions(maxHours, parseInt(hoursSelect.value));
+
+    // После пересчета длительности обновляем доступность кнопки
+    updateRoomBookButtonBySelection();
 }
 
 function updateHoursOptions(maxHours, currentValue) {

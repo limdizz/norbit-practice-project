@@ -14,6 +14,78 @@ document.addEventListener('DOMContentLoaded', function () {
 // Глобальная переменная для хранения текущего загруженного инструмента
 let currentInstrument = null;
 
+// Занятые интервалы по инструменту (для отключения занятых дат в UI)
+let instrumentBookings = [];
+let instrumentBookingsLoaded = false;
+
+function setBookButtonState(enabled, reasonText) {
+    const btn = document.getElementById('book_button');
+    if (!btn) return;
+
+    if (!enabled) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        const statusEl = document.getElementById('inst-status');
+        if (statusEl) {
+            statusEl.textContent = reasonText || 'На выбранные даты инструмент занят';
+            statusEl.style.color = '#e44d26';
+        }
+    } else {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        const statusEl = document.getElementById('inst-status');
+        if (statusEl) {
+            statusEl.textContent = '';
+        }
+    }
+}
+
+function isInstrumentSelectionConflicting() {
+    if (!instrumentBookingsLoaded) return false;
+    if (!Array.isArray(instrumentBookings) || instrumentBookings.length === 0) return false;
+
+    const startDateStr = document.getElementById('start_date')?.value;
+    const endDateStr = document.getElementById('end_date')?.value;
+
+    if (!startDateStr || !endDateStr) return true;
+
+    const startDateObj = parseDate(startDateStr);
+    const endDateObj = parseDate(endDateStr);
+    if (Number.isNaN(startDateObj.getTime()) || Number.isNaN(endDateObj.getTime())) return true;
+
+    const candidateStartAbs = new Date(toMoscowOffsetISO(startDateObj));
+    const candidateEndAbs = new Date(toMoscowOffsetISO(endDateObj));
+
+    // Интервал должен быть корректным: [start, end)
+    if (candidateStartAbs >= candidateEndAbs) return true;
+
+    return instrumentBookings.some(b => {
+        const bStart = new Date(b.startTime ?? b.StartTime);
+        const bEnd = new Date(b.endTime ?? b.EndTime);
+        if (Number.isNaN(bStart.getTime()) || Number.isNaN(bEnd.getTime())) return false;
+        return candidateStartAbs < bEnd && candidateEndAbs > bStart;
+    });
+}
+
+function updateBookButtonBySelection() {
+    const startDateStr = document.getElementById('start_date')?.value;
+    const endDateStr = document.getElementById('end_date')?.value;
+
+    if (!startDateStr || !endDateStr) {
+        setBookButtonState(false, 'Выберите доступные даты');
+        return;
+    }
+
+    const isConflicting = isInstrumentSelectionConflicting();
+    if (isConflicting) {
+        setBookButtonState(false, 'Инструмент занят на выбранные даты');
+    } else {
+        setBookButtonState(true);
+    }
+}
+
 // Словари для перевода (как в каталоге)
 const categoryTranslations = {
     "Electric Guitars": "Электрогитары",
@@ -79,6 +151,25 @@ async function loadInstrumentData() {
         // Инициализируем зависимые элементы
         updateBookingButton();
         initPriceCalculation(); // Запускаем расчет цены только когда данные есть
+
+        // Загружаем бронирования по инструменту для отключения занятых дат
+        try {
+            const bookingsResp = await fetch(`https://localhost:7123/api/BookingsAdvanced/byInstrument/${currentInstrument.id}`);
+            if (bookingsResp.ok) {
+                instrumentBookings = await bookingsResp.json();
+                instrumentBookingsLoaded = true;
+            }
+        } catch (e) {
+            console.warn('Не удалось загрузить бронирования инструмента для отключения дат:', e);
+        }
+
+        // Обновляем список доступных дат (end_date) с учетом занятостей
+        const startSelect = document.getElementById('start_date');
+        if (startSelect && startSelect.value) {
+            updateEndDateOptions(startSelect.value);
+            updatePriceCalculation();
+            updateBookButtonBySelection();
+        }
 
         // История браузера
         addToBrowserHistory(instrumentId);
@@ -230,10 +321,12 @@ function initDateSelects() {
         startDateSelect.addEventListener('change', function () {
             updateEndDateOptions(this.value);
             updatePriceCalculation();
+            updateBookButtonBySelection();
         });
 
         endDateSelect.addEventListener('change', function () {
             updatePriceCalculation();
+            updateBookButtonBySelection();
         });
 
         console.log('Селекты дат инициализированы');
@@ -271,19 +364,56 @@ function updateEndDateOptions(selectedStartDate) {
 
     endDateSelect.innerHTML = '';
 
+    let firstEnabledValue = null;
+
     for (let i = 1; i <= 30; i++) {
-        const date = new Date(startDate);
-        date.setDate(startDate.getDate() + i);
-        const dateString = formatDate(date);
+        const candidateEnd = new Date(startDate);
+        candidateEnd.setDate(startDate.getDate() + i);
+        const dateString = formatDate(candidateEnd);
+
         const option = document.createElement('option');
         option.value = dateString;
-        option.textContent = dateString;
+
+        let disabledByConflict = false;
+        if (instrumentBookingsLoaded && Array.isArray(instrumentBookings) && instrumentBookings.length > 0) {
+            disabledByConflict = instrumentBookings.some(b => {
+                const candidateStartAbs = new Date(toMoscowOffsetISO(startDate));
+                const candidateEndAbs = new Date(toMoscowOffsetISO(candidateEnd));
+
+                const bStart = new Date(b.startTime ?? b.StartTime);
+                const bEnd = new Date(b.endTime ?? b.EndTime);
+                if (Number.isNaN(bStart.getTime()) || Number.isNaN(bEnd.getTime())) return false;
+
+                // Проверяем пересечение полуинтервалов [start, end)
+                return candidateStartAbs < bEnd && candidateEndAbs > bStart;
+            });
+        }
+
+        if (disabledByConflict) {
+            option.disabled = true;
+            option.textContent = `${dateString} (занято)`;
+        } else {
+            option.textContent = dateString;
+            if (firstEnabledValue === null) firstEnabledValue = dateString;
+        }
+
         endDateSelect.appendChild(option);
     }
 
-    if (endDateSelect.options.length > 0) {
-        endDateSelect.value = endDateSelect.options[0].value;
+    // Выбираем первый доступный end_date
+    if (firstEnabledValue !== null) {
+        endDateSelect.value = firstEnabledValue;
+        updateBookButtonBySelection();
+        return;
     }
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Нет свободных дат';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    endDateSelect.appendChild(placeholder);
+    updateBookButtonBySelection();
 }
 
 // 11. Инициализация расчета цены
@@ -351,6 +481,11 @@ async function handleBooking() {
     
     const startDateStr = document.getElementById('start_date').value;
     const endDateStr = document.getElementById('end_date').value;
+
+    if (!startDateStr || !endDateStr) {
+        alert('Выберите доступные даты бронирования.');
+        return;
+    }
 
     const days = calculateDaysDifference(startDateStr, endDateStr);
 
