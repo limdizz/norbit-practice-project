@@ -61,15 +61,16 @@ async function loadRoomsFromApi() {
         roomsData = data.map(item => {
             // Получаем данные о типе по ID (1, 2 или 3)
             const typeInfo = roomTypesMap[item.roomTypeId] || { name: "Неизвестно", price: 0, desc: "" };
+            const roomName = item.name || 'Без названия';
 
             return {
                 id: item.roomId,
-                name: item.name || 'Без названия',
+                name: roomName || 'Без названия',
                 category: typeInfo.name,
                 price: typeInfo.price,
                 description: typeInfo.desc,
                 isFree: item.isFree,
-                image: getRoomImage(item.roomTypeId),
+                image: getRoomImageByTypeAndName(item.roomTypeId, roomName),
                 roomTypeId: item.roomTypeId
             };
         });
@@ -125,23 +126,30 @@ let roomCounters = {
     3: 0  // Репетиционный зал
 };
 
-function getRoomImage(typeId) {
+function getRoomImageByTypeAndName(typeId, roomName) {
     const images = roomImageCollections[typeId];
-
+    
     if (!images || images.length === 0) {
-        return getDefaultImage(typeId);
+        return 'img/rooms/default_room.jpg';
     }
+    
+    // Ищем номер в названии (например "Lounge 1", "Studio 2", "Rehearsal Room 3")
+    let index = 0;
+    const numberMatch = roomName.match(/\d+$/);
+    if (numberMatch) {
+        const num = parseInt(numberMatch[0], 10);
+        // Индекс = (номер - 1) % количество изображений
+        index = (num - 1) % images.length;
+    } else {
+        // Если нет номера, используем первый индекс
+        index = 0;
+    }
+    
+    return images[index];
+}
 
-    // Получаем текущий счетчик для этого типа
-    const currentIndex = roomCounters[typeId] || 0;
-
-    // Выбираем изображение по порядку
-    const selectedImage = images[currentIndex % images.length];
-
-    // Увеличиваем счетчик для следующей комнаты этого типа
-    roomCounters[typeId] = currentIndex + 1;
-
-    return selectedImage;
+function getRoomImage(roomTypeId, roomName) {
+    return getRoomImageByTypeAndName(roomTypeId, roomName);
 }
 
 
