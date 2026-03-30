@@ -305,6 +305,26 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
             return end.getTime();
         }
     }
+
+    function isActiveBooking(b) {
+    // Если статус отменен - всегда в архив
+    if (b.status === 'cancelled') return false;
+    
+    // Если статус завершен - в архив
+    if (b.status === 'completed') return false;
+    
+    // Если статус in progress - проверяем по дате
+    if (b.status === 'in progress') {
+        const endMs = getBookingEndMs(b);
+        if (endMs === null) return true;
+        return endMs > Date.now();
+    }
+    
+    // Для бронирований без статуса (старые данные) - проверяем по дате
+    const endMs = getBookingEndMs(b);
+    if (endMs === null) return true;
+    return endMs > Date.now();
+}
     
     // Разделяем на текущие и архивные
     const currentItems = [];
@@ -313,7 +333,7 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
     bookings.forEach(b => {
         const endMs = getBookingEndMs(b);
         // Активные: статус "in progress" или дата окончания еще не прошла
-        if (b.status === 'in progress' || (endMs && endMs > nowMs)) {
+        if (isActiveBooking(b)) {
             currentItems.push(b);
         } else {
             archiveItems.push(b);

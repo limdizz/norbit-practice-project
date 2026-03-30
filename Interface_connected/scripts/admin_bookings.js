@@ -127,9 +127,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             btn.addEventListener('click', async () => {
                 const bookingId = btn.getAttribute('data-id');
 
-                const newStart = prompt('Введите новое время начала (в формате ГГГГ-ММ-ДД ЧЧ:ММ):');
+                const newStart = await showDateTimePicker('Выберите новое время начала');
                 if (!newStart) return;
-                const newEnd = prompt('Введите новое время окончания (в формате ГГГГ-ММ-ДД ЧЧ:ММ):');
+                const newEnd = await showDateTimePicker('Выберите новое время окончания');
                 if (!newEnd) return;
 
                 const startDate = new Date(newStart.replace(' ', 'T'));
@@ -183,4 +183,3 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 });
-
