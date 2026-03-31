@@ -43,19 +43,61 @@
             <div class="contacts-container">
                 <div class="contact-info">
                     <h2>Контактная информация</h2>
-                    <p><strong>📍 Адрес:</strong> г. Нижний Новгород, проспект Гагарина, 23</p>
-                    <p><strong>📞 Телефон:</strong> <a href="tel:+74951234567">+7 (495) 123-45-67</a></p>
-                    <p><strong>✉️ Email:</strong> <a href="mailto:vlad.klimenko.mmv@bk.ru">vlad.klimenko.mmv@bk.ru</a>
-                    </p>
-                    <p><strong>🕒 Режим работы:</strong><br>
-                        Пн–Пт: 10:00–22:00<br>
-                        Сб–Вс: 11:00–21:00
-                    </p>
-                    <p><strong>Социальные сети:</strong><br>
-                        <a href="https://github.com/limdizz">GitHub</a> |
-                        <a href="https://vk.com/limdizz">VK</a> |
-                        <a href="https://www.youtube.com/@Limdizz">YouTube</a>
-                    </p>
+                    <div class="info-cards">
+                        <div class="info-card">
+                            <div class="info-card-icon">📍</div>
+                            <div class="info-card-content">
+                                <div class="info-card-title">Адрес</div>
+                                <div class="info-card-text">г. Нижний Новгород, проспект Гагарина, 23</div>
+                                <a href="https://yandex.ru/maps/58/nizhny-novgorod/?ll=43.962114%2C56.298589&z=17" target="_blank" class="info-card-link">Показать на карте</a>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-icon">📞</div>
+                            <div class="info-card-content">
+                                <div class="info-card-title">Телефон</div>
+                                <div class="info-card-text">+7 (495) 123-45-67</div>
+                                <a href="tel:+74951234567" class="info-card-link">Позвонить</a>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-icon">✉️</div>
+                            <div class="info-card-content">
+                                <div class="info-card-title">Email</div>
+                                <div class="info-card-text">vlad.klimenko.mmv@bk.ru</div>
+                                <a href="mailto:vlad.klimenko.mmv@bk.ru" class="info-card-link">Написать письмо</a>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-icon">🕒</div>
+                            <div class="info-card-content">
+                                <div class="info-card-title">Режим работы</div>
+                                <div class="info-card-text">
+                                    Пн–Пт: 10:00–22:00<br>
+                                    Сб–Вс: 11:00–21:00
+                                </div>
+                                <div id="status-open-now" class="info-card-link">Проверка...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p><strong>Социальные сети:</strong></p>
+                    <div class="social-cards">
+                        <a href="https://github.com/limdizz" class="social-card">
+                            <div class="social-card-icon">🐙</div>
+                            <div class="social-card-title">GitHub</div>
+                            <div class="social-card-desc">Код и проекты</div>
+                        </a>
+                        <a href="https://vk.com/limdizz" class="social-card">
+                            <div class="social-card-icon">📱</div>
+                            <div class="social-card-title">VK</div>
+                            <div class="social-card-desc">Новости и фото</div>
+                        </a>
+                        <a href="https://www.youtube.com/@Limdizz" class="social-card">
+                            <div class="social-card-icon">🎥</div>
+                            <div class="social-card-title">YouTube</div>
+                            <div class="social-card-desc">Видео и трансляции</div>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="faq-info">
@@ -117,6 +159,44 @@
             });
         });
     </script>
+    <script>
+function updateOpenStatus() {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Воскресенье, 1 = Понедельник, ..., 6 = Суббота
+    const hour = now.getHours();
+    const minutes = now.getMinutes();
+    const currentMinutes = hour * 60 + minutes;
+
+    let isOpen = false;
+
+    if (day >= 1 && day <= 5) {
+        // Пн–Пт: 10:00–22:00
+        const openTime = 10 * 60; // 10:00
+        const closeTime = 22 * 60; // 22:00
+        isOpen = currentMinutes >= openTime && currentMinutes < closeTime;
+    } else if (day === 6 || day === 0) {
+        // Сб (6), Вс (0): 11:00–21:00
+        const openTime = 11 * 60; // 11:00
+        const closeTime = 21 * 60; // 21:00
+        isOpen = currentMinutes >= openTime && currentMinutes < closeTime;
+    }
+
+    const statusElement = document.getElementById('status-open-now');
+    if (isOpen) {
+        statusElement.textContent = 'Открыто сейчас';
+        statusElement.style.color = '#4CAF50'; // зелёный
+    } else {
+        statusElement.textContent = 'Закрыто';
+        statusElement.style.color = '#f44336'; // красный
+    }
+}
+
+// Обновляем статус при загрузке страницы
+updateOpenStatus();
+
+// Обновляем каждые 60 секунд
+setInterval(updateOpenStatus, 60000);
+</script>
 </body>
 
 </html>

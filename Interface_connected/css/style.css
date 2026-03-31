@@ -637,6 +637,148 @@ h2 {
     text-align: center;
 }
 
+/* Стили для карточек социальных сетей */
+.social-cards {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.social-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+    width: 180px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.social-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    border-color: #000;
+}
+
+.social-card-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.social-card-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 5px;
+    color: #000;
+}
+
+.social-card-desc {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Стили для карточек контактной информации */
+/* Стили для карточек контактной информации */
+.info-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.info-card {
+    display: flex;
+    align-items: flex-start;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.info-card-icon {
+    font-size: 24px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.info-card-content {
+    flex: 1;
+    min-width: 0; /* Позволяет переносу текста работать внутри flex-элемента */
+}
+
+.info-card-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.info-card-text {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    word-wrap: break-word; /* Критично для длинных слов, например email */
+    overflow-wrap: break-word;
+}
+
+.info-card-link {
+    display: inline-block;
+    color: #007bff;
+    font-size: 14px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.info-card-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* На больших экранах — две колонки */
+@media (min-width: 768px) {
+    .info-cards {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .info-card {
+        flex: 1;
+        min-width: 250px;
+        max-width: 400px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .info-cards {
+        flex-direction: row;
+    }
+    
+    .info-card {
+        width: calc(50% - 7.5px);
+    }
+}
+
+@media (min-width: 1200px) {
+    .info-card {
+        width: calc(50% - 7.5px);
+    }
+}
+
 .contacts-container {
     display: flex;
     flex-wrap: wrap;
