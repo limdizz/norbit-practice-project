@@ -25,6 +25,11 @@ function updateHeaderState() {
         // Показываем кнопку админ-панели только для сотрудников
         if (adminBtn) {
             adminBtn.style.display = isStaff ? 'inline-block' : 'none';
+
+        // Для сотрудников меняем ссылку админ-панели на обновленную
+        if (adminBtn && isStaff) {
+            adminBtn.onclick = function() { window.location.href = 'admin_instruments.html'; };
+        }
         }
 
         // Для сотрудников скрываем пункт "Мои бронирования" в хедере

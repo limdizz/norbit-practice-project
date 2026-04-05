@@ -25,8 +25,7 @@
 
                 <div id="user-controls" class="menu">
                     <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
-                    <button id="admin-panel-btn" class="menu__item__button" style="display: none;"
-                        onclick="location.href='admin_bookings.html'">Админ-панель</button>
+
                     <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</button>
                     <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</button>
                 </div>
@@ -41,7 +40,17 @@
         <main class="container">
             <h2>Профиль пользователя</h2>
             <div id="user-info" class="user-info">Загрузка информации о пользователе...</div>
-
+            <div id="admin-controls" style="display: none; margin-top: 20px; text-align: center;">
+                <p><strong>Панель управления (администратор)</strong></p>
+                <div style="margin-top: 10px;">
+                    <button class="button" onclick="location.href='admin_bookings.html'">
+                        Управление бронированиями
+                    </button>
+                    <button class="button" onclick="location.href='admin_instruments.html'" style="margin-left: 10px;">
+                        Управление инструментами
+                    </button>
+                </div>
+            </div>
             <div id="profile-bookings-section">
                 <h3 id="profile-bookings-title">Мои бронирования</h3>
 

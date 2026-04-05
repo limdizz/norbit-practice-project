@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadInstrumentsFromApi();
     initPriceRange();
     handleUrlParams();
+    setupAddInstrumentButton();
 });
 
 // Глобальная переменная для хранения данных
@@ -399,6 +400,58 @@ function renderInstruments(instruments) {
         const instrumentCard = createInstrumentCard(instrument);
         productList.appendChild(instrumentCard);
     });
+
+    // Добавляем карточку для добавления нового инструмента
+    const addCard = document.createElement('div');
+    addCard.className = 'instrument-card';
+    addCard.style.cssText = `
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: Inter;
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: inline-block;
+        vertical-align: top;
+        width: 150px;
+        height: 275px;
+        background-color: #f8f9fa;
+        flex: 0 0 auto;
+    `;
+
+    addCard.innerHTML = `
+        <div style="width: 100px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 0 auto; background-color: #e9ecef; border-radius: 4px;">
+            <span style="font-size: 48px; color: #6c757d;">+</span>
+        </div>
+        <h3 style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">Добавить инструмент</h3>
+        <div style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
+            <span class="condition-badge" style="background: #2196F3; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
+                Новый
+            </span>
+        </div>
+        <div style="color: #888; font-size: 0.75em; margin-bottom: 5px;">
+            Нажмите для добавления
+        </div>
+        <div style="color: black; font-weight: bold; font-size: 1em;">
+            ₽0
+        </div>
+    `;
+
+    // Показываем карточку только для сотрудников
+    const isStaff = localStorage.getItem('isStaff') === 'true';
+    addCard.style.display = isStaff ? 'block' : 'none';
+
+    // Добавляем обработчик клика
+    addCard.addEventListener('click', function (e) {
+        e.preventDefault();
+        showAddInstrumentForm();
+    });
+
+    productList.appendChild(addCard);
 }
 
 // ---- 8. Создание карточки инструмента ----
@@ -547,4 +600,138 @@ function handleUrlParams() {
             }
         }
     }
+}
+
+function setupAddInstrumentButton() {
+    // Находим кнопку и блок управления
+    const addButton = document.getElementById('add-instrument-btn');
+    const controls = document.querySelector('.controls');
+
+    if (!addButton || !controls) return;
+
+    // Скрываем отдельную кнопку, так как добавление теперь через карточку
+    addButton.style.display = 'none';
+}
+
+function showAddInstrumentForm() {
+    // Создаем модальное окно добавления
+    const modalHtml = `
+    <div id="add-instrument-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90vw;">
+            <h3 style="margin-top: 0;">Добавить новый инструмент</h3>
+            <form id="add-instrument-form">
+                <div style="margin-bottom: 10px;">
+                    <label for="new-name" style="display: inline-block; width: 120px;">Название:</label>
+                    <input type="text" id="new-name" name="name" required style="width: 200px; padding: 5px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-category" style="display: inline-block; width: 120px;">Категория:</label>
+                    <select id="new-category" name="category" required style="width: 200px; padding: 5px;">
+                        <option value="Электрогитары">Электрогитары</option>
+                        <option value="Классические гитары">Классические гитары</option>
+                        <option value="Синтезаторы">Синтезаторы</option>
+                        <option value="Ударные установки">Ударные установки</option>
+                        <option value="Микрофоны">Микрофоны</option>
+                        <option value="Бас-гитары">Бас-гитары</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-rentalPrice" style="display: inline-block; width: 120px;">Цена за час (₽):</label>
+                    <input type="number" id="new-rentalPrice" name="rentalPrice" min="0" step="0.01" required style="width: 200px; padding: 5px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-description" style="display: inline-block; width: 120px; vertical-align: top;">Описание:</label>
+                    <textarea id="new-description" name="description" rows="3" style="width: 200px; padding: 5px; vertical-align: top;"></textarea>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-imageUrl" style="display: inline-block; width: 120px;">Ссылка на изображение:</label>
+                    <input type="url" id="new-imageUrl" name="imageUrl" style="width: 200px; padding: 5px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-color" style="display: inline-block; width: 120px;">Цвет:</label>
+                    <input type="text" id="new-color" name="color" style="width: 200px; padding: 5px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-currentCondition" style="display: inline-block; width: 120px;">Состояние:</label>
+                    <select id="new-currentCondition" name="currentCondition" style="width: 200px; padding: 5px;">
+                        <option value="excellent">Отличное состояние</option>
+                        <option value="good">Хорошее состояние</option>
+                        <option value="unsignificant defects">Незначительные дефекты</option>
+                        <option value="repairing">В ремонте</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-handedness" style="display: inline-block; width: 120px;">Ориентация:</label>
+                    <select id="new-handedness" name="handedness" style="width: 200px; padding: 5px;">
+                        <option value="righty">Правша</option>
+                        <option value="lefty">Левша</option>
+                        <option value="">Не применимо</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-isRentable" style="display: inline-block; width: 120px;">Доступен для аренды:</label>
+                    <input type="checkbox" id="new-isRentable" name="isRentable" checked>
+                </div>
+                <div style="margin-top: 15px; text-align: right;">
+                    <button type="button" id="cancel-add" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Отмена</button>
+                    <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>`;
+
+    // Вставляем модальное окно в body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Настраиваем кнопки
+    const modal = document.getElementById('add-instrument-modal');
+    const form = document.getElementById('add-instrument-form');
+    const cancelButton = document.getElementById('cancel-add');
+
+    cancelButton.addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const instrumentData = {
+            name: formData.get('name'),
+            category: formData.get('category'),
+            rentalPrice: parseFloat(formData.get('rentalPrice')),
+            description: formData.get('description'),
+            imageUrl: formData.get('imageUrl'),
+            color: formData.get('color'),
+            currentCondition: formData.get('currentCondition'),
+            handedness: formData.get('handedness') || null,
+            isRentable: formData.get('isRentable') === 'on'
+        };
+
+        try {
+            const response = await fetch('https://localhost:7123/api/Equipments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(instrumentData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Ошибка при добавлении инструмента');
+            }
+
+            // Удаляем модальное окно
+            document.body.removeChild(modal);
+
+            // Обновление списка
+            loadInstrumentsFromApi();
+
+            alert('Инструмент успешно добавлен!');
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Не удалось добавить инструмент: ' + error.message);
+        }
+    });
 }

@@ -714,7 +714,8 @@ h2 {
 
 .info-card-content {
     flex: 1;
-    min-width: 0; /* Позволяет переносу текста работать внутри flex-элемента */
+    min-width: 0;
+    /* Позволяет переносу текста работать внутри flex-элемента */
 }
 
 .info-card-title {
@@ -729,7 +730,8 @@ h2 {
     font-size: 14px;
     line-height: 1.4;
     margin-bottom: 8px;
-    word-wrap: break-word; /* Критично для длинных слов, например email */
+    word-wrap: break-word;
+    /* Критично для длинных слов, например email */
     overflow-wrap: break-word;
 }
 
@@ -767,7 +769,7 @@ h2 {
     .info-cards {
         flex-direction: row;
     }
-    
+
     .info-card {
         width: calc(50% - 7.5px);
     }
@@ -1585,4 +1587,12 @@ input[type="range"] {
 .main--contacts>p {
     text-align: center;
     margin-bottom: 40px;
+}
+
+.product-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding: 10px;
+    gap: 20px;
 }

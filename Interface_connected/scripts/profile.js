@@ -7,7 +7,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userInfo = document.getElementById('user-info');
+    const adminControls = document.getElementById('admin-controls');
     const isStaff = localStorage.getItem('isStaff') === 'true';
+
 
     // Для администратора скрываем блоки, связанные с бронированиями
     if (isStaff && profileBookingsSection) {
@@ -24,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Загружаем актуальные данные из API
     loadBookingsFromAPI(userData, bookingContainerCurrent, bookingContainerArchive, clearBtn);
-    
+
     // Отображаем профиль пользователя
     renderUserProfile(userData, isStaff);
 });
@@ -50,12 +53,12 @@ function saveRoomImageMapping(mapping) {
 function getRoomImageWithSync(roomTypeId, roomId, roomName) {
     // Загружаем существующий маппинг
     let mapping = loadRoomImageMapping();
-    
+
     // Если для этого помещения уже есть сохраненное изображение, возвращаем его
     if (mapping[roomId]) {
         return mapping[roomId];
     }
-    
+
     // Коллекции изображений для каждого типа помещения
     const roomImageCollections = {
         1: [ // Лаунж-зона
@@ -74,12 +77,12 @@ function getRoomImageWithSync(roomTypeId, roomId, roomName) {
             "img/rooms/rehearsal_rooms/rehearsal_room_3.jpeg"
         ]
     };
-    
+
     const images = roomImageCollections[roomTypeId];
     if (!images || images.length === 0) {
         return 'img/rooms/default_room.jpg';
     }
-    
+
     // Определяем индекс для этого помещения на основе имени (для согласованности)
     // Ищем номер в названии (например "Rehearsal Room 2" -> 2)
     let index = 0;
@@ -92,42 +95,42 @@ function getRoomImageWithSync(roomTypeId, roomId, roomName) {
         // Если нет номера, используем ID для определения индекса
         index = roomId % images.length;
     }
-    
+
     const selectedImage = images[index];
-    
+
     // Сохраняем в маппинг
     mapping[roomId] = selectedImage;
     saveRoomImageMapping(mapping);
-    
+
     return selectedImage;
 }
 
 // Загрузка бронирований из API
 async function loadBookingsFromAPI(userData, currentContainer, archiveContainer, clearBtn) {
     const userId = userData.userUid;
-    
+
     if (!userId) return;
-    
+
     try {
         const response = await fetch(`https://localhost:7123/api/BookingsAdvanced`);
         if (!response.ok) throw new Error('Ошибка загрузки бронирований');
-        
+
         const allBookings = await response.json();
-        
+
         // Фильтруем только бронирования текущего пользователя
         const userBookings = allBookings.filter(b => b.userUid === userId);
-        
+
         // Преобразуем в формат для отображения
         const formattedBookings = await enrichBookingsWithDetails(userBookings, userData);
-        
+
         currentBookings = formattedBookings;
-        
+
         // Обновляем localStorage для обратной совместимости
         updateLocalStorage(userData, formattedBookings);
-        
+
         // Отрисовываем бронирования
         renderBookings(formattedBookings, currentContainer, archiveContainer, clearBtn, userData);
-        
+
     } catch (error) {
         console.error('Ошибка загрузки бронирований из API:', error);
         // Fallback на localStorage
@@ -140,28 +143,28 @@ async function enrichBookingsWithDetails(bookings, userData) {
     // Загружаем инструменты и помещения для получения названий и картинок
     let instruments = [];
     let rooms = [];
-    
+
     try {
         const [instrResponse, roomsResponse] = await Promise.all([
             fetch('https://localhost:7123/api/Equipments'),
             fetch('https://localhost:7123/api/Rooms')
         ]);
-        
+
         if (instrResponse.ok) instruments = await instrResponse.json();
         if (roomsResponse.ok) rooms = await roomsResponse.json();
     } catch (error) {
         console.error('Ошибка загрузки справочников:', error);
     }
-    
+
     return bookings.map(booking => {
         const startDate = booking.startTime ? new Date(booking.startTime) : null;
         const endDate = booking.endTime ? new Date(booking.endTime) : null;
-        
+
         let itemName = 'Неизвестно';
         let itemType = booking.roomId ? 'Room' : 'Instrument';
         let imageUrl = 'img/no-image.png';
         let roomTypeId = null;
-        
+
         if (booking.roomId) {
             const room = rooms.find(r => r.roomId === booking.roomId);
             itemName = room?.name || `Помещение #${booking.roomId}`;
@@ -173,19 +176,19 @@ async function enrichBookingsWithDetails(bookings, userData) {
             itemName = instrument?.name || `Инструмент #${booking.instrumentId}`;
             imageUrl = instrument?.imageUrl || 'img/instruments/default_instrument.jpg';
         }
-        
+
         // Расчет стоимости
         let totalPrice = 0;
         let dailyPrice = 600;
         let pricePerHour = 1000;
         let days = 1;
         let hours = 1;
-        
+
         if (startDate && endDate) {
             const diffMs = endDate - startDate;
             const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
             const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
-            
+
             if (booking.roomId) {
                 hours = diffHours;
                 totalPrice = pricePerHour * hours;
@@ -194,7 +197,7 @@ async function enrichBookingsWithDetails(bookings, userData) {
                 totalPrice = dailyPrice * days;
             }
         }
-        
+
         return {
             bookingId: booking.bookingUid,
             itemType: itemType,
@@ -239,7 +242,7 @@ function formatTime(date) {
 function updateLocalStorage(userData, bookings) {
     const userEmail = userData.email;
     const storageKey = userEmail ? `bookingHistory_${userEmail}` : 'bookingHistory_guest';
-    
+
     const localStorageBookings = bookings.map(b => ({
         bookingId: b.bookingId,
         orderId: b.orderId,
@@ -261,17 +264,17 @@ function updateLocalStorage(userData, bookings) {
         bookingDate: b.bookingDate,
         image: b.image
     }));
-    
+
     localStorage.setItem(storageKey, JSON.stringify(localStorageBookings));
 }
 
 // Рендеринг бронирований
 function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, userData) {
     if (!currentContainer || !archiveContainer) return;
-    
+
     currentContainer.innerHTML = '';
     archiveContainer.innerHTML = '';
-    
+
     if (!bookings.length) {
         currentContainer.innerHTML = `
             <div class="no-bookings">
@@ -285,11 +288,11 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
         if (clearBtn) clearBtn.style.display = 'none';
         return;
     }
-    
+
     if (clearBtn) clearBtn.style.display = 'inline-block';
-    
+
     const nowMs = Date.now();
-    
+
     function getBookingEndMs(b) {
         if (b.itemType === 'Room') {
             if (!b.date || !b.time || !b.hours) return null;
@@ -307,29 +310,29 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
     }
 
     function isActiveBooking(b) {
-    // Если статус отменен - всегда в архив
-    if (b.status === 'cancelled') return false;
-    
-    // Если статус завершен - в архив
-    if (b.status === 'completed') return false;
-    
-    // Если статус in progress - проверяем по дате
-    if (b.status === 'in progress') {
+        // Если статус отменен - всегда в архив
+        if (b.status === 'cancelled') return false;
+
+        // Если статус завершен - в архив
+        if (b.status === 'completed') return false;
+
+        // Если статус in progress - проверяем по дате
+        if (b.status === 'in progress') {
+            const endMs = getBookingEndMs(b);
+            if (endMs === null) return true;
+            return endMs > Date.now();
+        }
+
+        // Для бронирований без статуса (старые данные) - проверяем по дате
         const endMs = getBookingEndMs(b);
         if (endMs === null) return true;
         return endMs > Date.now();
     }
-    
-    // Для бронирований без статуса (старые данные) - проверяем по дате
-    const endMs = getBookingEndMs(b);
-    if (endMs === null) return true;
-    return endMs > Date.now();
-}
-    
+
     // Разделяем на текущие и архивные
     const currentItems = [];
     const archiveItems = [];
-    
+
     bookings.forEach(b => {
         const endMs = getBookingEndMs(b);
         // Активные: статус "in progress" или дата окончания еще не прошла
@@ -339,32 +342,32 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
             archiveItems.push(b);
         }
     });
-    
+
     if (currentItems.length === 0) {
         currentContainer.innerHTML = `
             <div class="no-bookings">
                 <p>Текущих бронирований нет.</p>
             </div>`;
     }
-    
+
     if (archiveItems.length === 0) {
         archiveContainer.innerHTML = `
             <div class="no-bookings">
                 <p>Архив пока пуст.</p>
             </div>`;
     }
-    
+
     function renderCards(list, container, isArchive = false) {
         list.forEach(b => {
             const card = document.createElement('div');
             card.className = 'booking-card';
             card.dataset.id = b.bookingId;
-            
+
             const name = b.itemName || 'Без названия';
             const image = b.image || 'img/no-image.png';
-            
+
             let detailsHTML = '';
-            
+
             if (b.itemType === 'Room') {
                 detailsHTML = `
                     <p><strong>Номер заказа:</strong> ${b.orderId}</p>
@@ -381,16 +384,16 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
                     <p><strong>Цена за день:</strong> ₽${b.dailyPrice}</p>
                 `;
             }
-            
-            const statusText = b.status === 'in progress' ? 'Активно' : 
-                              b.status === 'completed' ? 'Завершено' : 
-                              b.status === 'cancelled' ? 'Отменено' : 'Неизвестно';
+
+            const statusText = b.status === 'in progress' ? 'Активно' :
+                b.status === 'completed' ? 'Завершено' :
+                    b.status === 'cancelled' ? 'Отменено' : 'Неизвестно';
             const statusClass = b.status === 'in progress' ? 'status-active' :
-                               b.status === 'completed' ? 'status-completed' :
-                               b.status === 'cancelled' ? 'status-cancelled' : '';
-            
+                b.status === 'completed' ? 'status-completed' :
+                    b.status === 'cancelled' ? 'status-cancelled' : '';
+
             card.innerHTML = `
-                ${b.status !== 'cancelled' && b.status !== 'completed' ? 
+                ${b.status !== 'cancelled' && b.status !== 'completed' ?
                     `<button class="delete-booking" title="Отменить бронирование">✖</button>` : ''}
                 <img src="${image}" alt="${name}" onerror="this.src='img/no-image.png'">
                 <div class="booking-info">
@@ -404,23 +407,23 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
                         <span style="color:#e44d26">₽${b.totalPrice}</span>
                     </p>
                 </div>`;
-            
+
             container.appendChild(card);
-            
+
             // Обработчик отмены (только для активных бронирований)
             const deleteBtn = card.querySelector('.delete-booking');
             if (deleteBtn) {
                 deleteBtn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     if (!confirm('Вы точно хотите отменить это бронирование?')) return;
-                    
+
                     try {
                         const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/${b.bookingId}/cancel`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ staffUserUid: userData.userUid })
                         });
-                        
+
                         if (response.ok) {
                             alert('Бронирование отменено');
                             // Перезагружаем данные
@@ -436,7 +439,7 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
             }
         });
     }
-    
+
     renderCards(currentItems, currentContainer, false);
     renderCards(archiveItems, archiveContainer, true);
 }
@@ -446,7 +449,7 @@ function loadFromLocalStorage(userData, currentContainer, archiveContainer, clea
     const userEmail = userData.email;
     const storageKey = userEmail ? `bookingHistory_${userEmail}` : 'bookingHistory_guest';
     const localStorageBookings = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    
+
     currentBookings = localStorageBookings;
     renderBookings(localStorageBookings, currentContainer, archiveContainer, clearBtn, userData);
 }
@@ -455,36 +458,37 @@ function loadFromLocalStorage(userData, currentContainer, archiveContainer, clea
 async function renderUserProfile(userData, isStaff) {
     const userInfoDiv = document.getElementById('user-info');
     const userId = userData.userUid || userData.uid;
-    
+
     if (!userInfoDiv) return;
-    
+
     let userHTML = `
         <p><strong>Имя:</strong> ${userData.firstName || 'Пользователь'}</p>
         <p><strong>Фамилия:</strong> ${userData.lastName || 'Пользователь'}</p>
         <p><strong>Email:</strong> ${userData.email || 'Не указан'}</p>
     `;
-    
+
     if (isStaff) {
         userHTML += `
             <hr>
             <p><strong>Режим:</strong> Администратор</p>
-            <a href="admin_bookings.html" class="button">Админ-панель</a>
+            <a href="admin_bookings.html" class="button">Управление бронированиями</a>
+            <a href="admin_instruments.html" class="button">Управление инструментами</a>
             <br><a href="log_out.html" class="button logout" style="margin-top:20px;">Выйти</a>
         `;
         userInfoDiv.innerHTML = userHTML;
         return;
     }
-    
+
     try {
         const response = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/active/${userId}`);
-        
+
         if (response.ok) {
             const sub = await response.json();
             const validDateRaw = sub.validUntil || sub.ValidUntil;
             const validDate = new Date(validDateRaw).toLocaleDateString('ru-RU');
             const sessions = sub.sessionsRemaining !== undefined ? sub.sessionsRemaining : sub.SessionsRemaining;
             const planName = sub.planName || sub.PlanName || (sub.plan ? (sub.plan.planName || sub.plan.PlanName) : 'Тариф');
-            
+
             userHTML += `
                 <div style="margin-top: 20px; padding: 15px; border: 1px solid #4CAF50; border-radius: 8px; background-color: #f9fff9;">
                     <h3 style="color: #2E7D32; margin-top:0;">Ваш абонемент: ${planName}</h3>
@@ -508,10 +512,10 @@ async function renderUserProfile(userData, isStaff) {
         console.error("Ошибка загрузки профиля", e);
         userHTML += `<p style="color:red">Не удалось загрузить данные подписки.</p>`;
     }
-    
+
     userHTML += `<br><a href="log_out.html" class="button logout" style="margin-top:20px;">Выйти</a>`;
     userInfoDiv.innerHTML = userHTML;
-    
+
     const cancelBtn = document.getElementById('cancel-sub-btn');
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => cancelSubscription(userId));
@@ -520,12 +524,12 @@ async function renderUserProfile(userData, isStaff) {
 
 async function cancelSubscription(userId) {
     if (!confirm('Вы уверены, что хотите отменить подписку?')) return;
-    
+
     try {
         const response = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/cancel/${userId}`, {
             method: 'POST'
         });
-        
+
         if (response.ok) {
             alert('Подписка успешно отменена.');
             window.location.reload();
