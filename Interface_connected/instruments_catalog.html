@@ -56,8 +56,10 @@
                     <option value="good">Хорошее состояние</option>
                     <option value="unsignificant defects">Незначительные дефекты</option>
                 </select>
-                <!-- <p><input type="checkbox" name="current_status" value="repairing">В ремонте</p> -->
-
+                <p id="repairing-filter" style="display: none;">
+                    <input type="checkbox" name="current_status" value="repairing" id="filter-repairing">
+                    <label for="filter-repairing">В ремонте</label>
+                </p>
                 <h1 class="filters_h">Цена</h1>
                 <div id="price-container"></div>
                 <h1 class="filters_h">Цвет</h1>

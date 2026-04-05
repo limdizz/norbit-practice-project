@@ -101,6 +101,15 @@ async function loadInstrumentsFromApi() {
         // 4. Обновляем цены
         updatePriceRange();
 
+        const repairingFilter = document.getElementById('repairing-filter');
+        const isStaff = localStorage.getItem('isStaff') === 'true';
+
+        if (isStaff) {
+            repairingFilter.style.display = 'block';
+        } else {
+            repairingFilter.style.display = 'none';
+        }
+
     } catch (error) {
         console.error('Ошибка при загрузке инструментов:', error);
         productList.innerHTML = '<p style="text-align:center; color:red;">Не удалось загрузить список инструментов.</p>';
@@ -338,12 +347,10 @@ function applyFilters() {
         }
 
         if (repairingCondition) {
-            // Если галочка "в ремонте" стоит - показываем ТОЛЬКО инструменты в ремонте
             if (instrument.condition !== "В ремонте") {
                 return false;
             }
         } else {
-            // Если галочки нет - СКРЫВАЕМ инструменты в ремонте (по умолчанию)
             if (instrument.condition === "В ремонте") {
                 return false;
             }

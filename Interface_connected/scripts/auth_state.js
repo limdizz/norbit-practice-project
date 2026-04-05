@@ -11,25 +11,14 @@ function updateHeaderState() {
     // 2. Находим блоки кнопок
     const userControls = document.getElementById('user-controls');
     const guestControls = document.getElementById('guest-controls');
-    const adminBtn = document.getElementById('admin-panel-btn');
 
     // 3. Переключаем видимость
     if (isLoggedIn) {
         // Пользователь вошел
         if (guestControls) guestControls.style.display = 'none';
-        
+
         if (userControls) {
             userControls.style.display = 'flex';
-        }
-
-        // Показываем кнопку админ-панели только для сотрудников
-        if (adminBtn) {
-            adminBtn.style.display = isStaff ? 'inline-block' : 'none';
-
-        // Для сотрудников меняем ссылку админ-панели на обновленную
-        if (adminBtn && isStaff) {
-            adminBtn.onclick = function() { window.location.href = 'admin_instruments.html'; };
-        }
         }
 
         // Для сотрудников скрываем пункт "Мои бронирования" в хедере
@@ -43,9 +32,5 @@ function updateHeaderState() {
         // Гость
         if (userControls) userControls.style.display = 'none';
         if (guestControls) guestControls.style.display = 'flex';
-
-        if (adminBtn) {
-            adminBtn.style.display = 'none';
-        }
     }
 }
