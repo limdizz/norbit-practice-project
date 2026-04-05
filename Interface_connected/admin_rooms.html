@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель помещений</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="scripts/auth_state.js" defer></script>
+    <script src="scripts/admin_rooms.js" defer></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header class="header">
+            <div class="header__logo">
+                <img src="img/logo.png" alt="logo" width="100" height="90">
+            </div>
+            <nav class="menu">
+                <a class="menu__item" href="index.html">Главная</a>
+                <a class="menu__item" href="subscription_plans.html">Абонементы</a>
+                <a class="menu__item" href="prices.html">Цены</a>
+                <a class="menu__item" href="contacts.html">Контакты</a>
+
+                <div id="user-controls" class="menu">
+                    <a class="menu__item" href="my_bookings.html">Мои бронирования</a>
+                    <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</button>
+                    <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</button>
+                </div>
+
+                <div id="guest-controls" class="menu">
+                    <button class="menu__item__button" onclick="location.href='log_in.html'">Войти</button>
+                    <button class="menu__item__button" onclick="location.href='sign_up.html'">Регистрация</button>
+                </div>
+            </nav>
+        </header>
+
+        <main class="main">
+            <section class="about">
+                <h1 class="about_h">Административная панель помещений</h1>
+                <p class="about_p">
+                    Здесь сотрудники студии могут добавлять, редактировать и удалять помещения в каталоге.
+                </p>
+            </section>
+
+            <section id="access-message" style="display:none;" class="no-bookings">
+            </section>
+
+            <section id="rooms-section" style="display:none;">
+                <h2 class="about_h" style="margin-top: 30px;">Каталог помещений</h2>
+                <button id="add-room-btn" class="menu__item__button">Добавить помещение</button>
+                <div class="table-wrapper">
+                    <table id="rooms-table" class="bookings-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название</th>
+                                <th>Тип</th>
+                                <th>Свободно</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rooms-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div id="add-room-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close"
+                        onclick="document.getElementById('add-room-modal').style.display='none'">&times;</span>
+                    <h2>Добавить новое помещение</h2>
+                    <form id="add-room-form">
+                        <label for="name">Название:</label>
+                        <input type="text" id="name" name="name" required>
+
+                        <label for="roomTypeId">Тип помещения:</label>
+                        <select id="roomTypeId" name="roomTypeId" required>
+                            <option value="1">Лаунж-зона</option>
+                            <option value="2">Студия звукозаписи</option>
+                            <option value="3">Репетиционный зал</option>
+                        </select>
+
+                        <label for="isFree">Свободно для аренды:</label>
+                        <input type="checkbox" id="isFree" name="isFree" checked>
+
+                        <button type="submit">Добавить помещение</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <section class="instruments">
+                <a class="footer_menu__item_h" href="instruments_catalog.html">Каталог инструментов</a><br><br>
+                <a class="footer_menu__item"
+                    href="instruments_catalog.html?category=electroguitars">Электрогитары</a><br>
+                <a class="footer_menu__item" href="instruments_catalog.html?category=classicguitars">Классические
+                    гитары</a><br>
+                <a class="footer_menu__item" href="instruments_catalog.html?category=synths">Синтезаторы</a><br>
+                <a class="footer_menu__item" href="instruments_catalog.html?category=microphones">Микрофоны</a><br><br>
+            </section>
+            <section class="rooms">
+                <a class="footer_menu__item_h" href="rooms_catalog.html">Помещения</a><br><br>
+                <a class="footer_menu__item" href="rooms_catalog.html?type=recording">Студия звукозаписи</a><br>
+                <a class="footer_menu__item" href="rooms_catalog.html?type=rehearsal">Репетиционные залы</a><br>
+                <a class="footer_menu__item" href="rooms_catalog.html?type=lounge">Лаунж-зоны</a><br><br>
+            </section>
+            <section class="contacts">
+                <a class="footer_menu__item_h" href="#">Студия</a><br><br>
+                <a class="footer_menu__item" href="contacts.html">О нас</a><br>
+            </section>
+        </footer>
+    </div>
+</body>
+
+</html>

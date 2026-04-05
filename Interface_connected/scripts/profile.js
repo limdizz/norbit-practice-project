@@ -473,6 +473,7 @@ async function renderUserProfile(userData, isStaff) {
             <p><strong>Режим:</strong> Администратор</p>
             <a href="admin_bookings.html" class="button">Управление бронированиями</a>
             <a href="admin_instruments.html" class="button">Управление инструментами</a>
+            <a href="admin_rooms.html" class="button">Управление помещениями</a>
             <br><a href="log_out.html" class="button logout" style="margin-top:20px;">Выйти</a>
         `;
         userInfoDiv.innerHTML = userHTML;

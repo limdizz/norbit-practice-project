@@ -73,9 +73,30 @@ namespace WebAPI.Controllers
 
         // POST: api/Rooms
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Room>> PostRoom(Room room)
+        // DTO для создания помещения
+        public class CreateRoomDto
         {
+            public string Name { get; set; }
+            public int RoomTypeId { get; set; }
+            public bool? IsFree { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Room>> PostRoom(CreateRoomDto roomDto)
+        {
+            var roomType = await _context.RoomTypes.FindAsync(roomDto.RoomTypeId);
+            if (roomType == null)
+            {
+                return BadRequest($"Тип помещения с ID {roomDto.RoomTypeId} не существует.");
+            }
+            
+            var room = new Room
+            {
+                Name = roomDto.Name,
+                RoomTypeId = roomDto.RoomTypeId,
+                IsFree = roomDto.IsFree ?? true
+            };
+            
             _context.Rooms.Add(room);
             await _context.SaveChangesAsync();
 

@@ -128,11 +128,11 @@ let roomCounters = {
 
 function getRoomImageByTypeAndName(typeId, roomName) {
     const images = roomImageCollections[typeId];
-    
+
     if (!images || images.length === 0) {
         return 'img/rooms/default_room.jpg';
     }
-    
+
     // Ищем номер в названии (например "Lounge 1", "Studio 2", "Rehearsal Room 3")
     let index = 0;
     const numberMatch = roomName.match(/\d+$/);
@@ -144,7 +144,7 @@ function getRoomImageByTypeAndName(typeId, roomName) {
         // Если нет номера, используем первый индекс
         index = 0;
     }
-    
+
     return images[index];
 }
 
@@ -330,6 +330,58 @@ function renderRooms(rooms) {
         const card = createRoomCard(room);
         productList.appendChild(card);
     });
+
+    // Добавляем карточку для добавления нового помещения
+    const addCard = document.createElement('div');
+    addCard.className = 'instrument-card';
+    addCard.style.cssText = `
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: Inter;
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: inline-block;
+        vertical-align: top;
+        width: 200px;
+        height: 320px;
+        background-color: #f8f9fa;
+        flex: 0 0 auto;
+    `;
+
+    addCard.innerHTML = `
+        <div style="width: 100px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 0 auto; background-color: #e9ecef; border-radius: 4px;">
+            <span style="font-size: 48px; color: #6c757d;">+</span>
+        </div>
+        <h3 style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">Добавить помещение</h3>
+        <div style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
+            <span class="condition-badge" style="background: #2196F3; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
+                Новое
+            </span>
+        </div>
+        <div style="color: #888; font-size: 0.75em; margin-bottom: 5px;">
+            Нажмите для добавления
+        </div>
+        <div style="color: black; font-weight: bold; font-size: 1em;">
+            ₽0
+        </div>
+    `;
+
+    // Показываем карточку только для сотрудников (staff)
+    const isStaff = localStorage.getItem('isStaff') === 'true';
+    addCard.style.display = isStaff ? 'block' : 'none';
+
+    // Добавляем обработчик клика
+    addCard.addEventListener('click', function (e) {
+        e.preventDefault();
+        showAddRoomForm();
+    });
+
+    productList.appendChild(addCard);
 }
 
 function createRoomCard(room) {
@@ -418,6 +470,92 @@ function initNavigation() {
     menuItems.forEach(item => {
         // Если у ссылки есть href, браузер сам перейдет, 
         // JS нужен только если мы хотим SPA поведение или кастомные действия
+    });
+}
+
+function showAddRoomForm() {
+    // Создаем модальное окно добавления
+    const modalHtml = `
+    <div id="add-room-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        <div style="background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90vw;">
+            <h3 style="margin-top: 0;">Добавить новое помещение</h3>
+            <form id="add-room-form">
+                <div style="margin-bottom: 10px;">
+                    <label for="new-name" style="display: inline-block; width: 120px;">Название:</label>
+                    <input type="text" id="new-name" name="name" required style="width: 200px; padding: 5px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-roomTypeId" style="display: inline-block; width: 120px;">Тип помещения:</label>
+                    <select id="new-roomTypeId" name="roomTypeId" required style="width: 200px; padding: 5px;">
+                        <option value="1">Лаунж-зона</option>
+                        <option value="2">Студия звукозаписи</option>
+                        <option value="3">Репетиционный зал</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="new-isFree" style="display: inline-block; width: 120px;">Свободно для аренды:</label>
+                    <input type="checkbox" id="new-isFree" name="isFree" checked>
+                </div>
+                <div style="margin-top: 15px; text-align: right;">
+                    <button type="button" id="cancel-add" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Отмена</button>
+                    <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>`;
+
+    // Вставляем модальное окно в body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Настраиваем кнопки
+    const modal = document.getElementById('add-room-modal');
+    const form = document.getElementById('add-room-form');
+    const cancelButton = document.getElementById('cancel-add');
+
+    cancelButton.addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const roomData = {
+            name: formData.get('name'),
+            roomTypeId: parseInt(formData.get('roomTypeId')),
+            isFree: formData.get('isFree') === 'on'
+        };
+
+        try {
+            const response = await fetch('https://localhost:7123/api/Rooms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(roomData)
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                try {
+                    const error = JSON.parse(text);
+                    throw new Error(error.message || error.error || 'Ошибка при добавлении помещения');
+                } catch (e) {
+                    throw new Error(`Ошибка сервера: ${response.status} - ${text}`);
+                }
+            }
+
+            // Удаляем модальное окно
+            document.body.removeChild(modal);
+
+            // Обновление списка
+            loadRoomsFromApi();
+
+            alert('Помещение успешно добавлено!');
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Не удалось добавить помещение: ' + error.message);
+        }
     });
 }
 
