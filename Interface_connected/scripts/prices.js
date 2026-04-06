@@ -113,24 +113,31 @@ document.addEventListener("DOMContentLoaded", function () {
         instrumentsContainer.innerHTML = "";
         roomsContainer.innerHTML = "";
 
-        // Показываем базовые карточки
-        [...baseInstruments].forEach(item => {
-            const card = createCardElement(item, "instrument", false);
-            instrumentsContainer.appendChild(card);
-        });
+        const displayedNames = new Set();
 
-        [...baseRooms].forEach(item => {
-            const card = createCardElement(item, "room", false);
-            roomsContainer.appendChild(card);
-        });
-
-        // Показываем кастомные карточки (если есть)
+        // Сначала рендерим кастомные (чтобы они шли первыми или поверх)
         customCards.forEach((card, index) => {
             const el = createCardElement(card, card.type, true, index);
             if (card.type === "instrument") {
                 instrumentsContainer.appendChild(el);
             } else {
                 roomsContainer.appendChild(el);
+            }
+            displayedNames.add(card.name);
+        });
+
+        // Потом рендерим базовые, КРОМЕ тех, что уже переопределены
+        [...baseInstruments].forEach(item => {
+            if (!displayedNames.has(item.name)) {
+                const card = createCardElement(item, "instrument", false);
+                instrumentsContainer.appendChild(card);
+            }
+        });
+
+        [...baseRooms].forEach(item => {
+            if (!displayedNames.has(item.name)) {
+                const card = createCardElement(item, "room", false);
+                roomsContainer.appendChild(card);
             }
         });
 
@@ -149,24 +156,29 @@ document.addEventListener("DOMContentLoaded", function () {
         div.dataset.custom = isCustom;
         div.dataset.index = index;
         div.dataset.type = type;
+        div.dataset.name = data.name; // для поиска при сохранении
 
-        if (isEditing && isCustom) {
+        if (isEditing) {
             div.innerHTML = `
-                <input type="text" value="${data.name}" class="edit-name" style="width:100%; padding:5px; margin-bottom:5px;">
-                <input type="number" value="${data.price}" class="edit-price" style="width:80px; padding:5px;">
-                <select class="edit-unit" style="padding:5px;">
-                    <option value="час" ${data.unit === "час" ? "selected" : ""}>час</option>
-                    <option value="сутки" ${data.unit === "сутки" ? "selected" : ""}>сутки</option>
-                </select>
-                <button class="delete-custom" style="color:red; background:none; border:none; font-size:18px; cursor:pointer;">×</button>
-            `;
-            div.querySelector(".delete-custom").onclick = () => removeCustomCard(index);
+            <input type="text" value="${data.name}" class="edit-name" style="width:100%; padding:5px; margin-bottom:5px;">
+            <input type="number" value="${data.price}" class="edit-price" style="width:80px; padding:5px;">
+            <select class="edit-unit" style="padding:5px;">
+                <option value="час" ${data.unit === "час" ? "selected" : ""}>час</option>
+                <option value="сутки" ${data.unit === "сутки" ? "selected" : ""}>сутки</option>
+            </select>
+            ${isCustom ? `<button class="delete-custom" style="color:red; background:none; border:none; font-size:18px; cursor:pointer;">×</button>` : ''}
+        `;
+
+            // Удаление только для кастомных
+            if (isCustom) {
+                div.querySelector(".delete-custom").onclick = () => removeCustomCard(index);
+            }
         } else {
             div.innerHTML = `
-                <h3>${data.name}</h3>
-                <p class="price">₽${data.price} / ${data.unit}</p>
-                ${isCustom ? '<span style="font-size:0.8em; color:#999;">(кастомная)</span>' : ''}
-            `;
+            <h3>${data.name}</h3>
+            <p class="price">₽${data.price} / ${data.unit}</p>
+            ${isCustom ? '<span style="font-size:0.8em; color:#999;"></span>' : ''}
+        `;
         }
 
         return div;
@@ -229,19 +241,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function saveAndExitEditMode() {
-        // Обновляем кастомные карточки из формы
-        const customEls = document.querySelectorAll(".price-card[data-custom='true']");
+        const allEditable = document.querySelectorAll(".price-card[data-type]");
+
         const updatedCustom = [];
 
-        customEls.forEach((el) => {
-            const name = el.querySelector(".edit-name")?.value || "Новая позиция";
+        allEditable.forEach(el => {
+            const name = el.querySelector(".edit-name")?.value.trim();
             const price = parseFloat(el.querySelector(".edit-price")?.value) || 0;
-            const unit = el.querySelector(".edit-unit")?.value || "сутки";
+            const unit = el.querySelector(".edit-unit")?.value;
             const type = el.dataset.type;
 
-            updatedCustom.push({ name, price, unit, type, source: "custom" });
+            if (!name || isNaN(price)) return;
+
+            // Добавляем во все изменённые
+            updatedCustom.push({
+                name,
+                price,
+                unit,
+                type,
+                source: "custom"
+            });
         });
 
+        // Полная замена кастомных карточек
         customCards = updatedCustom;
         saveCustomCards();
 
