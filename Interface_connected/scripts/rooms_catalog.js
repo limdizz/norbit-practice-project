@@ -373,7 +373,8 @@ function renderRooms(rooms) {
 
     // Показываем карточку только для сотрудников (staff)
     const isStaff = localStorage.getItem('isStaff') === 'true';
-    addCard.style.display = isStaff ? 'block' : 'none';
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    addCard.style.display = (isLoggedIn && isStaff) ? 'block' : 'none';
 
     // Добавляем обработчик клика
     addCard.addEventListener('click', function (e) {
@@ -388,30 +389,46 @@ function createRoomCard(room) {
     const cardContainer = document.createElement('div');
     cardContainer.className = 'instrument-card';
     cardContainer.style.cssText = `
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 15px;
-                margin: 10px;
-                text-align: center;
-                background: white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                cursor: pointer;
-                transition: transform 0.2s;
-                display: inline-block;
-                vertical-align: top;
-                width: 200px;
-                height: 320px;
-            `;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+        display: inline-block;
+        vertical-align: top;
+        width: 200px;
+        height: 320px;
+        position: relative;
+    `;
 
     const statusColor = room.isFree ? '#4CAF50' : '#F44336';
     const statusText = room.isFree ? 'Свободно' : 'Занято';
 
+    // Получаем статус staff
+    const isStaff = localStorage.getItem('isStaff') === 'true';
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+    // Крестик (виден только staff)
+    const deleteButtonHtml = (isLoggedIn && isStaff) ? `
+        <button class="delete-room" data-id="${room.id}"
+                style="position: absolute; top: 8px; right: 8px; width: 22px; height: 22px;
+                       background: rgba(255,0,0,0.7); color: white; border: none; border-radius: 50%;
+                       font-size: 14px; font-weight: bold; cursor: pointer; z-index: 10;">
+            ×
+        </button>
+    ` : '';
+
     cardContainer.innerHTML = `
+        ${deleteButtonHtml}
         <div style="position: relative; height: 120px; overflow: hidden; border-radius: 4px; background: #f5f5f5;">
             <img src="${room.image}" alt="${room.name}" 
                  style="width: 100%; height: 100%; object-fit: cover;"
                  onerror="this.src='img/room_default.png'">
-            <div style="position: absolute; top: 8px; right: 8px; background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold;">
+            <div style="position: absolute; top: 8px; right: 8px; background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; z-index: 1;">
                 ${statusText}
             </div>
         </div>
@@ -435,13 +452,48 @@ function createRoomCard(room) {
         </div>
     `;
 
+    // Обработчик клика по карточке
     cardContainer.addEventListener('click', function (e) {
-        if (e.target.tagName !== 'A') {
-            // Сохраняем выбранное изображение
+        if (e.target.tagName !== 'A' && !e.target.classList.contains('delete-room')) {
             sessionStorage.setItem('selectedRoomImage', room.image);
             window.location.href = `room.html?id=${room.id}`;
         }
     });
+
+    // Обработчик удаления
+    const deleteBtn = cardContainer.querySelector('.delete-room');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async function (e) {
+            e.stopPropagation(); // Не срабатывает переход по карточке
+
+            if (!confirm(`Вы действительно хотите удалить помещение "${room.name}"?`)) return;
+
+            try {
+                const response = await fetch(`https://localhost:7123/api/Rooms/${room.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка при удалении: ${response.status}`);
+                }
+
+                // Удаляем карточку из DOM
+                cardContainer.remove();
+
+                // Обновим глобальные данные
+                roomsData = roomsData.filter(r => r.id !== room.id);
+
+                alert('Помещение успешно удалено.');
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                alert('Не удалось удалить помещение.');
+            }
+        });
+    }
+
     return cardContainer;
 }
 

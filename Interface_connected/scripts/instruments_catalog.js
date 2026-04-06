@@ -450,7 +450,8 @@ function renderInstruments(instruments) {
 
     // Показываем карточку только для сотрудников
     const isStaff = localStorage.getItem('isStaff') === 'true';
-    addCard.style.display = isStaff ? 'block' : 'none';
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    addCard.style.display = (isLoggedIn && isStaff) ? 'block' : 'none';
 
     // Добавляем обработчик клика
     addCard.addEventListener('click', function (e) {
@@ -480,11 +481,42 @@ function createInstrumentCard(instrument) {
         vertical-align: top;
         width: 150px;
         height: 275px;
+        position: relative;
     `;
 
-    // Используем заглушку, если картинки нет
-    const imgSrc = instrument.image || 'img/file_not_found.png';
+    // Проверяем, является ли пользователь сотрудником
+    const isStaff = localStorage.getItem('isStaff') === 'true';
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
+    // HTML кнопки удаления (появляется только у staff)
+    const deleteButtonHtml = (isLoggedIn && isStaff) ? `
+        <button class="delete-instrument" data-id="${instrument.id}"
+                style="position: absolute; top: 8px; right: 8px; width: 22px; height: 22px;
+                       background: rgba(255,0,0,0.7); color: white; border: none; border-radius: 50%;
+                       font-size: 14px; font-weight: bold; cursor: pointer; z-index: 10;">
+            ×
+        </button>
+    ` : '';
+
+    // Определяем цвет бейджа состояния
+    let conditionColor = '#2196F3'; // синий по умолчанию
+
+    switch (instrument.condition) {
+        case 'Отличное состояние':
+            conditionColor = '#128816ff'; // зелёный
+            break;
+        case 'Хорошее состояние':
+            conditionColor = '#07ce0eff'; // ярко-зелёный
+            break;
+        case 'Незначительные дефекты':
+            conditionColor = '#FFC107'; // жёлтый
+            break;
+        case 'В ремонте':
+            conditionColor = '#F44336'; // красный
+            break;
+    }
+
+    // Гитарные категории (для отображения ориентации)
     const guitarCategories = [
         "Электрогитары",
         "Классические гитары",
@@ -492,35 +524,18 @@ function createInstrumentCard(instrument) {
         "Акустические гитары"
     ];
 
-    // Начинаем с цвета
+    // Формируем строку деталей (цвет + ориентация, если актуально)
     let detailsText = instrument.color;
-
-    // Если категория относится к гитарам, добавляем ориентацию
     if (guitarCategories.includes(instrument.category)) {
         detailsText += ` • ${instrument.handedness}`;
     }
 
-    let conditionColor = '#2196F3'; // Синий по умолчанию
+    // Используем изображение или заглушку
+    const imgSrc = instrument.image || 'img/file_not_found.png';
 
-    switch (instrument.condition) {
-        case 'Отличное состояние':
-            conditionColor = '#128816ff'; // Зеленый
-            break;
-        case 'Хорошее состояние':
-            conditionColor = '#07ce0eff'; // Зеленый
-            break;
-        case 'Незначительные дефекты':
-            conditionColor = '#FFC107'; // Желтый (янтарный)
-            break;
-        case 'В ремонте':
-            conditionColor = '#F44336'; // Красный
-            break;
-        default:
-            conditionColor = '#2196F3'
-    }
-    // ---------------------------------------
-
+    // Вставляем HTML карточки с крестиком и содержимым
     cardContainer.innerHTML = `
+        ${deleteButtonHtml}
         <img src="${imgSrc}" 
              alt="${instrument.name}" 
              style="width: 100px; height: 150px; object-fit: contain; border-radius: 4px;">
@@ -540,6 +555,14 @@ function createInstrumentCard(instrument) {
         </a>
     `;
 
+    // Обработчик клика по карточке (кроме крестика)
+    cardContainer.addEventListener('click', function (e) {
+        if (e.target.tagName.toLowerCase() !== 'a' && !e.target.classList.contains('delete-instrument')) {
+            window.location.href = `instrument.html?id=${instrument.id}`;
+        }
+    });
+
+    // Обработчик наведения
     cardContainer.addEventListener('mouseenter', function () {
         this.style.transform = 'translateY(-2px)';
         this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
@@ -550,10 +573,39 @@ function createInstrumentCard(instrument) {
         this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     });
 
-    cardContainer.addEventListener('click', function (e) {
-        if (e.target.tagName.toLowerCase() === 'a') return;
-        window.location.href = `instrument.html?id=${instrument.id}`;
-    });
+    // Обработчик удаления (только для staff)
+    const deleteBtn = cardContainer.querySelector('.delete-instrument');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async function (e) {
+            e.stopPropagation(); // Предотвращаем переход по карточке
+
+            if (!confirm(`Вы действительно хотите удалить инструмент "${instrument.name}"?`)) return;
+
+            try {
+                const response = await fetch(`https://localhost:7123/api/Equipments/${instrument.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка при удалении: ${response.status}`);
+                }
+
+                // Удаляем карточку из DOM
+                cardContainer.remove();
+
+                // Обновляем глобальные данные
+                instrumentsData = instrumentsData.filter(i => i.id !== instrument.id);
+
+                alert('Инструмент успешно удалён.');
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                alert('Не удалось удалить инструмент.');
+            }
+        });
+    }
 
     return cardContainer;
 }
