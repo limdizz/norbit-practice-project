@@ -1596,3 +1596,9 @@ input[type="range"] {
     padding: 10px;
     gap: 20px;
 }
+
+.price-edit-btn {
+    background-color: black;
+    color: white;
+    font-family: Inter;
+}
