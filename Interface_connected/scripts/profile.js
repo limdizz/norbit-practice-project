@@ -458,8 +458,15 @@ function loadFromLocalStorage(userData, currentContainer, archiveContainer, clea
 async function renderUserProfile(userData, isStaff) {
     const userInfoDiv = document.getElementById('user-info');
     const userId = userData.userUid || userData.uid;
+    const titleElement = document.getElementById('profile-title');
 
     if (!userInfoDiv) return;
+
+    if (titleElement) {
+        titleElement.textContent = isStaff
+            ? 'Профиль администратора'
+            : 'Профиль пользователя';
+    }
 
     let userHTML = `
         <p><strong>Имя:</strong> ${userData.firstName || 'Пользователь'}</p>
@@ -467,10 +474,14 @@ async function renderUserProfile(userData, isStaff) {
         <p><strong>Email:</strong> ${userData.email || 'Не указан'}</p>
     `;
 
+    userHTML += `
+    <hr>
+    <p><strong>Режим:</strong> ${isStaff ? 'Администратор' : 'Пользователь'}</p>
+`;
+
     if (isStaff) {
         userHTML += `
-            <hr>
-            <p><strong>Режим:</strong> Администратор</p>
+            <a href="admin_subscription_plans.html" class="button">Управление абонементами</a>
             <a href="admin_bookings.html" class="button">Управление бронированиями</a>
             <a href="admin_instruments.html" class="button">Управление инструментами</a>
             <a href="admin_rooms.html" class="button">Управление помещениями</a>

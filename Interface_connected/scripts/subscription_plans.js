@@ -10,7 +10,8 @@ async function loadPlans() {
     const container = document.getElementById('plans-container');
     container.innerHTML = '<p>Загрузка тарифов...</p>';
     const isStaff = localStorage.getItem('isStaff') === 'true';
-
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    
     try {
         const response = await fetch(`${API_BASE_URL}/SubscriptionPlans`);
         if (!response.ok) throw new Error('Ошибка загрузки планов');
@@ -34,8 +35,8 @@ async function loadPlans() {
             if (pName.includes('Dark')) icon = '☠';
             if (pName.includes('Lord')) icon = '👑';
 
-            const buttonHtml = isStaff
-                ? `<button class="subscribe-btn" onclick="location.href='admin_bookings.html'">Админ-панель</button>`
+            const buttonHtml = (isStaff && isLoggedIn)
+                ? `<button class="subscribe-btn" onclick="location.href='admin_subscription_plans.html'">Управление абонементами</button>`
                 : `<button class="subscribe-btn" onclick="buySubscription(${pId}, '${pName}', ${pDays}, ${pSessions})">Выбрать</button>`;
 
             card.innerHTML = `
