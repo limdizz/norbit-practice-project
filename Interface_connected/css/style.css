@@ -662,12 +662,6 @@ h2 {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.social-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-    border-color: #000;
-}
-
 .social-card-icon {
     font-size: 48px;
     margin-bottom: 10px;
@@ -685,7 +679,6 @@ h2 {
     font-size: 14px;
 }
 
-/* Стили для карточек контактной информации */
 /* Стили для карточек контактной информации */
 .info-cards {
     display: flex;
@@ -806,10 +799,6 @@ h2 {
 .contact-info a {
     color: black;
     text-decoration: none;
-}
-
-.contact-info a:hover {
-    text-decoration: underline;
 }
 
 .contact-form label {
@@ -1440,6 +1429,12 @@ input[type="range"] {
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
 }
 
+.info-card:hover,
+.social-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
 .faq-item h4 {
     margin: 0;
     color: var(--accent-primary);
@@ -1597,7 +1592,8 @@ input[type="range"] {
     gap: 20px;
 }
 
-.price-edit-btn {
+.price-edit-btn,
+.add-contact-card-btn {
     background-color: black;
     color: white;
     font-family: Inter;
