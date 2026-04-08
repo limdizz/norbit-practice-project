@@ -8,6 +8,95 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// Функция для преобразования файла в base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Функция для добавления поля выбора файла в форму
+function addImageUploadField(formContainer, imageUrlFieldId) {
+    const uploadContainer = document.createElement('div');
+    uploadContainer.style.marginBottom = '10px';
+    uploadContainer.innerHTML = `
+        <label style="display: inline-block; width: 130px;">Или выберите файл:</label>
+        <input type="file" id="image-file" accept="image/jpeg,image/png,image/gif,image/webp" style="width: 240px; padding: 5px;">
+        <small style="display: block; margin-left: 130px; color: #666;">Поддерживаются JPG, PNG, GIF, WEBP</small>
+    `;
+    
+    // Вставляем после поля URL
+    const imageUrlField = document.getElementById(imageUrlFieldId);
+    if (imageUrlField && imageUrlField.parentElement) {
+        imageUrlField.parentElement.insertAdjacentElement('afterend', uploadContainer);
+    }
+    
+    const fileInput = uploadContainer.querySelector('#image-file');
+    fileInput.addEventListener('change', async function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            
+            // Проверка размера файла (макс 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Файл слишком большой. Максимальный размер 5MB.');
+                fileInput.value = '';
+                return;
+            }
+            
+            try {
+                const base64 = await fileToBase64(file);
+                const urlField = document.getElementById(imageUrlFieldId);
+                if (urlField) {
+                    urlField.value = base64;
+                    // Добавляем визуальный индикатор
+                    const preview = document.createElement('div');
+                    preview.style.cssText = 'margin-left: 130px; margin-top: 5px;';
+                    preview.innerHTML = `<img src="${base64}" style="max-width: 100px; max-height: 100px; border-radius: 4px;">`;
+                    
+                    // Удаляем старый превью, если есть
+                    const oldPreview = urlField.parentElement.querySelector('.image-preview');
+                    if (oldPreview) oldPreview.remove();
+                    
+                    preview.className = 'image-preview';
+                    urlField.parentElement.appendChild(preview);
+                }
+            } catch (error) {
+                console.error('Ошибка конвертации файла:', error);
+                alert('Не удалось загрузить изображение');
+            }
+        }
+    });
+}
+
+// Функция для добавления превью изображения в форму
+function addImagePreview(formContainer, imageUrlFieldId) {
+    const imageUrlField = document.getElementById(imageUrlFieldId);
+    if (imageUrlField && imageUrlField.value) {
+        const preview = document.createElement('div');
+        preview.style.cssText = 'margin-left: 130px; margin-top: 5px;';
+        preview.innerHTML = `<img src="${imageUrlField.value}" style="max-width: 100px; max-height: 100px; border-radius: 4px;" onerror="this.style.display='none'">`;
+        preview.className = 'image-preview';
+        imageUrlField.parentElement.appendChild(preview);
+        
+        // Обновляем превью при изменении URL
+        imageUrlField.addEventListener('input', function() {
+            const existingPreview = imageUrlField.parentElement.querySelector('.image-preview');
+            if (existingPreview) existingPreview.remove();
+            
+            if (this.value) {
+                const newPreview = document.createElement('div');
+                newPreview.style.cssText = 'margin-left: 130px; margin-top: 5px;';
+                newPreview.innerHTML = `<img src="${this.value}" style="max-width: 100px; max-height: 100px; border-radius: 4px;" onerror="this.style.display='none'">`;
+                newPreview.className = 'image-preview';
+                imageUrlField.parentElement.appendChild(newPreview);
+            }
+        });
+    }
+}
+
 async function loadInstruments() {
     try {
         const response = await fetch('https://localhost:7123/api/Equipments');
@@ -36,7 +125,6 @@ function displayInstruments(instruments) {
     instruments.forEach(instrument => {
         const row = document.createElement('tr');
 
-        // Маппинг состояния для отображения
         const conditionMap = {
             'excellent': 'Отличное состояние',
             'good': 'Хорошее состояние',
@@ -59,6 +147,31 @@ function displayInstruments(instruments) {
     });
 
     document.getElementById('instruments-section').style.display = 'block';
+}
+
+// Модифицируем форму добавления, чтобы добавить выбор файла
+// Нужно добавить поле для загрузки файла в HTML или через JS
+// Для этого добавим инициализацию форм после загрузки
+const originalAddModalSetup = setupAddModal;
+function setupAddModal() {
+    const modal = document.getElementById('add-instrument-modal');
+    if (modal && !modal.hasAttribute('data-upload-initialized')) {
+        modal.setAttribute('data-upload-initialized', 'true');
+        // Немного ждём, чтобы форма отобразилась
+        setTimeout(() => {
+            addImageUploadField(modal, 'imageUrl');
+        }, 100);
+    }
+}
+
+// Вызываем при каждом открытии модального окна
+const originalAddButtonClick = document.getElementById('add-instrument-btn')?.onclick;
+if (document.getElementById('add-instrument-btn')) {
+    document.getElementById('add-instrument-btn').addEventListener('click', function() {
+        setTimeout(() => {
+            setupAddModal();
+        }, 50);
+    });
 }
 
 async function createInstrument(event) {
@@ -91,13 +204,9 @@ async function createInstrument(event) {
             throw new Error(error.message || 'Ошибка при добавлении инструмента');
         }
 
-        // Сброс формы и скрытие модального окна
         event.target.reset();
         document.getElementById('add-instrument-modal').style.display = 'none';
-
-        // Обновление списка
         loadInstruments();
-
         alert('Инструмент успешно добавлен!');
     } catch (error) {
         console.error('Ошибка:', error);
@@ -123,7 +232,141 @@ async function deleteInstrument(id) {
     }
 }
 
-function editInstrument(id) {
-    alert('Функция редактирования временно недоступна. Используйте прямое редактирование через API или базу данных.');
-    // В будущем здесь будет реализовано окно редактирования
+async function editInstrument(id) {
+    try {
+        const response = await fetch(`https://localhost:7123/api/Equipments/${id}`);
+        if (!response.ok) throw new Error('Инструмент не найден');
+
+        const instrument = await response.json();
+
+        const modalHtml = `
+            <div id="edit-instrument-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                <div style="background: white; padding: 20px; border-radius: 8px; width: 500px; max-width: 90vw; max-height: 85vh; overflow-y: auto;">
+                    <h3 style="margin-top: 0;">Редактировать инструмент</h3>
+                    <form id="edit-instrument-form">
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-name" style="display: inline-block; width: 130px;">Название:</label>
+                            <input type="text" id="edit-name" name="name" value="${escapeHtml(instrument.name)}" required style="width: 280px; padding: 5px;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-category" style="display: inline-block; width: 130px;">Категория:</label>
+                            <select id="edit-category" name="category" style="width: 280px; padding: 5px;">
+                                <option value="Electric Guitars" ${instrument.category === 'Electric Guitars' ? 'selected' : ''}>Электрогитары</option>
+                                <option value="Classical Guitars" ${instrument.category === 'Classical Guitars' ? 'selected' : ''}>Классические гитары</option>
+                                <option value="Synths" ${instrument.category === 'Synths' ? 'selected' : ''}>Синтезаторы</option>
+                                <option value="Microphones" ${instrument.category === 'Microphones' ? 'selected' : ''}>Микрофоны</option>
+                                <option value="Bass Guitars" ${instrument.category === 'Bass Guitars' ? 'selected' : ''}>Бас-гитары</option>
+                                <option value="Drums" ${instrument.category === 'Drums' ? 'selected' : ''}>Ударные установки</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-rentalPrice" style="display: inline-block; width: 130px;">Цена за час (₽):</label>
+                            <input type="number" id="edit-rentalPrice" name="rentalPrice" value="${instrument.rentalPrice}" min="0" step="0.01" required style="width: 280px; padding: 5px;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-description" style="display: inline-block; width: 130px; vertical-align: top;">Описание:</label>
+                            <textarea id="edit-description" name="description" rows="3" style="width: 280px; padding: 5px; vertical-align: top;">${escapeHtml(instrument.description || '')}</textarea>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-imageUrl" style="display: inline-block; width: 130px;">Ссылка на изображение:</label>
+                            <input type="url" id="edit-imageUrl" name="imageUrl" value="${escapeHtml(instrument.imageUrl || '')}" style="width: 280px; padding: 5px;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-color" style="display: inline-block; width: 130px;">Цвет:</label>
+                            <input type="text" id="edit-color" name="color" value="${escapeHtml(instrument.color || '')}" style="width: 280px; padding: 5px;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-currentCondition" style="display: inline-block; width: 130px;">Состояние:</label>
+                            <select id="edit-currentCondition" name="currentCondition" style="width: 280px; padding: 5px;">
+                                <option value="excellent" ${instrument.currentCondition === 'excellent' ? 'selected' : ''}>Отличное состояние</option>
+                                <option value="good" ${instrument.currentCondition === 'good' ? 'selected' : ''}>Хорошее состояние</option>
+                                <option value="unsignificant defects" ${instrument.currentCondition === 'unsignificant defects' ? 'selected' : ''}>Незначительные дефекты</option>
+                                <option value="repairing" ${instrument.currentCondition === 'repairing' ? 'selected' : ''}>В ремонте</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-handedness" style="display: inline-block; width: 130px;">Ориентация:</label>
+                            <select id="edit-handedness" name="handedness" style="width: 280px; padding: 5px;">
+                                <option value="righty" ${instrument.handedness === 'righty' ? 'selected' : ''}>Правша</option>
+                                <option value="lefty" ${instrument.handedness === 'lefty' ? 'selected' : ''}>Левша</option>
+                                <option value="" ${!instrument.handedness ? 'selected' : ''}>Не применимо</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="edit-isRentable" style="display: inline-block; width: 130px;">Доступен для аренды:</label>
+                            <input type="checkbox" id="edit-isRentable" name="isRentable" ${instrument.isRentable ? 'checked' : ''}>
+                        </div>
+                        <div style="margin-top: 15px; text-align: right;">
+                            <button type="button" id="cancel-edit" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Отмена</button>
+                            <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const modal = document.getElementById('edit-instrument-modal');
+        const form = document.getElementById('edit-instrument-form');
+        const cancelButton = document.getElementById('cancel-edit');
+
+        // Добавляем поле выбора файла в форму редактирования
+        addImageUploadField(modal, 'edit-imageUrl');
+        
+        // Добавляем превью текущего изображения
+        addImagePreview(modal, 'edit-imageUrl');
+
+        cancelButton.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const updatedData = {
+                equipmentId: id,
+                name: formData.get('name'),
+                category: formData.get('category'),
+                rentalPrice: parseFloat(formData.get('rentalPrice')),
+                description: formData.get('description') || null,
+                imageUrl: formData.get('imageUrl') || null,
+                color: formData.get('color') || null,
+                currentCondition: formData.get('currentCondition'),
+                handedness: formData.get('handedness') || null,
+                isRentable: formData.get('isRentable') === 'on'
+            };
+
+            try {
+                const response = await fetch(`https://localhost:7123/api/Equipments/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Ошибка при обновлении');
+                }
+
+                document.body.removeChild(modal);
+                loadInstruments();
+                alert('Инструмент успешно обновлён!');
+            } catch (err) {
+                console.error('Ошибка:', err);
+                alert('Не удалось обновить инструмент: ' + err.message);
+            }
+        });
+    } catch (error) {
+        console.error('Ошибка загрузки инструмента:', error);
+        alert('Не удалось загрузить данные инструмента.');
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }

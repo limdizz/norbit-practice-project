@@ -673,7 +673,6 @@ function setupAddInstrumentButton() {
 }
 
 function showAddInstrumentForm() {
-    // Создаем модальное окно добавления
     const modalHtml = `
     <div id="add-instrument-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
         <div style="background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90vw;">
@@ -702,10 +701,34 @@ function showAddInstrumentForm() {
                     <label for="new-description" style="display: inline-block; width: 120px; vertical-align: top;">Описание:</label>
                     <textarea id="new-description" name="description" rows="3" style="width: 200px; padding: 5px; vertical-align: top;"></textarea>
                 </div>
+
+                <!-- Переключатель источника изображения -->
                 <div style="margin-bottom: 10px;">
-                    <label for="new-imageUrl" style="display: inline-block; width: 120px;">Ссылка на изображение:</label>
+                    <label style="display: inline-block; width: 120px;">Изображение:</label>
+                    <select id="image-source" style="width: 200px; padding: 5px;">
+                        <option value="url">По ссылке</option>
+                        <option value="file">С компьютера</option>
+                    </select>
+                </div>
+
+                <!-- Поле для URL -->
+                <div id="url-field" style="margin-bottom: 10px;">
+                    <label for="new-imageUrl" style="display: inline-block; width: 120px;">Ссылка:</label>
                     <input type="url" id="new-imageUrl" name="imageUrl" style="width: 200px; padding: 5px;">
                 </div>
+
+                <!-- Поле для файла -->
+                <div id="file-field" style="margin-bottom: 10px; display: none;">
+                    <label for="new-imageFile" style="display: inline-block; width: 120px;">Файл:</label>
+                    <input type="file" id="new-imageFile" accept="image/*" style="width: 200px; padding: 5px;">
+                    <small style="display: block; margin-left: 120px; color: #666;">JPG, PNG, GIF, WEBP до 5MB</small>
+                </div>
+
+                <!-- Превью изображения -->
+                <div id="image-preview" style="margin-left: 120px; margin-top: 5px; display: none;">
+                    <img id="preview-img" src="" style="max-width: 100px; max-height: 100px; border-radius: 4px;">
+                </div>
+
                 <div style="margin-bottom: 10px;">
                     <label for="new-color" style="display: inline-block; width: 120px;">Цвет:</label>
                     <input type="text" id="new-color" name="color" style="width: 200px; padding: 5px;">
@@ -739,20 +762,88 @@ function showAddInstrumentForm() {
         </div>
     </div>`;
 
-    // Вставляем модальное окно в body
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-    // Настраиваем кнопки
     const modal = document.getElementById('add-instrument-modal');
     const form = document.getElementById('add-instrument-form');
     const cancelButton = document.getElementById('cancel-add');
 
-    cancelButton.addEventListener('click', function () {
+    // --- Поля ---
+    const imageSource = document.getElementById('image-source');
+    const urlField = document.getElementById('url-field');
+    const fileField = document.getElementById('file-field');
+    const imageUrlInput = document.getElementById('new-imageUrl');
+    const imageFileInput = document.getElementById('new-imageFile');
+    const previewContainer = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+
+    // --- Переключение полей ---
+    imageSource.addEventListener('change', function () {
+        if (this.value === 'url') {
+            urlField.style.display = 'block';
+            fileField.style.display = 'none';
+            previewContainer.style.display = 'none';
+            imageUrlInput.setAttribute('name', 'imageUrl');
+            imageFileInput.removeAttribute('name');
+        } else {
+            urlField.style.display = 'none';
+            fileField.style.display = 'block';
+            imageUrlInput.removeAttribute('name');
+            imageFileInput.setAttribute('name', 'imageUrl');
+        }
+    });
+
+    // --- Предпросмотр файла ---
+    imageFileInput.addEventListener('change', async function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Файл слишком большой. Максимальный размер — 5 МБ.');
+            this.value = '';
+            previewContainer.style.display = 'none';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            previewImg.src = e.target.result;
+            previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // --- Отмена ---
+    cancelButton.addEventListener('click', () => {
         document.body.removeChild(modal);
     });
 
+    // --- Отправка формы ---
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
+
+        let imageUrl = null;
+
+        if (imageSource.value === 'url') {
+            imageUrl = imageUrlInput.value.trim();
+            if (imageUrl && !isValidUrl(imageUrl)) {
+                alert('Пожалуйста, введите корректную ссылку на изображение.');
+                return;
+            }
+        } else {
+            const file = imageFileInput.files[0];
+            if (!file) {
+                alert('Пожалуйста, выберите файл.');
+                return;
+            }
+            try {
+                imageUrl = await fileToBase64(file);
+            } catch (err) {
+                console.error('Ошибка чтения файла:', err);
+                alert('Не удалось загрузить изображение.');
+                return;
+            }
+        }
 
         const formData = new FormData(form);
         const instrumentData = {
@@ -760,7 +851,7 @@ function showAddInstrumentForm() {
             category: formData.get('category'),
             rentalPrice: parseFloat(formData.get('rentalPrice')),
             description: formData.get('description'),
-            imageUrl: formData.get('imageUrl'),
+            imageUrl: imageUrl,
             color: formData.get('color'),
             currentCondition: formData.get('currentCondition'),
             handedness: formData.get('handedness') || null,
@@ -770,27 +861,40 @@ function showAddInstrumentForm() {
         try {
             const response = await fetch('https://localhost:7123/api/Equipments', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(instrumentData)
             });
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.message || 'Ошибка при добавлении инструмента');
+                throw new Error(error.message || 'Ошибка при добавлении');
             }
 
-            // Удаляем модальное окно
             document.body.removeChild(modal);
-
-            // Обновление списка
-            loadInstrumentsFromApi();
-
+            loadInstrumentsFromApi(); // Обновляем список
             alert('Инструмент успешно добавлен!');
         } catch (error) {
             console.error('Ошибка:', error);
             alert('Не удалось добавить инструмент: ' + error.message);
         }
     });
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Проверка URL
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return string.match(/\.(jpeg|jpg|png|gif|webp)$/i);
+    } catch (err) {
+        return false;
+    }
 }
