@@ -8,95 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Функция для преобразования файла в base64
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
-
-// Функция для добавления поля выбора файла в форму
-function addImageUploadField(formContainer, imageUrlFieldId) {
-    const uploadContainer = document.createElement('div');
-    uploadContainer.style.marginBottom = '10px';
-    uploadContainer.innerHTML = `
-        <label style="display: inline-block; width: 130px;">Или выберите файл:</label>
-        <input type="file" id="image-file" accept="image/jpeg,image/png,image/gif,image/webp" style="width: 240px; padding: 5px;">
-        <small style="display: block; margin-left: 130px; color: #666;">Поддерживаются JPG, PNG, GIF, WEBP</small>
-    `;
-    
-    // Вставляем после поля URL
-    const imageUrlField = document.getElementById(imageUrlFieldId);
-    if (imageUrlField && imageUrlField.parentElement) {
-        imageUrlField.parentElement.insertAdjacentElement('afterend', uploadContainer);
-    }
-    
-    const fileInput = uploadContainer.querySelector('#image-file');
-    fileInput.addEventListener('change', async function(e) {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            
-            // Проверка размера файла (макс 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Файл слишком большой. Максимальный размер 5MB.');
-                fileInput.value = '';
-                return;
-            }
-            
-            try {
-                const base64 = await fileToBase64(file);
-                const urlField = document.getElementById(imageUrlFieldId);
-                if (urlField) {
-                    urlField.value = base64;
-                    // Добавляем визуальный индикатор
-                    const preview = document.createElement('div');
-                    preview.style.cssText = 'margin-left: 130px; margin-top: 5px;';
-                    preview.innerHTML = `<img src="${base64}" style="max-width: 100px; max-height: 100px; border-radius: 4px;">`;
-                    
-                    // Удаляем старый превью, если есть
-                    const oldPreview = urlField.parentElement.querySelector('.image-preview');
-                    if (oldPreview) oldPreview.remove();
-                    
-                    preview.className = 'image-preview';
-                    urlField.parentElement.appendChild(preview);
-                }
-            } catch (error) {
-                console.error('Ошибка конвертации файла:', error);
-                alert('Не удалось загрузить изображение');
-            }
-        }
-    });
-}
-
-// Функция для добавления превью изображения в форму
-function addImagePreview(formContainer, imageUrlFieldId) {
-    const imageUrlField = document.getElementById(imageUrlFieldId);
-    if (imageUrlField && imageUrlField.value) {
-        const preview = document.createElement('div');
-        preview.style.cssText = 'margin-left: 130px; margin-top: 5px;';
-        preview.innerHTML = `<img src="${imageUrlField.value}" style="max-width: 100px; max-height: 100px; border-radius: 4px;" onerror="this.style.display='none'">`;
-        preview.className = 'image-preview';
-        imageUrlField.parentElement.appendChild(preview);
-        
-        // Обновляем превью при изменении URL
-        imageUrlField.addEventListener('input', function() {
-            const existingPreview = imageUrlField.parentElement.querySelector('.image-preview');
-            if (existingPreview) existingPreview.remove();
-            
-            if (this.value) {
-                const newPreview = document.createElement('div');
-                newPreview.style.cssText = 'margin-left: 130px; margin-top: 5px;';
-                newPreview.innerHTML = `<img src="${this.value}" style="max-width: 100px; max-height: 100px; border-radius: 4px;" onerror="this.style.display='none'">`;
-                newPreview.className = 'image-preview';
-                imageUrlField.parentElement.appendChild(newPreview);
-            }
-        });
-    }
-}
-
 async function loadInstruments() {
     try {
         const response = await fetch('https://localhost:7123/api/Equipments');
@@ -147,31 +58,6 @@ function displayInstruments(instruments) {
     });
 
     document.getElementById('instruments-section').style.display = 'block';
-}
-
-// Модифицируем форму добавления, чтобы добавить выбор файла
-// Нужно добавить поле для загрузки файла в HTML или через JS
-// Для этого добавим инициализацию форм после загрузки
-const originalAddModalSetup = setupAddModal;
-function setupAddModal() {
-    const modal = document.getElementById('add-instrument-modal');
-    if (modal && !modal.hasAttribute('data-upload-initialized')) {
-        modal.setAttribute('data-upload-initialized', 'true');
-        // Немного ждём, чтобы форма отобразилась
-        setTimeout(() => {
-            addImageUploadField(modal, 'imageUrl');
-        }, 100);
-    }
-}
-
-// Вызываем при каждом открытии модального окна
-const originalAddButtonClick = document.getElementById('add-instrument-btn')?.onclick;
-if (document.getElementById('add-instrument-btn')) {
-    document.getElementById('add-instrument-btn').addEventListener('click', function() {
-        setTimeout(() => {
-            setupAddModal();
-        }, 50);
-    });
 }
 
 async function createInstrument(event) {
@@ -310,12 +196,6 @@ async function editInstrument(id) {
         const modal = document.getElementById('edit-instrument-modal');
         const form = document.getElementById('edit-instrument-form');
         const cancelButton = document.getElementById('cancel-edit');
-
-        // Добавляем поле выбора файла в форму редактирования
-        addImageUploadField(modal, 'edit-imageUrl');
-        
-        // Добавляем превью текущего изображения
-        addImagePreview(modal, 'edit-imageUrl');
 
         cancelButton.addEventListener('click', () => {
             document.body.removeChild(modal);

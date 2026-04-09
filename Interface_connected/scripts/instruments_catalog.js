@@ -16,8 +16,8 @@ const categoryTranslations = {
     "Classical Guitars": "Классические гитары",
     "Microphones": "Микрофоны",
     "Synths": "Клавишные",
-    "Bass Guitars": "Бас-гитары",     // На случай, если появятся
-    "Drums": "Ударные установки"      // На случай, если появятся
+    "Bass Guitars": "Бас-гитары",
+    "Drums": "Ударные установки"
 };
 
 const colorTranslations = {
@@ -52,12 +52,11 @@ async function loadInstrumentsFromApi() {
         const data = await response.json();
 
         instrumentsData = data.map(item => {
-            // 1. Переводим категорию. Если перевода нет, оставляем как есть из БД
             const translatedCategory = categoryTranslations[item.category] || item.category;
             const translatedColor = colorTranslations[item.color?.toLowerCase()] || item.color || "Не указан";
             const translatedHandedness = item.handedness === "lefty" ? "Левша" :
                 item.handedness === "righty" ? "Правша" : "";
-            // 2. Определяем логику "Новизны" и "Состояния"
+            
             let translatedCondition = "Хорошее";
 
             if (item.currentCondition === "excellent") translatedCondition = "Отличное состояние";
@@ -71,34 +70,18 @@ async function loadInstrumentsFromApi() {
                 price: item.rentalPrice || 0,
                 category: translatedCategory,
                 condition: translatedCondition,
-
                 image: item.imageUrl || "img/file_not_found.png",
-
-                // 2. Цвет. Если в БД пусто, пишем "Не указан"
                 color: translatedColor || "Не указан",
-
-                // 3. Левша/Правша. Если пусто - считаем Правша
                 handedness: translatedHandedness || "Правша",
-
-                // Дополнительно сохраняем статус доступности из БД
                 isRentable: item.isRentable
             };
         });
 
-        // 1. Заполняем фильтр 
         populateCategoryOptions();
-
         populateColorOptions();
-
-        // 2. Проверяем URL параметры
         handleUrlParams();
-
         checkHandednessVisibility();
-
-        // 3. Применяем фильтры
         applyFilters();
-
-        // 4. Обновляем цены
         updatePriceRange();
 
         const repairingFilter = document.getElementById('repairing-filter');
@@ -121,11 +104,8 @@ function populateCategoryOptions() {
     if (!categorySelect) return;
 
     const currentValue = categorySelect.value;
-
-    // Получаем уникальные категории (уже переведенные на русский)
     const uniqueCategories = [...new Set(instrumentsData.map(i => i.category))].filter(c => c);
 
-    // Очищаем и добавляем "Все"
     categorySelect.innerHTML = '<option value="Все">Все категории</option>';
 
     uniqueCategories.forEach(category => {
@@ -135,7 +115,6 @@ function populateCategoryOptions() {
         categorySelect.appendChild(option);
     });
 
-    // Восстанавливаем выбор
     if (uniqueCategories.includes(currentValue)) {
         categorySelect.value = currentValue;
     }
@@ -145,19 +124,12 @@ function populateColorOptions() {
     const colorSelect = document.getElementById('colors');
     if (!colorSelect) return;
 
-    // Сохраняем текущий выбор пользователя
     const currentValue = colorSelect.value;
-
-    // Получаем список уникальных цветов из загруженных данных
     const uniqueColors = [...new Set(instrumentsData.map(i => i.color))].filter(c => c);
-
-    // Сортируем цвета по алфавиту для красоты
     uniqueColors.sort();
 
-    // Очищаем селект и добавляем опцию "Все"
     colorSelect.innerHTML = '<option value="Все">Все цвета</option>';
 
-    // Создаем опции
     uniqueColors.forEach(color => {
         const option = document.createElement('option');
         option.value = color;
@@ -165,7 +137,6 @@ function populateColorOptions() {
         colorSelect.appendChild(option);
     });
 
-    // Восстанавливаем выбор, если такой цвет всё еще существует в списке
     if (uniqueColors.includes(currentValue)) {
         colorSelect.value = currentValue;
     }
@@ -179,7 +150,6 @@ function checkHandednessVisibility() {
 
     const selectedCategory = categorySelect.value;
 
-    // Список категорий, для которых актуален этот фильтр
     const guitarCategories = [
         "Электрогитары",
         "Классические гитары",
@@ -187,15 +157,11 @@ function checkHandednessVisibility() {
         "Акустические гитары"
     ];
 
-    // Проверяем, входит ли выбранная категория в список гитар
     if (guitarCategories.includes(selectedCategory)) {
-        // Показываем
         handednessContainer.style.display = 'block';
     } else {
-        // Скрываем
         handednessContainer.style.display = 'none';
 
-        // ВАЖНО: Сбрасываем галочки, чтобы скрытый фильтр не влиял на поиск
         const checkboxes = document.querySelectorAll('input[name="handedness"]');
         let changed = false;
         checkboxes.forEach(cb => {
@@ -205,14 +171,12 @@ function checkHandednessVisibility() {
             }
         });
 
-        // Если были убраны галочки, нужно перезапустить фильтрацию
         if (changed) {
             applyFilters();
         }
     }
 }
 
-// 1. Инициализация фильтров
 function initFilters() {
     const categorySelect = document.getElementById('categories');
     const conditionSelect = document.getElementById('condition')
@@ -220,9 +184,7 @@ function initFilters() {
 
     if (categorySelect) {
         categorySelect.addEventListener('change', function () {
-            // Сначала проверяем видимость блока handedness
             checkHandednessVisibility();
-            // Потом применяем фильтры
             applyFilters();
         });
     }
@@ -239,7 +201,6 @@ function initFilters() {
     });
 }
 
-// ---- 2. Инициализация поиска ----
 function initSearch() {
     const searchInput = document.getElementById('site-search');
     const searchButton = document.getElementById('search-button');
@@ -265,16 +226,14 @@ function initSearch() {
     });
 }
 
-// ---- 4. Инициализация диапазона цен ----
 function initPriceRange() {
     const priceContainer = document.getElementById('price-container');
     if (!priceContainer) return;
 
-    // Создаем элементы, но max значение обновим позже
     const priceRange = document.createElement('input');
     priceRange.type = 'range';
     priceRange.min = 1;
-    priceRange.max = 10000; // Временное значение
+    priceRange.max = 10000;
     priceRange.value = 10000;
     priceRange.id = 'price-range';
 
@@ -293,7 +252,6 @@ function initPriceRange() {
     });
 }
 
-// Функция обновления слайдера после получения данных
 function updatePriceRange() {
     const priceRange = document.getElementById('price-range');
     const priceDisplay = document.querySelector('.price-display');
@@ -306,7 +264,6 @@ function updatePriceRange() {
     }
 }
 
-// ---- 6. Основная функция применения фильтров ----
 function applyFilters() {
     const categoryEl = document.getElementById('categories');
     const colorEl = document.getElementById('colors');
@@ -326,22 +283,18 @@ function applyFilters() {
     const rightyChecked = !!document.querySelector('input[value="righty"]') && document.querySelector('input[value="righty"]').checked;
 
     const filteredInstruments = instrumentsData.filter(instrument => {
-        // Категория
         if (selectedCategory && selectedCategory !== "Все" && instrument.category !== selectedCategory) {
             return false;
         }
 
-        // Цвет
         if (selectedColor && selectedColor !== "Все" && instrument.color !== selectedColor) {
             return false;
         }
 
-        // Поиск
         if (searchTerm && instrument.name && !instrument.name.toLowerCase().includes(searchTerm)) {
             return false;
         }
 
-        // Цена
         if (instrument.price > maxPrice) {
             return false;
         }
@@ -356,14 +309,11 @@ function applyFilters() {
             }
         }
 
-        // Состояние
         if (selectedCondition && selectedCondition !== "Все") {
-            // Маппинг значений из select в русские названия состояний
             const conditionMap = {
                 'excellent': 'Отличное состояние',
                 'good': 'Хорошее состояние',
                 'unsignificant defects': 'Незначительные дефекты',
-                // 'repairing': 'В ремонте'
             };
 
             const targetCondition = conditionMap[selectedCondition];
@@ -372,7 +322,6 @@ function applyFilters() {
             }
         }
 
-        // Удобство (левша/правша)
         if (leftyChecked && rightyChecked) {
             // оба выбраны
         } else if (leftyChecked && instrument.handedness !== "Левша") {
@@ -387,7 +336,6 @@ function applyFilters() {
     renderInstruments(filteredInstruments);
 }
 
-// ---- 7. Рендеринг инструментов ----
 function renderInstruments(instruments) {
     const productList = document.querySelector('.product-list');
     if (!productList) return;
@@ -408,7 +356,6 @@ function renderInstruments(instruments) {
         productList.appendChild(instrumentCard);
     });
 
-    // Добавляем карточку для добавления нового инструмента
     const addCard = document.createElement('div');
     addCard.className = 'instrument-card';
     addCard.style.cssText = `
@@ -448,12 +395,10 @@ function renderInstruments(instruments) {
         </div>
     `;
 
-    // Показываем карточку только для сотрудников
     const isStaff = localStorage.getItem('isStaff') === 'true';
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     addCard.style.display = (isLoggedIn && isStaff) ? 'block' : 'none';
 
-    // Добавляем обработчик клика
     addCard.addEventListener('click', function (e) {
         e.preventDefault();
         showAddInstrumentForm();
@@ -462,7 +407,6 @@ function renderInstruments(instruments) {
     productList.appendChild(addCard);
 }
 
-// ---- 8. Создание карточки инструмента ----
 function createInstrumentCard(instrument) {
     const cardContainer = document.createElement('div');
     cardContainer.className = 'instrument-card';
@@ -484,11 +428,9 @@ function createInstrumentCard(instrument) {
         position: relative;
     `;
 
-    // Проверяем, является ли пользователь сотрудником
     const isStaff = localStorage.getItem('isStaff') === 'true';
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-    // HTML кнопки удаления (появляется только у staff)
     const deleteButtonHtml = (isLoggedIn && isStaff) ? `
         <button class="delete-instrument" data-id="${instrument.id}"
                 style="position: absolute; top: 8px; right: 8px; width: 22px; height: 22px;
@@ -498,25 +440,23 @@ function createInstrumentCard(instrument) {
         </button>
     ` : '';
 
-    // Определяем цвет бейджа состояния
-    let conditionColor = '#2196F3'; // синий по умолчанию
+    let conditionColor = '#2196F3';
 
     switch (instrument.condition) {
         case 'Отличное состояние':
-            conditionColor = '#128816ff'; // зелёный
+            conditionColor = '#128816ff';
             break;
         case 'Хорошее состояние':
-            conditionColor = '#07ce0eff'; // ярко-зелёный
+            conditionColor = '#07ce0eff';
             break;
         case 'Незначительные дефекты':
-            conditionColor = '#FFC107'; // жёлтый
+            conditionColor = '#FFC107';
             break;
         case 'В ремонте':
-            conditionColor = '#F44336'; // красный
+            conditionColor = '#F44336';
             break;
     }
 
-    // Гитарные категории (для отображения ориентации)
     const guitarCategories = [
         "Электрогитары",
         "Классические гитары",
@@ -524,16 +464,13 @@ function createInstrumentCard(instrument) {
         "Акустические гитары"
     ];
 
-    // Формируем строку деталей (цвет + ориентация, если актуально)
     let detailsText = instrument.color;
     if (guitarCategories.includes(instrument.category)) {
         detailsText += ` • ${instrument.handedness}`;
     }
 
-    // Используем изображение или заглушку
     const imgSrc = instrument.image || 'img/file_not_found.png';
 
-    // Вставляем HTML карточки с крестиком и содержимым
     cardContainer.innerHTML = `
         ${deleteButtonHtml}
         <img src="${imgSrc}" 
@@ -555,14 +492,12 @@ function createInstrumentCard(instrument) {
         </a>
     `;
 
-    // Обработчик клика по карточке (кроме крестика)
     cardContainer.addEventListener('click', function (e) {
         if (e.target.tagName.toLowerCase() !== 'a' && !e.target.classList.contains('delete-instrument')) {
             window.location.href = `instrument.html?id=${instrument.id}`;
         }
     });
 
-    // Обработчик наведения
     cardContainer.addEventListener('mouseenter', function () {
         this.style.transform = 'translateY(-2px)';
         this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
@@ -573,11 +508,10 @@ function createInstrumentCard(instrument) {
         this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     });
 
-    // Обработчик удаления (только для staff)
     const deleteBtn = cardContainer.querySelector('.delete-instrument');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async function (e) {
-            e.stopPropagation(); // Предотвращаем переход по карточке
+            e.stopPropagation();
 
             if (!confirm(`Вы действительно хотите удалить инструмент "${instrument.name}"?`)) return;
 
@@ -593,10 +527,7 @@ function createInstrumentCard(instrument) {
                     throw new Error(`Ошибка при удалении: ${response.status}`);
                 }
 
-                // Удаляем карточку из DOM
                 cardContainer.remove();
-
-                // Обновляем глобальные данные
                 instrumentsData = instrumentsData.filter(i => i.id !== instrument.id);
 
                 alert('Инструмент успешно удалён.');
@@ -610,7 +541,6 @@ function createInstrumentCard(instrument) {
     return cardContainer;
 }
 
-// ---- 10. debounce ----
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -623,7 +553,6 @@ function debounce(func, wait) {
     };
 }
 
-// ---- 11. URL параметры (категория) ----
 function handleUrlParams() {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('category');
@@ -632,7 +561,6 @@ function handleUrlParams() {
         const categorySelect = document.getElementById('categories');
         if (!categorySelect) return;
 
-        // Маппинг: "ссылка в футере" -> "Русское название в фильтре"
         const categoryMap = {
             'electroguitars': 'Электрогитары',
             'classicguitars': 'Классические гитары',
@@ -645,16 +573,11 @@ function handleUrlParams() {
         const targetCategory = categoryMap[category];
 
         if (targetCategory) {
-            // Проверяем, есть ли такая категория в списке
             const optionExists = Array.from(categorySelect.options).some(opt => opt.value === targetCategory);
 
             if (optionExists) {
                 categorySelect.value = targetCategory;
-
-                // Если мы перешли на гитары, нужно сразу показать фильтр правша/левша
                 checkHandednessVisibility();
-
-                // Принудительно запускаем фильтрацию
                 applyFilters();
             }
         }
@@ -662,13 +585,11 @@ function handleUrlParams() {
 }
 
 function setupAddInstrumentButton() {
-    // Находим кнопку и блок управления
     const addButton = document.getElementById('add-instrument-btn');
     const controls = document.querySelector('.controls');
 
     if (!addButton || !controls) return;
 
-    // Скрываем отдельную кнопку, так как добавление теперь через карточку
     addButton.style.display = 'none';
 }
 
@@ -701,34 +622,10 @@ function showAddInstrumentForm() {
                     <label for="new-description" style="display: inline-block; width: 120px; vertical-align: top;">Описание:</label>
                     <textarea id="new-description" name="description" rows="3" style="width: 200px; padding: 5px; vertical-align: top;"></textarea>
                 </div>
-
-                <!-- Переключатель источника изображения -->
                 <div style="margin-bottom: 10px;">
-                    <label style="display: inline-block; width: 120px;">Изображение:</label>
-                    <select id="image-source" style="width: 200px; padding: 5px;">
-                        <option value="url">По ссылке</option>
-                        <option value="file">С компьютера</option>
-                    </select>
-                </div>
-
-                <!-- Поле для URL -->
-                <div id="url-field" style="margin-bottom: 10px;">
-                    <label for="new-imageUrl" style="display: inline-block; width: 120px;">Ссылка:</label>
+                    <label for="new-imageUrl" style="display: inline-block; width: 120px;">Ссылка на изображение:</label>
                     <input type="url" id="new-imageUrl" name="imageUrl" style="width: 200px; padding: 5px;">
                 </div>
-
-                <!-- Поле для файла -->
-                <div id="file-field" style="margin-bottom: 10px; display: none;">
-                    <label for="new-imageFile" style="display: inline-block; width: 120px;">Файл:</label>
-                    <input type="file" id="new-imageFile" accept="image/*" style="width: 200px; padding: 5px;">
-                    <small style="display: block; margin-left: 120px; color: #666;">JPG, PNG, GIF, WEBP до 5MB</small>
-                </div>
-
-                <!-- Превью изображения -->
-                <div id="image-preview" style="margin-left: 120px; margin-top: 5px; display: none;">
-                    <img id="preview-img" src="" style="max-width: 100px; max-height: 100px; border-radius: 4px;">
-                </div>
-
                 <div style="margin-bottom: 10px;">
                     <label for="new-color" style="display: inline-block; width: 120px;">Цвет:</label>
                     <input type="text" id="new-color" name="color" style="width: 200px; padding: 5px;">
@@ -768,82 +665,12 @@ function showAddInstrumentForm() {
     const form = document.getElementById('add-instrument-form');
     const cancelButton = document.getElementById('cancel-add');
 
-    // --- Поля ---
-    const imageSource = document.getElementById('image-source');
-    const urlField = document.getElementById('url-field');
-    const fileField = document.getElementById('file-field');
-    const imageUrlInput = document.getElementById('new-imageUrl');
-    const imageFileInput = document.getElementById('new-imageFile');
-    const previewContainer = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
-
-    // --- Переключение полей ---
-    imageSource.addEventListener('change', function () {
-        if (this.value === 'url') {
-            urlField.style.display = 'block';
-            fileField.style.display = 'none';
-            previewContainer.style.display = 'none';
-            imageUrlInput.setAttribute('name', 'imageUrl');
-            imageFileInput.removeAttribute('name');
-        } else {
-            urlField.style.display = 'none';
-            fileField.style.display = 'block';
-            imageUrlInput.removeAttribute('name');
-            imageFileInput.setAttribute('name', 'imageUrl');
-        }
-    });
-
-    // --- Предпросмотр файла ---
-    imageFileInput.addEventListener('change', async function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Файл слишком большой. Максимальный размер — 5 МБ.');
-            this.value = '';
-            previewContainer.style.display = 'none';
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            previewImg.src = e.target.result;
-            previewContainer.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    });
-
-    // --- Отмена ---
     cancelButton.addEventListener('click', () => {
         document.body.removeChild(modal);
     });
 
-    // --- Отправка формы ---
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
-
-        let imageUrl = null;
-
-        if (imageSource.value === 'url') {
-            imageUrl = imageUrlInput.value.trim();
-            if (imageUrl && !isValidUrl(imageUrl)) {
-                alert('Пожалуйста, введите корректную ссылку на изображение.');
-                return;
-            }
-        } else {
-            const file = imageFileInput.files[0];
-            if (!file) {
-                alert('Пожалуйста, выберите файл.');
-                return;
-            }
-            try {
-                imageUrl = await fileToBase64(file);
-            } catch (err) {
-                console.error('Ошибка чтения файла:', err);
-                alert('Не удалось загрузить изображение.');
-                return;
-            }
-        }
 
         const formData = new FormData(form);
         const instrumentData = {
@@ -851,7 +678,7 @@ function showAddInstrumentForm() {
             category: formData.get('category'),
             rentalPrice: parseFloat(formData.get('rentalPrice')),
             description: formData.get('description'),
-            imageUrl: imageUrl,
+            imageUrl: formData.get('imageUrl') || null,
             color: formData.get('color'),
             currentCondition: formData.get('currentCondition'),
             handedness: formData.get('handedness') || null,
@@ -871,30 +698,11 @@ function showAddInstrumentForm() {
             }
 
             document.body.removeChild(modal);
-            loadInstrumentsFromApi(); // Обновляем список
+            loadInstrumentsFromApi();
             alert('Инструмент успешно добавлен!');
         } catch (error) {
             console.error('Ошибка:', error);
             alert('Не удалось добавить инструмент: ' + error.message);
         }
     });
-}
-
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
-
-// Проверка URL
-function isValidUrl(string) {
-    try {
-        new URL(string);
-        return string.match(/\.(jpeg|jpg|png|gif|webp)$/i);
-    } catch (err) {
-        return false;
-    }
 }
