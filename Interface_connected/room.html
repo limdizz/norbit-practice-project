@@ -8,6 +8,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
     <script src="scripts/room.js" defer></script>
+    <script src="scripts/room_equipment_api.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
 
@@ -57,6 +58,11 @@
                         <p id="room-desc"></p>
                     </div>
 
+                    <div class="equipment_block">
+                        <h3>В комплекте с помещением:</h3>
+                        <ul id="room-equipment"></ul>
+                    </div>
+
                     <div id="room-details-extra"></div>
                 </div>
 
@@ -84,6 +90,10 @@
                             <option value="5">5 часов</option>
                             <option value="6">6 часов</option>
                         </select>
+                    </div>
+
+                    <div id="additional-equipment-container">
+                        <!-- Здесь будет список дополнительного оборудования -->
                     </div>
 
                     <div class="total_calc">

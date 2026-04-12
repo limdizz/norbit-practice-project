@@ -262,16 +262,16 @@ public partial class PracticeProjectContext : DbContext
             entity.ToTable("booking_equipment");
 
             entity.Property(e => e.BookingEquipmentId).HasColumnName("booking_equipment_id");
-            entity.Property(e => e.BookingId)
+            entity.Property(e => e.BookingUid)
                 .ValueGeneratedOnAdd()
-                .HasColumnName("booking_id");
+                .HasColumnName("booking_uid");
             entity.Property(e => e.EquipmentId)
                 .ValueGeneratedOnAdd()
                 .HasColumnName("equipment_id");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
 
-            entity.HasOne(d => d.Booking).WithMany(p => p.BookingEquipments)
-                .HasForeignKey(d => d.BookingId)
+            entity.HasOne(d => d.BookingsAdvanced).WithMany(p => p.BookingEquipments)
+                .HasForeignKey(d => d.BookingUid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("bookingeq_bookings_fkey");
 

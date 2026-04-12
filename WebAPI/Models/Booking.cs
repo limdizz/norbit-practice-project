@@ -23,7 +23,7 @@ public partial class Booking
 
     public virtual ICollection<Bill> Bills { get; set; } = new List<Bill>();
 
-    public virtual ICollection<BookingEquipment> BookingEquipments { get; set; } = new List<BookingEquipment>();
+    // public virtual ICollection<BookingEquipment> BookingEquipments { get; set; } = new List<BookingEquipment>();
 
     public virtual Room? Room { get; set; } = null!;
 

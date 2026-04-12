@@ -1598,3 +1598,40 @@ input[type="range"] {
     color: white;
     font-family: Inter;
 }
+
+/* Стили для отображения оборудования в заказе */
+.order-equipment-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.order-equipment-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.order-equipment-list li:last-child {
+    border-bottom: none;
+}
+
+.order-equipment-list .equipment-price {
+    color: #e44d26;
+    font-weight: bold;
+}
+
+.additional-equipment-order h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1em;
+}
+
+/* Стили для полей пользователя (readonly) */
+.register_placeholder_ln:read-only,
+.register_placeholder_fn:read-only {
+    background-color: #f5f5f5;
+    cursor: default;
+}

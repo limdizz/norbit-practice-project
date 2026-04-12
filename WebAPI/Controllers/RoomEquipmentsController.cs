@@ -27,6 +27,16 @@ namespace WebAPI.Controllers
             return await _context.RoomEquipments.ToListAsync();
         }
 
+        [HttpGet("byRoom/{roomId}")]
+        public async Task<ActionResult<IEnumerable<RoomEquipment>>> GetRoomEquipmentsByRoom(int roomId)
+        {
+            var roomEquipments = await _context.RoomEquipments
+                .Where(re => re.RoomId == roomId)
+                .ToListAsync();
+            
+            return Ok(roomEquipments);
+        }
+
         // GET: api/RoomEquipments/5
         [HttpGet("{id}")]
         public async Task<ActionResult<RoomEquipment>> GetRoomEquipment(int id)

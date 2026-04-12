@@ -75,10 +75,42 @@ namespace WebAPI.Controllers
         // POST: api/BookingEquipments
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<BookingEquipment>> PostBookingEquipment(BookingEquipment bookingEquipment)
+        public async Task<ActionResult<BookingEquipment>> PostBookingEquipment([FromBody] BookingEquipment bookingEquipment)
         {
+            // Проверяем, существует ли бронирование
+            var bookingExists = await _context.BookingsAdvanceds
+                .AnyAsync(b => b.BookingUid == bookingEquipment.BookingUid);
+
+            if (!bookingExists)
+            {
+                return BadRequest($"Бронирование с UID {bookingEquipment.BookingUid} не найдено");
+            }
+
+            // Проверяем, существует ли оборудование
+            var equipmentExists = await _context.Equipment
+                .AnyAsync(e => e.EquipmentId == bookingEquipment.EquipmentId);
+
+            if (!equipmentExists)
+            {
+                return BadRequest($"Оборудование с ID {bookingEquipment.EquipmentId} не найдено");
+            }
+
+            // Устанавливаем количество по умолчанию, если не указано
+            if (bookingEquipment.Quantity == null || bookingEquipment.Quantity <= 0)
+            {
+                bookingEquipment.Quantity = 1;
+            }
+
             _context.BookingEquipments.Add(bookingEquipment);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Ошибка при сохранении: {ex.InnerException?.Message ?? ex.Message}");
+            }
 
             return CreatedAtAction("GetBookingEquipment", new { id = bookingEquipment.BookingEquipmentId }, bookingEquipment);
         }

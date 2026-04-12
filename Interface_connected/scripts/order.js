@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 1. Получаем данные пользователя из localStorage
     const userDataString = localStorage.getItem('userData');
-    let userData = { firstName: 'Гость', lastName: 'Гость' }; // По умолчанию
+    let userData = { firstName: 'Гость', lastName: 'Гость' };
 
     if (userDataString) {
         try {
@@ -45,28 +45,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const orderInstrument = document.getElementById('order-instrument');
     const orderDates = document.getElementById('order-dates');
     const orderTotal = document.getElementById('order-total');
+    const additionalEquipmentContainer = document.getElementById('additional-equipment-list');
     const confirmBtn = document.getElementById('confirm-booking-btn');
 
     // 4. Заполняем поля пользователя
     if (lastNameInput) {
-        lastNameInput.value = userData.lastName;
+        lastNameInput.value = userData.lastName || '';
     }
     if (firstNameInput) {
-        firstNameInput.value = userData.firstName;
+        firstNameInput.value = userData.firstName || '';
     }
 
-    // 5. Заполняем детали заказа
+    // 5. Заполняем детали заказа и отображаем оборудование
     if (bookingData) {
-        // Заголовок заказа
         if (orderTitle) {
             orderTitle.textContent = `Заказ`;
         }
 
-        // Название (для помещений и инструментов)
         const nameText = bookingData.instrumentName || bookingData.itemName || 'Неизвестно';
 
         if (orderInstrument) {
-            // Проверяем тип объекта
             if (bookingData.itemType === 'Room') {
                 orderInstrument.textContent = `Бронирование помещения: ${nameText}`;
             } else {
@@ -74,29 +72,55 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Даты и время 
+        // Отображаем даты и время
         if (orderDates) {
             if (bookingData.itemType === 'Room') {
-                // ЛОГИКА ДЛЯ ПОМЕЩЕНИЙ
-                // Выводим конкретную дату и количество часов
-                orderDates.textContent = `Дата: ${bookingData.date}, Время: ${bookingData.time}, Длительность: ${bookingData.hours} ч.`;
+                orderDates.textContent = `Дата: ${bookingData.date}, Начало: ${bookingData.time}, Длительность: ${bookingData.hours} ч.`;
             } else {
-                // ЛОГИКА ДЛЯ ИНСТРУМЕНТОВ 
                 orderDates.textContent = `Срок бронирования: ${bookingData.startDate} - ${bookingData.endDate}`;
             }
         }
 
-        // Цена
+        // Отображаем дополнительное оборудование (если есть)
+        if (additionalEquipmentContainer && bookingData.selectedEquipment && bookingData.selectedEquipment.length > 0) {
+            let equipmentHtml = '<h4>Дополнительное оборудование:</h4><ul class="order-equipment-list">';
+            bookingData.selectedEquipment.forEach(eq => {
+                equipmentHtml += `
+                    <li>
+                        <span>${escapeHtml(eq.name)}</span>
+                        <span class="equipment-price">+${eq.price} ₽</span>
+                    </li>
+                `;
+            });
+            equipmentHtml += '</ul>';
+            additionalEquipmentContainer.innerHTML = equipmentHtml;
+            additionalEquipmentContainer.style.display = 'block';
+        } else if (additionalEquipmentContainer) {
+            additionalEquipmentContainer.style.display = 'none';
+        }
+
+        // Отображаем цену
         if (orderTotal) {
-            orderTotal.textContent = `Итого: ₽${bookingData.totalPrice}`;
+            let totalText = '';
+            if (bookingData.itemType === 'Room') {
+                const roomTotal = bookingData.roomTotal || (bookingData.hours * bookingData.pricePerHour);
+                const equipmentTotal = bookingData.equipmentTotal || 0;
+                if (equipmentTotal > 0) {
+                    totalText = `Аренда помещения: ${roomTotal} ₽<br>Оборудование: +${equipmentTotal} ₽<br><strong>Итого: ${bookingData.totalPrice} ₽</strong>`;
+                } else {
+                    totalText = `Итого: ${bookingData.totalPrice} ₽`;
+                }
+            } else {
+                totalText = `Итого: ${bookingData.totalPrice} ₽`;
+            }
+            orderTotal.innerHTML = totalText;
         }
     } else {
-        // Ошибка, если данных нет
         if (orderInstrument) orderInstrument.textContent = 'Ошибка: Детали заказа не найдены.';
-        if (orderTotal) orderTotal.textContent = 'Итого: ₽0';
+        if (orderTotal) orderTotal.innerHTML = 'Итого: ₽0';
     }
 
-    // 6. Подтверждение бронирования (фактическая запись в БД)
+    // 6. Подтверждение бронирования
     if (confirmBtn) {
         confirmBtn.addEventListener('click', async function () {
             const pendingRequestString = sessionStorage.getItem('pendingBookingRequest');
@@ -117,14 +141,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // Получаем ID выбранного оборудования из currentBooking
+            const selectedEquipmentIds = (currentBooking.selectedEquipment || []).map(eq => eq.equipmentId);
+
+            // Добавляем ID оборудования в запрос
+            if (selectedEquipmentIds.length > 0) {
+                pendingRequest.SelectedEquipment = selectedEquipmentIds;
+            }
+
             try {
                 confirmBtn.disabled = true;
                 confirmBtn.textContent = 'Сохранение...';
 
+                // 1. Создаём бронирование
                 const response = await fetch('https://localhost:7123/api/BookingsAdvanced', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(pendingRequest)
+                    body: JSON.stringify({
+                        UserUid: pendingRequest.UserUid,
+                        RoomId: pendingRequest.RoomId,
+                        InstrumentId: pendingRequest.InstrumentId,
+                        StartTime: pendingRequest.StartTime,
+                        EndTime: pendingRequest.EndTime
+                    })
                 });
 
                 if (!response.ok) {
@@ -133,29 +172,51 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 const result = await response.json();
-                const bookingId = result.bookingUid;
-                const orderId = generateOrderId(bookingId);
+                console.log('Ответ сервера:', result);
+                const bookingUid = result.bookingUid || result.BookingUid;
+                console.log('BookingUid для оборудования:', bookingUid);
 
-                // Обновляем sessionStorage текущего заказа
-                currentBooking.bookingId = bookingId;
+                // 2. Если есть дополнительное оборудование, создаём записи в booking_equipment
+                if (selectedEquipmentIds.length > 0 && bookingUid) {
+                    // Фильтруем только уникальные ID
+                    const uniqueEquipmentIds = [...new Set(selectedEquipmentIds)];
+
+                    const equipmentPromises = uniqueEquipmentIds.map(equipmentId =>
+                        fetch('https://localhost:7123/api/BookingEquipments', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                BookingUid: bookingUid,
+                                EquipmentId: equipmentId
+                            })
+                        })
+                    );
+
+                    const equipmentResults = await Promise.all(equipmentPromises);
+                    const failed = equipmentResults.filter(r => !r.ok);
+                    if (failed.length > 0) {
+                        console.warn(`Не удалось сохранить ${failed.length} из ${uniqueEquipmentIds.length} позиций оборудования`);
+                    }
+                }
+
+                const orderId = generateOrderId(bookingUid);
+
+                // Обновляем данные бронирования
+                currentBooking.bookingId = bookingUid;
                 currentBooking.orderId = orderId;
                 currentBooking.bookingDate = new Date().toISOString();
                 sessionStorage.setItem('currentBooking', JSON.stringify(currentBooking));
 
-                // Сохраняем в LocalStorage (для отображения в профиле/списке)
-                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                // Сохраняем в историю пользователя
                 const userEmail = userData.email;
-                if (!userEmail) {
-                    // На всякий случай: если нет email, пропускаем локальное сохранение
-                    console.warn('userData.email не найден, локальная история не обновится.');
-                } else {
+                if (userEmail) {
                     const storageKey = `bookingHistory_${userEmail}`;
                     const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
                     history.push(currentBooking);
                     localStorage.setItem(storageKey, JSON.stringify(history));
                 }
 
-                // Очищаем pending-запрос
+                // Очищаем временные данные
                 sessionStorage.removeItem('pendingBookingRequest');
 
                 // Переход на страницу подтверждения
@@ -175,4 +236,14 @@ function generateOrderId(bookingUuid) {
     const cleanUuid = String(bookingUuid).replace(/-/g, '');
     const shortId = cleanUuid.substring(0, 4).toUpperCase();
     return `${shortId}`;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
