@@ -40,35 +40,52 @@ namespace WebAPI.Controllers
             return room;
         }
 
+        public class UpdateRoomDto
+        {
+            public string Name { get; set; }
+            public int RoomTypeId { get; set; }
+            public bool IsFree { get; set; }
+        }
+
         // PUT: api/Rooms/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRoom(int id, Room room)
+        public async Task<IActionResult> UpdateRoom(int id, [FromBody] UpdateRoomDto dto)
         {
-            if (id != room.RoomId)
+            if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
-            _context.Entry(room).State = EntityState.Modified;
+            // Проверяем, существует ли помещение
+            var room = await _context.Rooms.FindAsync(id);
+            if (room == null)
+            {
+                return NotFound(new { message = $"Помещение с ID {id} не найдено." });
+            }
+
+            // Проверяем, существует ли тип помещения
+            var roomTypeExists = await _context.RoomTypes.AnyAsync(rt => rt.RoomTypeId == dto.RoomTypeId);
+            if (!roomTypeExists)
+            {
+                return BadRequest($"Тип помещения с ID {dto.RoomTypeId} не существует.");
+            }
+
+            // Обновляем только поля
+            room.Name = dto.Name;
+            room.RoomTypeId = dto.RoomTypeId;
+            room.IsFree = dto.IsFree;
 
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok(room); // Возвращаем обновлённый объект
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!RoomExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                // Логируйте ex при необходимости
+                return StatusCode(500, new { message = "Ошибка при сохранении изменений." });
             }
-
-            return NoContent();
         }
 
         // POST: api/Rooms
