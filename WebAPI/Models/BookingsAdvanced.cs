@@ -31,6 +31,8 @@ public partial class BookingsAdvanced
 
     public virtual Room? Room { get; set; }
 
+    public virtual Equipment? Instrument { get; set; }
+
     public virtual StaffAdvanced? StaffU { get; set; }
 
     public virtual UsersAdvanced? UserU { get; set; }

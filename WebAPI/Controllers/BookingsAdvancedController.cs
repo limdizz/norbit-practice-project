@@ -107,6 +107,7 @@ namespace WebAPI.Controllers
             var bookings = await _context.BookingsAdvanceds
                 .Include(b => b.UserU)
                 .Include(b => b.Room)
+                .Include(b => b.Instrument)
                 .Include(b => b.StaffU)
                 .Select(b => new
                 {
@@ -117,6 +118,8 @@ namespace WebAPI.Controllers
                     userEmail = b.UserU != null ? b.UserU.Email : null,
                     b.RoomId,
                     roomName = b.Room != null ? b.Room.Name : null,
+                    b.InstrumentId,
+                    instrumentName = b.Instrument != null ? b.Instrument.Name : null,
                     b.StaffUid,
                     staffName = b.StaffU != null ? b.StaffU.StaffPosition : null,
                     b.StartTime,

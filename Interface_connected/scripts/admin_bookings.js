@@ -66,7 +66,18 @@ document.addEventListener('DOMContentLoaded', async function () {
                 ? `${b.userName || ''} ${b.userSurname || ''} (${b.userEmail})`
                 : b.userUid || '';
 
-            const itemInfo = b.roomName || b.instrumentName || (b.roomId ? `Комната #${b.roomId}` : '');
+            let itemInfo = '';
+            if (b.roomId && b.roomName) {
+                itemInfo = b.roomName;
+            } else if (b.instrumentId && b.instrumentName) {
+                itemInfo = b.instrumentName;
+            } else if (b.roomId) {
+                itemInfo = `Комната #${b.roomId}`;
+            } else if (b.instrumentId) {
+                itemInfo = `Инструмент #${b.instrumentId}`;
+            } else {
+                itemInfo = 'Неизвестно';
+            }
 
             const status = String(b.status || '').toLowerCase();
             const canEdit = status !== 'completed' && status !== 'cancelled';
