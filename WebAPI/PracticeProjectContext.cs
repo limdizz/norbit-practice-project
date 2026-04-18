@@ -152,7 +152,7 @@ public partial class PracticeProjectContext : DbContext
             entity.ToTable("bill_items_advanced");
 
             entity.Property(e => e.BillItemId)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("bill_item_id");
             entity.Property(e => e.BillUid).HasColumnName("bill_uid");
             entity.Property(e => e.ItemName)

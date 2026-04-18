@@ -140,21 +140,30 @@ async function loadBookingsFromAPI(userData, currentContainer, archiveContainer,
 
 // Обогащение бронирований дополнительными данными
 async function enrichBookingsWithDetails(bookings, userData) {
-    // Загружаем инструменты и помещения для получения названий и картинок
+    // Загружаем инструменты, помещения и типы помещений
     let instruments = [];
     let rooms = [];
+    let roomTypes = [];
 
     try {
-        const [instrResponse, roomsResponse] = await Promise.all([
+        const [instrResponse, roomsResponse, roomTypesResponse] = await Promise.all([
             fetch('https://localhost:7123/api/Equipments'),
-            fetch('https://localhost:7123/api/Rooms')
+            fetch('https://localhost:7123/api/Rooms'),
+            fetch('https://localhost:7123/api/RoomTypes') // ← Новый эндпоинт!
         ]);
 
         if (instrResponse.ok) instruments = await instrResponse.json();
         if (roomsResponse.ok) rooms = await roomsResponse.json();
+        if (roomTypesResponse.ok) roomTypes = await roomTypesResponse.json();
     } catch (error) {
         console.error('Ошибка загрузки справочников:', error);
     }
+
+    // Создаём маппинг цены по roomTypeId
+    const roomTypePriceMap = {};
+    roomTypes.forEach(type => {
+        roomTypePriceMap[type.roomTypeId] = type.rentalPricePerHour || 0;
+    });
 
     return bookings.map(booking => {
         const startDate = booking.startTime ? new Date(booking.startTime) : null;
@@ -164,38 +173,43 @@ async function enrichBookingsWithDetails(bookings, userData) {
         let itemType = booking.roomId ? 'Room' : 'Instrument';
         let imageUrl = 'img/no-image.png';
         let roomTypeId = null;
+        let pricePerHour = 1000; // fallback
+        let dailyPrice = 600;   // fallback для инструментов
 
         if (booking.roomId) {
             const room = rooms.find(r => r.roomId === booking.roomId);
             itemName = room?.name || `Помещение #${booking.roomId}`;
             roomTypeId = room?.roomTypeId;
-            // Получаем картинку с синхронизацией
+
+            // Берём цену из RoomType, а не из хардкода
+            if (roomTypeId && roomTypePriceMap[roomTypeId]) {
+                pricePerHour = roomTypePriceMap[roomTypeId];
+            }
+
             imageUrl = roomTypeId ? getRoomImageWithSync(roomTypeId, booking.roomId, itemName) : 'img/rooms/default_room.jpg';
         } else if (booking.instrumentId) {
             const instrument = instruments.find(i => i.equipmentId === booking.instrumentId);
             itemName = instrument?.name || `Инструмент #${booking.instrumentId}`;
+            dailyPrice = instrument?.rentalPrice || 600; // если инструмент — по его цене
             imageUrl = instrument?.imageUrl || 'img/instruments/default_instrument.jpg';
         }
 
-        // Расчет стоимости
+        // Расчет длительности и стоимости
         let totalPrice = 0;
-        let dailyPrice = 600;
-        let pricePerHour = 1000;
-        let days = 1;
         let hours = 1;
+        let days = 1;
 
         if (startDate && endDate) {
             const diffMs = endDate - startDate;
-            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-            const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+            hours = Math.ceil(diffMs / (1000 * 60 * 60));
+            days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        }
 
-            if (booking.roomId) {
-                hours = diffHours;
-                totalPrice = pricePerHour * hours;
-            } else {
-                days = diffDays;
-                totalPrice = dailyPrice * days;
-            }
+        // Для комнат — по часам, для инструментов — по дням
+        if (booking.roomId) {
+            totalPrice = pricePerHour * hours;
+        } else {
+            totalPrice = dailyPrice * days; // или использовать отдельное поле rentalPricePerDay
         }
 
         return {
@@ -210,7 +224,7 @@ async function enrichBookingsWithDetails(bookings, userData) {
             time: startDate ? formatTime(startDate) : '',
             hours: hours,
             days: days,
-            dailyPrice: dailyPrice,
+            dailyPrice: dailyPrice, // можно переименовать
             pricePerHour: pricePerHour,
             totalPrice: totalPrice,
             status: booking.status,

@@ -1628,10 +1628,3 @@ input[type="range"] {
     color: #333;
     font-size: 1em;
 }
-
-/* Стили для полей пользователя (readonly) */
-.register_placeholder_ln:read-only,
-.register_placeholder_fn:read-only {
-    background-color: #f5f5f5;
-    cursor: default;
-}

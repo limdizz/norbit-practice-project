@@ -162,7 +162,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         RoomId: pendingRequest.RoomId,
                         InstrumentId: pendingRequest.InstrumentId,
                         StartTime: pendingRequest.StartTime,
-                        EndTime: pendingRequest.EndTime
+                        EndTime: pendingRequest.EndTime,
+                        SelectedEquipment: pendingRequest.SelectedEquipment
                     })
                 });
 
