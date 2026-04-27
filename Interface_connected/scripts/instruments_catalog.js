@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadInstrumentsFromApi();
     initPriceRange();
     handleUrlParams();
+    initDateFilter();
     setupAddInstrumentButton();
 });
 
@@ -56,7 +57,7 @@ async function loadInstrumentsFromApi() {
             const translatedColor = colorTranslations[item.color?.toLowerCase()] || item.color || "Не указан";
             const translatedHandedness = item.handedness === "lefty" ? "Левша" :
                 item.handedness === "righty" ? "Правша" : "";
-            
+
             let translatedCondition = "Хорошее";
 
             if (item.currentCondition === "excellent") translatedCondition = "Отличное состояние";
@@ -264,6 +265,85 @@ function updatePriceRange() {
     }
 }
 
+let availabilityFilter = { enabled: false, date: null, availableIds: [] };
+
+function initDateFilter() {
+    const dateInput = document.getElementById('availability-date');
+    const clearButton = document.getElementById('clear-date-filter');
+
+    if (!dateInput) return;
+
+    dateInput.addEventListener('change', async function () {
+        if (this.value) {
+            const selectedDate = new Date(this.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                alert('Нельзя выбрать прошедшую дату');
+                this.value = '';
+                availabilityFilter.enabled = false;
+                if (clearButton) clearButton.style.display = 'none';
+                applyFilters();
+                return;
+            }
+
+            // Показываем индикатор загрузки
+            const productList = document.querySelector('.product-list');
+            if (productList) {
+                productList.innerHTML = '<p style="text-align:center;">Проверка доступности...</p>';
+            }
+
+            availabilityFilter.enabled = true;
+            availabilityFilter.date = this.value;
+
+            await loadAvailableInstruments(this.value);
+        } else {
+            availabilityFilter.enabled = false;
+            availabilityFilter.date = null;
+            availabilityFilter.availableIds = [];
+            if (clearButton) clearButton.style.display = 'none';
+            applyFilters();
+        }
+    });
+
+    if (clearButton) {
+        clearButton.addEventListener('click', function () {
+            dateInput.value = '';
+            availabilityFilter.enabled = false;
+            availabilityFilter.date = null;
+            availabilityFilter.availableIds = [];
+            clearButton.style.display = 'none';
+            applyFilters();
+        });
+    }
+}
+
+async function loadAvailableInstruments(date) {
+    try {
+        const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/available-ids?date=${date}&type=instrument`);
+        if (!response.ok) throw new Error('Ошибка загрузки');
+
+        const data = await response.json();
+        availabilityFilter.availableIds = data.availableIds || [];
+
+        console.log(`Доступно инструментов на ${date}: ${availabilityFilter.availableIds.length}`);
+
+        const clearButton = document.getElementById('clear-date-filter');
+        if (clearButton) clearButton.style.display = 'inline-block';
+
+        // Применяем фильтры
+        applyFilters();
+
+    } catch (error) {
+        console.error('Ошибка при загрузке доступных инструментов:', error);
+        alert('Не удалось загрузить информацию о доступности');
+        availabilityFilter.enabled = false;
+        const clearButton = document.getElementById('clear-date-filter');
+        if (clearButton) clearButton.style.display = 'none';
+    }
+}
+
 function applyFilters() {
     const categoryEl = document.getElementById('categories');
     const colorEl = document.getElementById('colors');
@@ -330,10 +410,40 @@ function applyFilters() {
             return false;
         }
 
+        // Добавьте эту проверку
+        if (availabilityFilter.enabled && availabilityFilter.availableIds.length > 0) {
+            if (!availabilityFilter.availableIds.includes(instrument.id)) {
+                return false;
+            }
+        }
+
         return true;
     });
 
     renderInstruments(filteredInstruments);
+    addAvailabilityFilterInfo();
+}
+
+function addAvailabilityFilterInfo() {
+    const productList = document.querySelector('.product-list');
+    if (!productList) return;
+    
+    // Удаляем старое сообщение, если есть
+    const oldInfo = document.querySelector('.availability-filter-info');
+    if (oldInfo) oldInfo.remove();
+    
+    if (availabilityFilter.enabled && availabilityFilter.date) {
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'availability-filter-info';
+        infoDiv.style.cssText = 'margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 8px; text-align: center;';
+        infoDiv.innerHTML = `📅 <strong>Фильтр по дате:</strong> показаны только инструменты, свободные на <strong>${formatDateForDisplay(availabilityFilter.date)}</strong>`;
+        productList.parentNode.insertBefore(infoDiv, productList);
+    }
+}
+
+function formatDateForDisplay(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}.${month}.${year}`;
 }
 
 function renderInstruments(instruments) {

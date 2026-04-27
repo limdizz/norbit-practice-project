@@ -62,6 +62,15 @@
                 </p>
                 <h1 class="filters_h">Цена</h1>
                 <div id="price-container"></div>
+                <h1 class="filters_h">Доступно на дату</h1>
+                <div id="date-filter-container" style="margin-bottom: 15px;">
+                    <input type="date" id="availability-date" class="date-picker">
+                    <p style="font-size: 0.75em; color: #666; margin-top: 5px;">
+                        Покажет только инструменты, свободные в выбранную дату
+                    </p>
+                    <button id="clear-date-filter"
+                        style="display: none; margin-top: 5px; padding: 4px 8px; font-size: 0.8em;">Очистить</button>
+                </div>
                 <h1 class="filters_h">Цвет</h1>
                 <select name="colors" id="colors">
                     <option value="Все">Все</option>

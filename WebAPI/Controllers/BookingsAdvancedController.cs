@@ -192,6 +192,107 @@ namespace WebAPI.Controllers
             return bookingsAdvanced;
         }
 
+        // GET: api/BookingsAdvanced/available-ids?date=2024-01-15&type=instrument
+        [HttpGet("available-ids")]
+        public async Task<ActionResult<object>> GetAvailableItemIds(
+            [FromQuery] DateTime date,
+            [FromQuery] string type)
+        {
+            var startOfDay = date.Date;
+            var endOfDay = date.Date.AddDays(1);
+
+            if (type == "instrument")
+            {
+                // Все арендуемые инструменты
+                var allInstruments = await _context.Equipment
+                    .Where(e => e.IsRentable == true)
+                    .Select(e => e.EquipmentId)
+                    .ToListAsync();
+
+                // Занятые инструменты на выбранную дату
+                var busyInstrumentIds = await _context.BookingsAdvanceds
+                    .Where(b => b.InstrumentId.HasValue &&
+                                b.Status != "cancelled" &&
+                                b.StartTime < endOfDay &&
+                                b.EndTime > startOfDay)
+                    .Select(b => b.InstrumentId.Value)
+                    .Distinct()
+                    .ToListAsync();
+
+                var availableIds = allInstruments.Except(busyInstrumentIds).ToList();
+
+                return Ok(new { date, type, availableIds });
+            }
+            else if (type == "room")
+            {
+                var allRooms = await _context.Rooms
+                    .Select(r => r.RoomId)
+                    .ToListAsync();
+
+                var busyRoomIds = await _context.BookingsAdvanceds
+                    .Where(b => b.RoomId.HasValue &&
+                                b.Status != "cancelled" &&
+                                b.StartTime < endOfDay &&
+                                b.EndTime > startOfDay)
+                    .Select(b => b.RoomId.Value)
+                    .Distinct()
+                    .ToListAsync();
+
+                var availableIds = allRooms.Except(busyRoomIds).ToList();
+
+                return Ok(new { date, type, availableIds });
+            }
+
+            return BadRequest("Type must be 'instrument' or 'room'");
+        }
+
+        // GET: api/BookingsAdvanced/available-room-slots?date=2024-04-28&startTime=10:00&endTime=12:00
+        [HttpGet("available-room-slots")]
+        public async Task<ActionResult<object>> GetAvailableRoomSlots(
+            [FromQuery] DateTime date,
+            [FromQuery] string startTime,
+            [FromQuery] string endTime)
+        {
+            var startOfDay = date.Date;
+            var endOfDay = date.Date.AddDays(1);
+            
+            // Парсим время
+            var startSlot = TimeSpan.Parse(startTime);
+            var endSlot = TimeSpan.Parse(endTime);
+            
+            var requestedStart = startOfDay + startSlot;
+            var requestedEnd = startOfDay + endSlot;
+            
+            // Все помещения
+            var allRooms = await _context.Rooms
+                .Select(r => new { r.RoomId, r.Name, r.RoomTypeId })
+                .ToListAsync();
+            
+            // Занятые помещения на выбранный временной слот
+            var busyRoomIds = await _context.BookingsAdvanceds
+                .Where(b => b.RoomId.HasValue &&
+                            b.Status != "cancelled" &&
+                            b.StartTime < requestedEnd &&
+                            b.EndTime > requestedStart)
+                .Select(b => b.RoomId.Value)
+                .Distinct()
+                .ToListAsync();
+            
+            var availableRooms = allRooms
+                .Where(r => !busyRoomIds.Contains(r.RoomId))
+                .Select(r => new { r.RoomId, r.Name, r.RoomTypeId })
+                .ToList();
+            
+            return Ok(new 
+            { 
+                date, 
+                startTime, 
+                endTime, 
+                availableRoomIds = availableRooms.Select(r => r.RoomId).ToList(),
+                availableRooms 
+            });
+        }
+
         // PUT: api/BookingsAdvanced/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

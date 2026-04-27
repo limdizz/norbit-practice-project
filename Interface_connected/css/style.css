@@ -1628,3 +1628,29 @@ input[type="range"] {
     color: #333;
     font-size: 1em;
 }
+
+.date-picker {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.availability-filter-info {
+    background: #e3f2fd;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+#clear-date-filter {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#clear-date-filter:hover {
+    background: #5a6268;
+}

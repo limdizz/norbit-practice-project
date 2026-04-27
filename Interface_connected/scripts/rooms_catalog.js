@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadRoomsFromApi();
     initPriceRange();
     initNavigation();
+    initDateFilter();
 });
 
 // Глобальная переменная для данных
@@ -246,6 +247,159 @@ function initSorting() {
     document.getElementById('sort-select').addEventListener('change', applyFilters);
 }
 
+
+
+let availabilityFilter = { enabled: false, date: null, availableIds: [] };
+
+function initDateFilter() {
+    const dateInput = document.getElementById('availability-date');
+    const startTimeSelect = document.getElementById('start-time');
+    const endTimeSelect = document.getElementById('end-time');
+    const clearButton = document.getElementById('clear-date-filter');
+    
+    if (!dateInput) return;
+    
+    // Функция проверки валидности времени
+    function validateTime(startTime, endTime) {
+        if (!startTime || !endTime) return true;
+        return startTime < endTime;
+    }
+    
+    // Функция обновления доступных опций времени
+    function updateTimeOptions() {
+        if (!startTimeSelect || !endTimeSelect) return;
+        
+        const startHour = parseInt(startTimeSelect.value.split(':')[0]);
+        const endHour = parseInt(endTimeSelect.value.split(':')[0]);
+        
+        // Обновляем опции для end-time (минимальное значение = start-time + 1 час)
+        Array.from(endTimeSelect.options).forEach(option => {
+            const optionHour = parseInt(option.value.split(':')[0]);
+            if (optionHour <= startHour) {
+                option.disabled = true;
+                option.style.color = '#ccc';
+            } else {
+                option.disabled = false;
+                option.style.color = '';
+            }
+        });
+        
+        // Если текущий end-time меньше start-time, устанавливаем корректное значение
+        if (endHour <= startHour) {
+            const nextHour = startHour + 1;
+            const nextHourStr = `${nextHour.toString().padStart(2, '0')}:00`;
+            if (Array.from(endTimeSelect.options).some(opt => opt.value === nextHourStr)) {
+                endTimeSelect.value = nextHourStr;
+            }
+        }
+    }
+    
+    async function applyAvailabilityFilter() {
+        if (!dateInput.value || !startTimeSelect?.value || !endTimeSelect?.value) {
+            availabilityFilter.enabled = false;
+            availabilityFilter.date = null;
+            availabilityFilter.startTime = null;
+            availabilityFilter.endTime = null;
+            availabilityFilter.availableIds = [];
+            if (clearButton) clearButton.style.display = 'none';
+            applyFilters();
+            return;
+        }
+        
+        const selectedDate = new Date(dateInput.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+            alert('Нельзя выбрать прошедшую дату');
+            dateInput.value = '';
+            availabilityFilter.enabled = false;
+            if (clearButton) clearButton.style.display = 'none';
+            applyFilters();
+            return;
+        }
+        
+        const startTime = startTimeSelect.value;
+        const endTime = endTimeSelect.value;
+        
+        if (!validateTime(startTime, endTime)) {
+            alert('Время начала должно быть раньше времени окончания');
+            return;
+        }
+        
+        const productList = document.querySelector('.product-list');
+        if (productList) {
+            productList.innerHTML = '<p style="text-align:center;">Проверка доступности...</p>';
+        }
+        
+        availabilityFilter.enabled = true;
+        availabilityFilter.date = dateInput.value;
+        availabilityFilter.startTime = startTime;
+        availabilityFilter.endTime = endTime;
+        
+        await loadAvailableRoomSlots(dateInput.value, startTime, endTime);
+    }
+    
+    // Слушаем изменения
+    dateInput.addEventListener('change', applyAvailabilityFilter);
+    if (startTimeSelect) {
+        startTimeSelect.addEventListener('change', () => {
+            updateTimeOptions();
+            applyAvailabilityFilter();
+        });
+    }
+    if (endTimeSelect) {
+        endTimeSelect.addEventListener('change', applyAvailabilityFilter);
+    }
+    
+    if (clearButton) {
+        clearButton.addEventListener('click', function () {
+            dateInput.value = '';
+            if (startTimeSelect) startTimeSelect.value = '10:00';
+            if (endTimeSelect) endTimeSelect.value = '20:00';
+            availabilityFilter.enabled = false;
+            availabilityFilter.date = null;
+            availabilityFilter.startTime = null;
+            availabilityFilter.endTime = null;
+            availabilityFilter.availableIds = [];
+            clearButton.style.display = 'none';
+            updateTimeOptions();
+            applyFilters();
+        });
+    }
+    
+    // Инициализация
+    updateTimeOptions();
+}
+
+async function loadAvailableRoomSlots(date, startTime, endTime) {
+    try {
+        const response = await fetch(
+            `https://localhost:7123/api/BookingsAdvanced/available-room-slots?date=${date}&startTime=${startTime}&endTime=${endTime}`
+        );
+        if (!response.ok) throw new Error('Ошибка загрузки');
+        
+        const data = await response.json();
+        availabilityFilter.availableIds = data.availableRoomIds || [];
+        
+        console.log(`Доступно помещений на ${date} с ${startTime} до ${endTime}: ${availabilityFilter.availableIds.length}`);
+        
+        const clearButton = document.getElementById('clear-date-filter');
+        if (clearButton && availabilityFilter.enabled) {
+            clearButton.style.display = 'inline-block';
+        }
+        
+        applyFilters();
+        
+    } catch (error) {
+        console.error('Ошибка при загрузке доступных помещений:', error);
+        alert('Не удалось загрузить информацию о доступности');
+        availabilityFilter.enabled = false;
+        const clearButton = document.getElementById('clear-date-filter');
+        if (clearButton) clearButton.style.display = 'none';
+    }
+}
+
 function applyFilters() {
     const categoryEl = document.getElementById('categories');
     const searchEl = document.getElementById('site-search');
@@ -278,10 +432,17 @@ function applyFilters() {
             return false;
         }
 
+        if (availabilityFilter.enabled && availabilityFilter.availableIds.length > 0) {
+            if (!availabilityFilter.availableIds.includes(room.id)) {
+                return false;
+            }
+        }
+
         return true;
     });
 
     renderRooms(filteredRooms);
+    addAvailabilityFilterInfo();
 
     const sortSelect = document.getElementById('sort-select');
     const sortValue = sortSelect ? sortSelect.value : 'name-asc';
@@ -313,6 +474,27 @@ function applyFilters() {
     }
 
     renderRooms(sortedRooms);
+}
+
+function addAvailabilityFilterInfo() {
+    const productList = document.querySelector('.product-list');
+    if (!productList) return;
+    
+    const oldInfo = document.querySelector('.availability-filter-info');
+    if (oldInfo) oldInfo.remove();
+    
+    if (availabilityFilter.enabled && availabilityFilter.date) {
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'availability-filter-info';
+        infoDiv.style.cssText = 'margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 8px; text-align: center;';
+        infoDiv.innerHTML = `📅 <strong>Фильтр по дате и времени:</strong> показаны только помещения, свободные <strong>${formatDateForDisplay(availabilityFilter.date)} с ${availabilityFilter.startTime} до ${availabilityFilter.endTime}</strong>`;
+        productList.parentNode.insertBefore(infoDiv, productList);
+    }
+}
+
+function formatDateForDisplay(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}.${month}.${year}`;
 }
 
 function renderRooms(rooms) {
