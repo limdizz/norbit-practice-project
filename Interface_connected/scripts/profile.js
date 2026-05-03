@@ -120,8 +120,26 @@ async function loadBookingsFromAPI(userData, currentContainer, archiveContainer,
         // Фильтруем только бронирования текущего пользователя
         const userBookings = allBookings.filter(b => b.userUid === userId);
 
+        // Загружаем скидку пользователя
+        let discountPercent = 0;
+        try {
+            const subResponse = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/active/${userId}`);
+            if (subResponse.ok) {
+                const activeSub = await subResponse.json();
+                discountPercent = activeSub.plan?.discountPercentage || activeSub.discountPercentage || activeSub.Plan?.DiscountPercentage || 0;
+                if (discountPercent > 0) {
+                    localStorage.setItem('userDiscount', discountPercent);
+                }
+            } else if (subResponse.status === 404) {
+                localStorage.setItem('userDiscount', '0');
+                console.log('Активная подписка не найдена, скидка сброшена');
+            }
+        } catch (e) {
+            console.warn("Не удалось получить скидку: ", e);
+        }
+
         // Преобразуем в формат для отображения
-        const formattedBookings = await enrichBookingsWithDetails(userBookings, userData);
+        const formattedBookings = await enrichBookingsWithDetails(userBookings, userData, discountPercent);
 
         currentBookings = formattedBookings;
 
@@ -139,7 +157,7 @@ async function loadBookingsFromAPI(userData, currentContainer, archiveContainer,
 }
 
 // Обогащение бронирований дополнительными данными
-async function enrichBookingsWithDetails(bookings, userData) {
+async function enrichBookingsWithDetails(bookings, userData, discountPercent = 0) {
     // Загружаем инструменты, помещения и типы помещений
     let instruments = [];
     let rooms = [];
@@ -209,7 +227,15 @@ async function enrichBookingsWithDetails(bookings, userData) {
         if (booking.roomId) {
             totalPrice = pricePerHour * hours;
         } else {
-            totalPrice = dailyPrice * days; // или использовать отдельное поле rentalPricePerDay
+            totalPrice = dailyPrice * days;
+        }
+
+        // Сохраняем оригинальную цену до скидки
+        const originalTotal = totalPrice;
+
+        // Применяем скидку абонемента
+        if (discountPercent > 0) {
+            totalPrice = Math.round(totalPrice * (1 - discountPercent / 100));
         }
 
         return {
@@ -224,9 +250,11 @@ async function enrichBookingsWithDetails(bookings, userData) {
             time: startDate ? formatTime(startDate) : '',
             hours: hours,
             days: days,
-            dailyPrice: dailyPrice, // можно переименовать
+            dailyPrice: dailyPrice,
             pricePerHour: pricePerHour,
             totalPrice: totalPrice,
+            originalTotal: originalTotal,
+            discountPercent: discountPercent,
             status: booking.status,
             bookingDate: booking.creationDate || new Date().toISOString(),
             image: imageUrl,
@@ -274,6 +302,8 @@ function updateLocalStorage(userData, bookings) {
         dailyPrice: b.dailyPrice,
         pricePerHour: b.pricePerHour,
         totalPrice: b.totalPrice,
+        originalTotal: b.originalTotal,
+        discountPercent: b.discountPercent,
         status: b.status,
         bookingDate: b.bookingDate,
         image: b.image
@@ -418,7 +448,12 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
                     ${detailsHTML}
                     <p style="margin-top: 10px; font-size: 1.1em;">
                         <strong>Итого:</strong> 
-                        <span style="color:#e44d26">₽${b.totalPrice}</span>
+                        ${b.discountPercent > 0
+                    ? `<span style="color:#888; text-decoration:line-through; margin-right:8px;">₽${b.originalTotal}</span>
+                               <span style="color:#e44d26">₽${b.totalPrice}</span>
+                               <span style="color:#4CAF50; font-size:0.85em; display:block;">✓ Абонемент −${b.discountPercent}%</span>`
+                    : `<span style="color:#e44d26">₽${b.totalPrice}</span>`
+                }
                     </p>
                 </div>`;
 
@@ -514,6 +549,16 @@ async function renderUserProfile(userData, isStaff) {
             const validDate = new Date(validDateRaw).toLocaleDateString('ru-RU');
             const sessions = sub.sessionsRemaining !== undefined ? sub.sessionsRemaining : sub.SessionsRemaining;
             const planName = sub.planName || sub.PlanName || (sub.plan ? (sub.plan.planName || sub.plan.PlanName) : 'Тариф');
+            const discountPercent = sub.discountPercentage || 0;
+
+            // Сохраняем скидку в localStorage для других страниц
+            if (discountPercent > 0) {
+                localStorage.setItem('userDiscount', discountPercent);
+            }
+
+            const discountInfo = discountPercent > 0
+                ? `<p><strong>Скидка:</strong> <span style="color: #4CAF50; font-weight: bold;">${discountPercent}%</span> на все бронирования</p>`
+                : '';
 
             userHTML += `
                 <div style="margin-top: 20px; padding: 15px; border: 1px solid #4CAF50; border-radius: 8px; background-color: #f9fff9;">
@@ -521,7 +566,7 @@ async function renderUserProfile(userData, isStaff) {
                     <p><strong>Статус:</strong> <span style="color: #4CAF50; font-weight: bold;">АКТИВЕН</span></p>
                     <p><strong>Осталось сеансов:</strong> ${sessions}</p>
                     <p><strong>Действует до:</strong> ${validDate}</p>
-                    
+                    ${discountInfo}
                     <button id="cancel-sub-btn" class="button logout" style="background:#dc3545; margin-top: 10px;">
                         Отменить подписку
                     </button>

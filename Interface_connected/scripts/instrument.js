@@ -132,6 +132,24 @@ async function loadInstrumentData() {
     }
 
     try {
+        // 1. Загружаем скидку ПЕРЕД рендером
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userId = userData.userUid || userData.uid || userData.id;
+        if (userId) {
+            try {
+                const subResp = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/active/${userId}`);
+                if (subResp.ok) {
+                    const activeSub = await subResp.json();
+                    const discount = activeSub.plan?.discountPercentage || activeSub.discountPercentage || activeSub.Plan?.DiscountPercentage || 0;
+                    localStorage.setItem('userDiscount', discount);
+                    console.log('Скидка загружена для инструмента:', discount);
+                } else if (subResp.status === 404) {
+                    localStorage.setItem('userDiscount', '0');
+                    console.log('Активная подписка не найдена, скидка сброшена');
+                }
+            } catch (e) { console.warn("Скидка не загружена", e); }
+        }
+
         // Запрос к API
         const response = await fetch(`https://localhost:7123/api/Equipments/${instrumentId}`);
 
@@ -251,7 +269,19 @@ function renderInstrumentDetails(instrument) {
     // Цена в блоке справа
     const priceDisplay = document.getElementById('inst-price-display');
     if (priceDisplay) {
-        priceDisplay.textContent = `${instrument.price} ₽ / сутки`;
+        const discountPercent = parseInt(localStorage.getItem('userDiscount') || '0');
+
+        if (discountPercent > 0) {
+            const discountedPrice = Math.round(instrument.price * (1 - discountPercent / 100));
+            priceDisplay.innerHTML = `
+            <span style="text-decoration: line-through; color: #888; font-size: 0.85em; margin-right: 5px;">
+                ${instrument.price} ₽
+            </span> 
+            <b style="color: #e44d26;">${discountedPrice} ₽ / сутки</b>
+        `;
+        } else {
+            priceDisplay.textContent = `${instrument.price} ₽ / сутки`;
+        }
     }
 
     // 3. Характеристики (список)
@@ -426,20 +456,38 @@ function updatePriceCalculation() {
     // ВАЖНО: Используем глобальную переменную currentInstrument вместо поиска в базе
     if (!currentInstrument) return;
 
+    const discountPercent = parseInt(localStorage.getItem('userDiscount') || '0');
+    console.log(`updatePriceCalculation: userDiscount=${discountPercent}`);
+
     const startDate = document.getElementById('start_date')?.value;
     const endDate = document.getElementById('end_date')?.value;
 
     if (!startDate || !endDate) return;
 
     const days = calculateDaysDifference(startDate, endDate);
-    const totalPrice = days * currentInstrument.price;
 
     const daysCountElement = document.getElementById('days-count');
     const totalPriceElement = document.getElementById('total-price');
 
+    let basePrice = currentInstrument.price;
+    if (discountPercent > 0) {
+        basePrice = Math.round(basePrice * (1 - discountPercent / 100));
+    }
+
+    const totalPrice = days * basePrice;
+
     if (daysCountElement && totalPriceElement) {
         daysCountElement.textContent = days;
-        totalPriceElement.textContent = `₽${totalPrice}`;
+        if (discountPercent > 0) {
+            const originalTotal = days * currentInstrument.price;
+            totalPriceElement.innerHTML = `
+                <span style="text-decoration: line-through; color: #888; font-size: 0.9em;">${originalTotal} ₽</span>
+                <b style="color: #e44d26; margin-left: 5px;">${totalPrice} ₽</b>
+                <div style="color: #4CAF50; font-size: 0.75em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+            `;
+        } else {
+            totalPriceElement.textContent = `₽${totalPrice}`;
+        }
     }
 }
 
@@ -478,7 +526,7 @@ async function handleBooking() {
         window.location.href = 'log_in.html';
         return;
     }
-    
+
     const startDateStr = document.getElementById('start_date').value;
     const endDateStr = document.getElementById('end_date').value;
 
@@ -517,6 +565,12 @@ async function handleBooking() {
     const startDisplay = { date: startDateStr, time: '00:00' };
     const endDisplay = { date: endDateStr, time: '00:00' };
 
+    const discountPercent = parseInt(localStorage.getItem('userDiscount') || '0');
+    const hasDiscount = discountPercent > 0;
+    const discountedDailyPrice = hasDiscount
+        ? Math.round(currentInstrument.price * (1 - discountPercent / 100))
+        : currentInstrument.price;
+
     const displayData = {
         bookingId: null,
         orderId: null,
@@ -530,8 +584,11 @@ async function handleBooking() {
         endTime: endDisplay.time,
         bookingDate: new Date().toISOString(),
         days: days,
-        dailyPrice: currentInstrument.price,
-        totalPrice: days * currentInstrument.price
+        dailyPrice: discountedDailyPrice,
+        originalDailyPrice: currentInstrument.price,
+        totalPrice: days * discountedDailyPrice,
+        originalTotal: days * currentInstrument.price,
+        discountPercent: discountPercent
     };
 
     sessionStorage.setItem('pendingBookingRequest', JSON.stringify(bookingRequest));

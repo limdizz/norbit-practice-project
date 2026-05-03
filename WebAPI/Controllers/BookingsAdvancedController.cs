@@ -463,7 +463,7 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<object>> PostBookingsAdvanced([FromBody] CreateBookingRequest request)
         {
-            // Генерируем новый GUID
+            // 1. Инициализация бронирования
             var booking = new BookingsAdvanced
             {
                 BookingUid = Guid.NewGuid(),
@@ -500,10 +500,9 @@ namespace WebAPI.Controllers
                 }
             }
 
-            // Статус
             booking.Status = booking.EndTime >= DateTime.Now ? "in progress" : "completed";
 
-            // Назначение случайного сотрудника
+            // Назначение сотрудника
             if (booking.StaffUid == null)
             {
                 var randomStaff = await _context.StaffAdvanceds
@@ -516,7 +515,32 @@ namespace WebAPI.Controllers
                 }
             }
 
-            // === ДОБАВЛЕНИЕ СЧЁТА (BILL) ===
+            // === ЛОГИКА АБОНЕМЕНТА (SUBSCRIPTION) ===
+            var subscription = await _context.UserSubscriptionsAdvanceds
+                .FirstOrDefaultAsync(s => s.UserUid == request.UserUid && 
+                                        s.IsActive == true && 
+                                        s.SessionsRemaining > 0 && 
+                                        s.ValidUntil > DateTime.Now);
+
+            decimal discountFactor = 1.0m;
+            Guid? usedSubscriptionUid = null;
+
+            if (subscription != null)
+            {
+                var plan = await _context.SubscriptionPlans.FindAsync(subscription.PlanId);
+                if (plan != null)
+                {
+                    discountFactor = 1 - (plan.DiscountPercentage / 100.0m);
+                }
+
+                // Списываем сеанс
+                subscription.SessionsRemaining -= 1;
+                if (subscription.SessionsRemaining <= 0) subscription.IsActive = false;
+                
+                usedSubscriptionUid = subscription.SubscriptionUid;
+            }
+
+            // === СОЗДАНИЕ СЧЁТА ===
             var bill = new BillsAdvanced
             {
                 BillUid = Guid.NewGuid(),
@@ -525,77 +549,58 @@ namespace WebAPI.Controllers
                 TotalSum = 0,
                 PaymentStatus = "not paid",
                 CreationDate = DateTime.Now,
-                SubscriptionUsed = false,
-                SubscriptionUid = null
+                SubscriptionUsed = subscription != null,
+                SubscriptionUid = usedSubscriptionUid
             };
 
-            // Сохраняем бронь и счёт
             _context.BookingsAdvanceds.Add(booking);
             _context.BillsAdvanceds.Add(bill);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex)
-            {
-                if (BookingsAdvancedExists(booking.BookingUid))
-                {
-                    return Conflict();
-                }
-                throw;
-            }
+            await _context.SaveChangesAsync();
 
-            // === ДОБАВЛЕНИЕ ОБОРУДОВАНИЯ (если есть) ===
-            var equipmentLinks = new List<BookingEquipment>();
-
+            // === ДОБАВЛЕНИЕ ОБОРУДОВАНИЯ ===
             if (request.SelectedEquipment != null && request.SelectedEquipment.Any())
             {
                 var uniqueIds = request.SelectedEquipment.Distinct().ToList();
-
-                foreach (var equipmentId in uniqueIds)
+                var equipmentLinks = uniqueIds.Select(id => new BookingEquipment
                 {
-                    var exists = await _context.Equipment.AnyAsync(e => e.EquipmentId == equipmentId && e.IsRentable == true);
-                    if (!exists) continue;
+                    BookingUid = booking.BookingUid,
+                    EquipmentId = id
+                }).ToList();
 
-                    equipmentLinks.Add(new BookingEquipment
-                    {
-                        BookingUid = booking.BookingUid,
-                        EquipmentId = equipmentId
-                    });
-                }
-
-                if (equipmentLinks.Any())
-                {
-                    _context.BookingEquipments.AddRange(equipmentLinks);
-                    await _context.SaveChangesAsync();
-                }
+                _context.BookingEquipments.AddRange(equipmentLinks);
+                await _context.SaveChangesAsync();
             }
 
-            // === ТЕПЕРЬ РАССЧИТЫВАЕМ ПУНКТЫ СЧЁТА (включая оборудование) ===
+            // === РАСЧЕТ СТОИМОСТИ С УЧЕТОМ СКИДКИ ===
             var billItems = new List<BillItemsAdvanced>();
             decimal totalSum = 0;
 
-            // 1. Основная позиция: комната или инструмент
-            string itemName = null;
-            decimal unitPrice = 0;
-            int mainQuantity = 1;
-
+            // 1. Основная позиция (Комната/Инструмент)
             if (booking.RoomId.HasValue)
             {
-                // Подтягиваем RoomType, чтобы взять актуальную цену напрямую из БД, а не из словаря
                 var room = await _context.Rooms
                     .Include(r => r.RoomType)
                     .FirstOrDefaultAsync(r => r.RoomId == booking.RoomId);
 
                 if (room != null)
                 {
-                    itemName = $"Аренда помещения: {room.Name}";
-                    unitPrice = room.RoomType?.RentalPricePerHour ?? 0m;
+                    decimal price = room.RoomType?.RentalPricePerHour ?? 0m;
+                    int hours = (int)Math.Ceiling((booking.EndTime.Value - booking.StartTime.Value).TotalHours);
+                    if (hours < 1) hours = 1;
 
-                    // Помещения бронируются по часам
-                    mainQuantity = (int)Math.Ceiling((booking.EndTime.Value - booking.StartTime.Value).TotalHours);
-                    if (mainQuantity < 1) mainQuantity = 1;
+                    decimal itemTotal = (price * hours) * discountFactor;
+
+                    billItems.Add(new BillItemsAdvanced
+                    {
+                        BillUid = bill.BillUid,
+                        ItemType = "Room",
+                        ItemName = $"Аренда: {room.Name} (со скидкой)",
+                        Quantity = hours,
+                        UnitPrice = price * discountFactor,
+                        TotalPrice = itemTotal
+                    });
+                    totalSum += itemTotal;
                 }
             }
             else if (booking.InstrumentId.HasValue)
@@ -603,33 +608,26 @@ namespace WebAPI.Controllers
                 var equipment = await _context.Equipment.FindAsync(booking.InstrumentId);
                 if (equipment != null)
                 {
-                    itemName = $"Аренда инструмента: {equipment.Name}";
-                    unitPrice = equipment.RentalPrice ?? 0m;
+                    decimal price = equipment.RentalPrice ?? 0m;
+                    int days = (int)Math.Ceiling((booking.EndTime.Value - booking.StartTime.Value).TotalDays);
+                    if (days < 1) days = 1;
 
-                    // Инструменты бронируются по дням!
-                    mainQuantity = (int)Math.Ceiling((booking.EndTime.Value - booking.StartTime.Value).TotalDays);
-                    if (mainQuantity < 1) mainQuantity = 1;
+                    decimal itemTotal = (price * days) * discountFactor;
+
+                    billItems.Add(new BillItemsAdvanced
+                    {
+                        BillUid = bill.BillUid,
+                        ItemType = "Instrument",
+                        ItemName = $"Аренда: {equipment.Name} (со скидкой)",
+                        Quantity = days,
+                        UnitPrice = price * discountFactor,
+                        TotalPrice = itemTotal
+                    });
+                    totalSum += itemTotal;
                 }
             }
 
-            if (!string.IsNullOrEmpty(itemName))
-            {
-                var itemTotal = unitPrice * mainQuantity;
-                var mainItem = new BillItemsAdvanced
-                {
-                    BillUid = bill.BillUid,
-                    ItemType = booking.RoomId.HasValue ? "Room" : "Instrument",
-                    ItemName = itemName,
-                    Quantity = mainQuantity,
-                    UnitPrice = unitPrice,
-                    TotalPrice = itemTotal
-                };
-
-                billItems.Add(mainItem);
-                totalSum += itemTotal;
-            }
-
-            // 2. Дополнительное оборудование (уже добавленное в БД)
+            // 2. Дополнительное оборудование (скидка распространяется на каждый пункт счёта)
             var addedEquipment = await _context.BookingEquipments
                 .Where(be => be.BookingUid == booking.BookingUid)
                 .Include(be => be.Equipment)
@@ -637,49 +635,38 @@ namespace WebAPI.Controllers
 
             foreach (var link in addedEquipment)
             {
-                var eq = link.Equipment;
-                if (eq == null) continue;
+                if (link.Equipment == null) continue;
+                decimal eqPrice = link.Equipment.RentalPrice ?? 0m;
+                decimal discountedEqPrice = eqPrice * discountFactor;
+                decimal itemTotal = discountedEqPrice;
+                totalSum += itemTotal;
 
-                // Согласно логике фронтенда, доп. оборудование оплачивается разово за сессию.
-                // Поэтому жестко ставим количество = 1.
-                int eqQuantity = 1;
-                var itemTotal = (eq.RentalPrice ?? 0m) * eqQuantity;
-
-                var eqItem = new BillItemsAdvanced
+                billItems.Add(new BillItemsAdvanced
                 {
                     BillUid = bill.BillUid,
                     ItemType = "Equipment",
-                    ItemName = $"Доп. оборудование: {eq.Name}",
-                    Quantity = eqQuantity,
-                    UnitPrice = eq.RentalPrice ?? 0m,
+                    ItemName = discountFactor < 1.0m
+                        ? $"Доп. оборудование: {link.Equipment.Name} (со скидкой)"
+                        : $"Доп. оборудование: {link.Equipment.Name}",
+                    Quantity = 1,
+                    UnitPrice = discountedEqPrice,
                     TotalPrice = itemTotal
-                };
-
-                billItems.Add(eqItem);
-                totalSum += itemTotal;
+                });
             }
 
-            // Обновляем сумму счёта и сохраняем пункты
+            // Обновление итоговой суммы
             bill.TotalSum = totalSum;
             _context.BillItemsAdvanceds.AddRange(billItems);
             await _context.SaveChangesAsync();
-            // === Формируем ответ ===
-            var result = new
+
+            return CreatedAtAction("GetBookingsAdvanced", new { id = booking.BookingUid }, new
             {
                 booking.BookingUid,
-                booking.UserUid,
-                booking.RoomId,
-                booking.InstrumentId,
-                booking.StaffUid,
-                booking.StartTime,
-                booking.EndTime,
                 booking.Status,
-                booking.CreationDate,
                 BillUid = bill.BillUid,
-                TotalSum = bill.TotalSum
-            };
-
-            return CreatedAtAction("GetBookingsAdvanced", new { id = booking.BookingUid }, result);
+                TotalSum = bill.TotalSum,
+                SubscriptionUsed = bill.SubscriptionUsed
+            });
         }
 
         // DELETE: api/BookingsAdvanced/5

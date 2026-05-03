@@ -44,6 +44,27 @@ async function loadInstrumentsFromApi() {
     productList.innerHTML = '<p style="text-align:center;">Загрузка инструментов...</p>';
 
     try {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userId = userData.userUid || userData.uid || userData.id;
+
+        if (userId) {
+            try {
+                const subResponse = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/active/${userId}`);
+                if (subResponse.ok) {
+                    const activeSub = await subResponse.json();
+                    const discount = activeSub.plan?.discountPercentage ||
+                        activeSub.discountPercentage ||
+                        activeSub.Plan?.DiscountPercentage || 0;
+                    localStorage.setItem('userDiscount', discount);
+                    console.log('Скидка загружена:', discount);
+                } else if (subResponse.status === 404) {
+                    localStorage.setItem('userDiscount', '0');
+                    console.log('Активная подписка не найдена, скидка сброшена');
+                }
+            } catch (e) {
+                console.warn("Не удалось получить скидку: ", e);
+            }
+        }
         const response = await fetch('https://localhost:7123/api/Equipments');
 
         if (!response.ok) {
@@ -427,11 +448,11 @@ function applyFilters() {
 function addAvailabilityFilterInfo() {
     const productList = document.querySelector('.product-list');
     if (!productList) return;
-    
+
     // Удаляем старое сообщение, если есть
     const oldInfo = document.querySelector('.availability-filter-info');
     if (oldInfo) oldInfo.remove();
-    
+
     if (availabilityFilter.enabled && availabilityFilter.date) {
         const infoDiv = document.createElement('div');
         infoDiv.className = 'availability-filter-info';
@@ -444,6 +465,52 @@ function addAvailabilityFilterInfo() {
 function formatDateForDisplay(dateStr) {
     const [year, month, day] = dateStr.split('-');
     return `${day}.${month}.${year}`;
+}
+
+async function applySubscriptionDiscount(userId, currentTotal) {
+    // Защита: если userId undefined, попробуем вытащить альтернативные поля
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const actualUserId = userId || userData.userUid || userData.uid || userData.id;
+
+    if (!actualUserId) return { total: currentTotal, discount: 0 };
+
+    try {
+        const response = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/active/${actualUserId}`);
+        if (!response.ok) return { total: currentTotal, discount: 0 };
+
+        const activeSub = await response.json();
+        console.log('Активная подписка:', activeSub);
+
+        // Учитываем разные форматы ответа C# API
+        let discountPercent = 0;
+
+        // Пытаемся найти процент скидки в разных полях
+        if (activeSub.plan) {
+            discountPercent = activeSub.plan.discountPercentage ||
+                activeSub.plan.DiscountPercentage || 0;
+        }
+        if (discountPercent === 0) {
+            discountPercent = activeSub.discountPercentage ||
+                activeSub.DiscountPercentage || 0;
+        }
+        if (discountPercent === 0 && activeSub.Plan) {
+            discountPercent = activeSub.Plan.discountPercentage ||
+                activeSub.Plan.DiscountPercentage || 0;
+        }
+
+        console.log('Процент скидки:', discountPercent);
+
+        // Сохраняем скидку в localStorage для использования на других страницах
+        if (discountPercent > 0) {
+            localStorage.setItem('userDiscount', discountPercent);
+        }
+
+        const discountedTotal = currentTotal * (1 - discountPercent / 100);
+        return { total: discountedTotal, discount: discountPercent };
+    } catch (e) {
+        console.error("Ошибка проверки скидки:", e);
+    }
+    return { total: currentTotal, discount: 0 };
 }
 
 function renderInstruments(instruments) {
@@ -518,6 +585,28 @@ function renderInstruments(instruments) {
 }
 
 function createInstrumentCard(instrument) {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const discountPercent = parseInt(localStorage.getItem('userDiscount') || '0');
+    console.log(`createInstrumentCard: instrument=${instrument.name}, userDiscount=${discountPercent}`);
+
+    // Базовый HTML для цены
+    let priceHtml = `
+        <div style="color: black; font-weight: bold; font-size: 1em;">
+            ₽${instrument.price}
+        </div>`;
+
+    // Если есть скидка, показываем две цены
+    if (discountPercent > 0) {
+        const discountedPrice = Math.round(instrument.price * (1 - discountPercent / 100));
+        priceHtml = `
+        <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 5px;">
+            <span style="text-decoration: line-through; color: #888; font-size: 0.9em; font-weight: normal;">₽${instrument.price}</span>
+            <span style="color: #e44d26; font-weight: bold; font-size: 1.1em;">₽${discountedPrice}</span>
+        </div>
+        <div style="color: #4CAF50; font-size: 0.7em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+    `;
+    }
+
     const cardContainer = document.createElement('div');
     cardContainer.className = 'instrument-card';
     cardContainer.style.cssText = `
@@ -596,10 +685,7 @@ function createInstrumentCard(instrument) {
         <div style="color: #888; font-size: 0.75em; margin-bottom: 5px;">
             ${detailsText}
         </div>
-        <a href="instrument.html?id=${instrument.id}" 
-           style="color: black; font-weight: bold; font-size: 1em; text-decoration: none;">
-            ₽${instrument.price}
-        </a>
+        ${priceHtml}
     `;
 
     cardContainer.addEventListener('click', function (e) {

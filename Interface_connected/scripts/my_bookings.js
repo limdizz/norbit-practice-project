@@ -100,7 +100,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     <p style="margin-top:10px;font-size:1.1em;">
                         <strong>Итого:</strong>
-                        <span style="color:#e44d26">₽${b.totalPrice}</span>
+                        ${b.discountPercent > 0
+                    ? `<span style="color:#888; text-decoration:line-through; margin-right:8px;">₽${b.originalTotal || b.totalPrice}</span>
+                               <span style="color:#e44d26">₽${b.totalPrice}</span>
+                               <span style="color:#4CAF50; font-size:0.85em; display:block;">✓ Абонемент −${b.discountPercent}%</span>`
+                    : `<span style="color:#e44d26">₽${b.totalPrice}</span>`
+                }
                     </p>
                 </div>
             `;

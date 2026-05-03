@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     console.log('Страница заказа загружена. Заполняем данные...');
 
     // 1. Получаем данные пользователя из localStorage
@@ -47,6 +47,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const orderTotal = document.getElementById('order-total');
     const additionalEquipmentContainer = document.getElementById('additional-equipment-list');
     const confirmBtn = document.getElementById('confirm-booking-btn');
+
+    async function applySubscriptionDiscount(userId, currentTotal) {
+        try {
+            const response = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/active/${userId}`);
+            if (!response.ok) return { total: currentTotal, discount: 0 };
+
+            const activeSub = await response.json();
+            const discountPercent = activeSub.plan?.discountPercentage || activeSub.discountPercentage || 0;
+
+            if (discountPercent > 0) {
+                const discountedTotal = currentTotal * (1 - discountPercent / 100);
+                return { total: discountedTotal, discount: discountPercent };
+            }
+        } catch (e) {
+            console.error("Ошибка проверки скидки:", e);
+        }
+        return { total: currentTotal, discount: 0 };
+    }
 
     // 4. Заполняем поля пользователя
     if (lastNameInput) {
@@ -101,23 +119,72 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Отображаем цену
         if (orderTotal) {
-            let totalText = '';
+            const userId = userData.userUid || userData.uid || userData.id;
+
+            // Если данные уже содержат скидку (пришли из room.js/instrument.js), используем их напрямую
+            let discount = bookingData.discountPercent || 0;
+            let total = bookingData.totalPrice;
+            let originalTotal = bookingData.originalTotal || total;
+
+            // Если скидка неизвестна, запрашиваем абонемент
+            if (discount === 0) {
+                const discountResult = await applySubscriptionDiscount(userId, bookingData.totalPrice);
+                discount = discountResult.discount;
+                total = discountResult.total;
+                originalTotal = bookingData.totalPrice;
+            }
+
+            let itemsHtml = '';
+            const hasDiscount = discount > 0;
+
             if (bookingData.itemType === 'Room') {
-                const roomTotal = bookingData.roomTotal || (bookingData.hours * bookingData.pricePerHour);
-                const equipmentTotal = bookingData.equipmentTotal || 0;
-                if (equipmentTotal > 0) {
-                    totalText = `Аренда помещения: ${roomTotal} ₽<br>Оборудование: +${equipmentTotal} ₽<br><strong>Итого: ${bookingData.totalPrice} ₽</strong>`;
+                const roomBase = bookingData.hours * bookingData.pricePerHour;
+                const roomOriginal = hasDiscount
+                    ? Math.round(roomBase / (1 - discount / 100))
+                    : roomBase;
+                if (hasDiscount) {
+                    itemsHtml += `Аренда помещения: <span style="text-decoration:line-through;color:#888;">${roomOriginal} ₽</span> <b>${roomBase} ₽</b><br>`;
                 } else {
-                    totalText = `Итого: ${bookingData.totalPrice} ₽`;
+                    itemsHtml += `Аренда помещения: ${roomBase} ₽<br>`;
+                }
+                if (bookingData.equipmentTotal > 0) {
+                    const eqDiscounted = hasDiscount
+                        ? Math.round(bookingData.equipmentTotal * (1 - discount / 100))
+                        : bookingData.equipmentTotal;
+                    if (hasDiscount) {
+                        itemsHtml += `Доп. оборудование: <span style="text-decoration:line-through;color:#888;">${bookingData.equipmentTotal} ₽</span> <b>${eqDiscounted} ₽</b><br>`;
+                    } else {
+                        itemsHtml += `Доп. оборудование: +${bookingData.equipmentTotal} ₽<br>`;
+                    }
                 }
             } else {
-                totalText = `Итого: ${bookingData.totalPrice} ₽`;
+                const instrumentTotal = bookingData.totalPrice;
+                if (hasDiscount) {
+                    itemsHtml += `Аренда инструмента: <span style="text-decoration:line-through;color:#888;">${originalTotal} ₽</span> <b>${instrumentTotal} ₽</b><br>`;
+                } else {
+                    itemsHtml += `Аренда инструмента: ${instrumentTotal} ₽<br>`;
+                }
             }
-            orderTotal.innerHTML = totalText;
+
+            if (hasDiscount) {
+                orderTotal.innerHTML = `
+                    <div style="margin-bottom: 10px; font-size: 0.9em; color: #666;">
+                        ${itemsHtml}
+                    </div>
+                    <div style="border-top: 1px solid #eee; padding-top: 10px;">
+                        <div style="color: #888; font-size: 0.95em;">Старая цена: ${originalTotal} ₽</div>
+                        <div style="font-size: 1.4em; margin-top: 5px;">
+                            <strong>К оплате: <span style="color: #e44d26;">${Math.round(total)} ₽</span></strong>
+                        </div>
+                        <div style="color: #4CAF50; font-size: 0.85em; margin-top: 5px;">
+                            ✓ Применен абонемент (скидка ${discount}%)
+                        </div>
+                    </div>
+                `;
+            } else {
+                orderTotal.innerHTML = `${itemsHtml}<br><strong>Итого: ${bookingData.totalPrice} ₽</strong>`;
+            }
         }
-    } else {
-        if (orderInstrument) orderInstrument.textContent = 'Ошибка: Детали заказа не найдены.';
-        if (orderTotal) orderTotal.innerHTML = 'Итого: ₽0';
     }
 
     // 6. Подтверждение бронирования
@@ -144,6 +211,23 @@ document.addEventListener('DOMContentLoaded', function () {
             // Получаем ID выбранного оборудования из currentBooking
             const selectedEquipmentIds = (currentBooking.selectedEquipment || []).map(eq => eq.equipmentId);
 
+            // Проверяем активный абонемент и рассчитываем итог со скидкой
+            const userId = userData.userUid || userData.uid || userData.id;
+            let finalTotal = currentBooking.totalPrice;
+            let discountPercent = currentBooking.discountPercent || 0;
+
+            // Если скидка ещё не применена в данных бронирования, запрашиваем абонемент
+            if (discountPercent === 0) {
+                const discountResult = await applySubscriptionDiscount(userId, currentBooking.totalPrice);
+                finalTotal = discountResult.total;
+                discountPercent = discountResult.discount;
+            }
+
+            // Сохраняем финальную сумму и скидку в данные бронирования
+            currentBooking.originalTotal = currentBooking.originalTotal || currentBooking.totalPrice;
+            currentBooking.totalPrice = Math.round(finalTotal);
+            currentBooking.discountPercent = discountPercent;
+
             // Добавляем ID оборудования в запрос
             if (selectedEquipmentIds.length > 0) {
                 pendingRequest.SelectedEquipment = selectedEquipmentIds;
@@ -153,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmBtn.disabled = true;
                 confirmBtn.textContent = 'Сохранение...';
 
-                // 1. Создаём бронирование
+                // 1. Создаём бронирование (отправляем оригинальные данные, сервер сам применит скидку)
                 const response = await fetch('https://localhost:7123/api/BookingsAdvanced', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

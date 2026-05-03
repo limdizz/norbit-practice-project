@@ -53,12 +53,13 @@ namespace WebAPI.Controllers
 
             if (subscription == null) return NotFound();
 
-            // Явно возвращаем нужные поля, включая PlanId
+            // Явно возвращаем нужные поля, включая PlanId и DiscountPercentage
             return Ok(new
             {
                 subscriptionUid = subscription.SubscriptionUid,
-                planId = subscription.PlanId, // Проверьте, что это поле заполнено в БД
+                planId = subscription.PlanId,
                 planName = subscription.Plan?.PlanName,
+                discountPercentage = subscription.Plan?.DiscountPercentage ?? 0,
                 sessionsRemaining = subscription.SessionsRemaining,
                 validUntil = subscription.ValidUntil,
                 isActive = subscription.IsActive

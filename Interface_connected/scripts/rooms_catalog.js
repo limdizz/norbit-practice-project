@@ -45,6 +45,28 @@ async function loadRoomsFromApi() {
     productList.innerHTML = '<p style="text-align:center;">Загрузка помещений...</p>';
 
     try {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userId = userData.userUid || userData.uid || userData.id;
+
+        if (userId) {
+            try {
+                const subResponse = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/active/${userId}`);
+                if (subResponse.ok) {
+                    const activeSub = await subResponse.json();
+                    // Учитываем разные форматы ответа C# API
+                    const discount = activeSub.plan?.discountPercentage ||
+                        activeSub.discountPercentage ||
+                        activeSub.Plan?.DiscountPercentage || 0;
+                    localStorage.setItem('userDiscount', discount);
+                    console.log('Скидка загружена:', discount);
+                } else if (subResponse.status === 404) {
+                    localStorage.setItem('userDiscount', '0');
+                    console.log('Активная подписка не найдена, скидка сброшена');
+                }
+            } catch (e) {
+                console.warn("Не удалось получить скидку: ", e);
+            }
+        }
         // Обращаемся к вашему контроллеру RoomsController
         const response = await fetch('https://localhost:7123/api/Rooms');
 
@@ -256,22 +278,22 @@ function initDateFilter() {
     const startTimeSelect = document.getElementById('start-time');
     const endTimeSelect = document.getElementById('end-time');
     const clearButton = document.getElementById('clear-date-filter');
-    
+
     if (!dateInput) return;
-    
+
     // Функция проверки валидности времени
     function validateTime(startTime, endTime) {
         if (!startTime || !endTime) return true;
         return startTime < endTime;
     }
-    
+
     // Функция обновления доступных опций времени
     function updateTimeOptions() {
         if (!startTimeSelect || !endTimeSelect) return;
-        
+
         const startHour = parseInt(startTimeSelect.value.split(':')[0]);
         const endHour = parseInt(endTimeSelect.value.split(':')[0]);
-        
+
         // Обновляем опции для end-time (минимальное значение = start-time + 1 час)
         Array.from(endTimeSelect.options).forEach(option => {
             const optionHour = parseInt(option.value.split(':')[0]);
@@ -283,7 +305,7 @@ function initDateFilter() {
                 option.style.color = '';
             }
         });
-        
+
         // Если текущий end-time меньше start-time, устанавливаем корректное значение
         if (endHour <= startHour) {
             const nextHour = startHour + 1;
@@ -293,7 +315,7 @@ function initDateFilter() {
             }
         }
     }
-    
+
     async function applyAvailabilityFilter() {
         if (!dateInput.value || !startTimeSelect?.value || !endTimeSelect?.value) {
             availabilityFilter.enabled = false;
@@ -305,11 +327,11 @@ function initDateFilter() {
             applyFilters();
             return;
         }
-        
+
         const selectedDate = new Date(dateInput.value);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         if (selectedDate < today) {
             alert('Нельзя выбрать прошедшую дату');
             dateInput.value = '';
@@ -318,28 +340,28 @@ function initDateFilter() {
             applyFilters();
             return;
         }
-        
+
         const startTime = startTimeSelect.value;
         const endTime = endTimeSelect.value;
-        
+
         if (!validateTime(startTime, endTime)) {
             alert('Время начала должно быть раньше времени окончания');
             return;
         }
-        
+
         const productList = document.querySelector('.product-list');
         if (productList) {
             productList.innerHTML = '<p style="text-align:center;">Проверка доступности...</p>';
         }
-        
+
         availabilityFilter.enabled = true;
         availabilityFilter.date = dateInput.value;
         availabilityFilter.startTime = startTime;
         availabilityFilter.endTime = endTime;
-        
+
         await loadAvailableRoomSlots(dateInput.value, startTime, endTime);
     }
-    
+
     // Слушаем изменения
     dateInput.addEventListener('change', applyAvailabilityFilter);
     if (startTimeSelect) {
@@ -351,7 +373,7 @@ function initDateFilter() {
     if (endTimeSelect) {
         endTimeSelect.addEventListener('change', applyAvailabilityFilter);
     }
-    
+
     if (clearButton) {
         clearButton.addEventListener('click', function () {
             dateInput.value = '';
@@ -367,7 +389,7 @@ function initDateFilter() {
             applyFilters();
         });
     }
-    
+
     // Инициализация
     updateTimeOptions();
 }
@@ -378,19 +400,19 @@ async function loadAvailableRoomSlots(date, startTime, endTime) {
             `https://localhost:7123/api/BookingsAdvanced/available-room-slots?date=${date}&startTime=${startTime}&endTime=${endTime}`
         );
         if (!response.ok) throw new Error('Ошибка загрузки');
-        
+
         const data = await response.json();
         availabilityFilter.availableIds = data.availableRoomIds || [];
-        
+
         console.log(`Доступно помещений на ${date} с ${startTime} до ${endTime}: ${availabilityFilter.availableIds.length}`);
-        
+
         const clearButton = document.getElementById('clear-date-filter');
         if (clearButton && availabilityFilter.enabled) {
             clearButton.style.display = 'inline-block';
         }
-        
+
         applyFilters();
-        
+
     } catch (error) {
         console.error('Ошибка при загрузке доступных помещений:', error);
         alert('Не удалось загрузить информацию о доступности');
@@ -479,10 +501,10 @@ function applyFilters() {
 function addAvailabilityFilterInfo() {
     const productList = document.querySelector('.product-list');
     if (!productList) return;
-    
+
     const oldInfo = document.querySelector('.availability-filter-info');
     if (oldInfo) oldInfo.remove();
-    
+
     if (availabilityFilter.enabled && availabilityFilter.date) {
         const infoDiv = document.createElement('div');
         infoDiv.className = 'availability-filter-info';
@@ -568,6 +590,19 @@ function renderRooms(rooms) {
 }
 
 function createRoomCard(room) {
+    const discountPercent = parseInt(localStorage.getItem('userDiscount') || '0');
+    console.log(`createRoomCard: room=${room.name}, userDiscount=${discountPercent}`);
+    let priceDisplayHtml = `${room.price} ₽/час`;
+
+    if (discountPercent > 0) {
+        const discountedPrice = Math.round(room.price * (1 - discountPercent / 100));
+        priceDisplayHtml = `
+            <span style="text-decoration: line-through; color: #888; font-size: 0.8em;">${room.price} ₽</span>
+            <span style="color: #e44d26;">${discountedPrice} ₽/час</span>
+            <div style="color: #4CAF50; font-size: 0.75em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+        `;
+    }
+
     const cardContainer = document.createElement('div');
     cardContainer.className = 'instrument-card';
     cardContainer.style.cssText = `
@@ -628,7 +663,7 @@ function createRoomCard(room) {
         <div style="margin-top: auto;">
             <a href="room.html?id=${room.id}" 
                style="color: #e44d26; font-weight: bold; font-size: 1.1em; text-decoration: none; display: block; padding: 8px 0;">
-                ${room.price} ₽/час
+                ${priceDisplayHtml}
             </a>
             <small style="color: #888; font-size: 0.8em;">Нажмите для бронирования</small>
         </div>

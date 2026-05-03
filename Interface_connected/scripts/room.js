@@ -136,6 +136,24 @@ async function loadRoomData() {
     }
 
     try {
+        // 1. Загружаем скидку ПЕРЕД рендером
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userId = userData.userUid || userData.uid || userData.id;
+        if (userId) {
+            try {
+                const subResp = await fetch(`https://localhost:7123/api/UserSubscriptionsAdvanced/active/${userId}`);
+                if (subResp.ok) {
+                    const activeSub = await subResp.json();
+                    const discount = activeSub.plan?.discountPercentage || activeSub.discountPercentage || activeSub.Plan?.DiscountPercentage || 0;
+                    localStorage.setItem('userDiscount', discount);
+                    console.log('Скидка загружена для комнаты:', discount);
+                } else if (subResp.status === 404) {
+                    localStorage.setItem('userDiscount', '0');
+                    console.log('Активная подписка не найдена, скидка сброшена');
+                }
+            } catch (e) { console.warn("Скидка не загружена", e); }
+        }
+
         const response = await fetch(`https://localhost:7123/api/Rooms/${roomId}`);
         if (!response.ok) throw new Error('Помещение не найдено');
 
@@ -144,7 +162,6 @@ async function loadRoomData() {
 
         renderRoomDetails(currentRoom);
         updatePageTitle(currentRoom.name);
-
         updateBookingButton();
         calculatePrice();
 
@@ -606,22 +623,51 @@ function getHoursTextEnding(hours) {
 function calculatePrice() {
     if (!currentRoom) return;
 
+    const discountPercent = parseInt(localStorage.getItem('userDiscount') || '0');
+    console.log(`calculatePrice: userDiscount=${discountPercent}`);
     const hoursSelect = document.getElementById('booking_hours');
     const hours = hoursSelect ? parseInt(hoursSelect.value) : 1;
 
-    const roomTotal = hours * currentRoom.price;
-    const equipmentTotal = getAdditionalEquipmentTotal();
-    const total = roomTotal + equipmentTotal;
+    const hasDiscount = discountPercent > 0;
+    const discountedUnitPrice = hasDiscount
+        ? Math.round(currentRoom.price * (1 - discountPercent / 100))
+        : currentRoom.price;
 
+    const roomTotal = hours * discountedUnitPrice;
+    const equipmentTotal = getAdditionalEquipmentTotal();
+    const discountedEquipmentTotal = hasDiscount
+        ? Math.round(equipmentTotal * (1 - discountPercent / 100))
+        : equipmentTotal;
+    const total = roomTotal + discountedEquipmentTotal;
+
+    // Итоговая сумма внизу
     const totalEl = document.getElementById('total-price');
     if (totalEl) {
-        totalEl.textContent = `${total} ₽`;
+        if (hasDiscount) {
+            const originalTotal = (hours * currentRoom.price) + equipmentTotal;
+            totalEl.innerHTML = `
+                <span style="text-decoration: line-through; color: #888; font-size: 0.9em;">${originalTotal} ₽</span>
+                <b style="color: #e44d26; margin-left: 5px;">${total} ₽</b>
+                <div style="color: #4CAF50; font-size: 0.75em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+            `;
+        } else {
+            totalEl.textContent = `${total} ₽`;
+        }
     }
 
-    // Обновляем отображение цены за час
+    // Отображение цены за час в деталях помещения
     const priceDisplay = document.getElementById('room-price-display');
     if (priceDisplay) {
-        priceDisplay.textContent = `${currentRoom.price} ₽ / час`;
+        if (hasDiscount) {
+            priceDisplay.innerHTML = `
+                <span style="text-decoration: line-through; color: #888; font-size: 0.85em; font-weight: normal; margin-right: 5px;">
+                    ${currentRoom.price} ₽
+                </span> 
+                <b style="color: #e44d26;">${discountedUnitPrice} ₽ / час</b>
+            `;
+        } else {
+            priceDisplay.textContent = `${currentRoom.price} ₽ / час`;
+        }
     }
 }
 
@@ -675,6 +721,17 @@ async function handleBooking() {
         SelectedEquipment: selectedEquipmentIds // Добавляем уникальные ID выбранного оборудования
     };
 
+    const discountPercent = parseInt(localStorage.getItem('userDiscount') || '0');
+    const hasDiscount = discountPercent > 0;
+    const discountedPrice = hasDiscount
+        ? Math.round(currentRoom.price * (1 - discountPercent / 100))
+        : currentRoom.price;
+
+    const equipmentTotal = getAdditionalEquipmentTotal();
+    const discountedEquipmentTotal = hasDiscount
+        ? Math.round(equipmentTotal * (1 - discountPercent / 100))
+        : equipmentTotal;
+
     const displayData = {
         bookingId: null,
         orderId: null,
@@ -686,10 +743,12 @@ async function handleBooking() {
         date: dateStr,
         time: timeStr,
         hours: hours,
-        pricePerHour: currentRoom.price,
-        roomTotal: hours * currentRoom.price,
-        equipmentTotal: getAdditionalEquipmentTotal(),
-        totalPrice: (hours * currentRoom.price) + getAdditionalEquipmentTotal(),
+        pricePerHour: discountedPrice,
+        roomTotal: hours * discountedPrice,
+        equipmentTotal: equipmentTotal,
+        totalPrice: (hours * discountedPrice) + discountedEquipmentTotal,
+        originalTotal: (hours * currentRoom.price) + equipmentTotal,
+        discountPercent: discountPercent,
         selectedEquipment: selectedAdditionalEquipment,
         bookingDate: new Date().toISOString()
     };

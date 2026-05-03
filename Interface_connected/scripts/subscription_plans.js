@@ -11,13 +11,16 @@ async function loadPlans() {
     container.innerHTML = '<p>Загрузка тарифов...</p>';
     const isStaff = localStorage.getItem('isStaff') === 'true';
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/SubscriptionPlans`);
         if (!response.ok) throw new Error('Ошибка загрузки планов');
 
         const plans = await response.json();
         container.innerHTML = '';
+
+        // Получаем активную подписку пользователя для определения скидки
+        const activeSubscription = isLoggedIn ? await getActiveSubscription() : null;
 
         plans.forEach(plan => {
             const pId = plan.planId || plan.PlanId;
@@ -26,10 +29,11 @@ async function loadPlans() {
             const pDays = plan.validityDays || plan.ValidityDays;
             const pSessions = plan.sessionsCount || plan.SessionsCount;
             const pDesc = plan.description || plan.Description || '';
+            const discountPercentage = plan.discountPercentage || 0;
 
             const card = document.createElement('div');
             card.className = 'plan-card';
-            card.dataset.planId = pId; 
+            card.dataset.planId = pId;
 
             let icon = '💀';
             if (pName.includes('Dark')) icon = '☠';
@@ -39,9 +43,25 @@ async function loadPlans() {
                 ? `<button class="subscribe-btn" onclick="location.href='admin_subscription_plans.html'">Управление абонементами</button>`
                 : `<button class="subscribe-btn" onclick="buySubscription(${pId}, '${pName}', ${pDays}, ${pSessions})">Выбрать</button>`;
 
+            // Определяем, нужно ли применять скидку
+            let priceHtml = `₽${pPrice} / ${pDays} дн.`;
+
+            // Проверяем, есть ли у пользователя активная подписка Acolyte и есть ли скидка для этого плана
+            if (activeSubscription &&
+                activeSubscription.planName &&
+                activeSubscription.planName.toLowerCase().includes('acolyte') &&
+                discountPercentage > 0) {
+
+                const discountedPrice = pPrice * (1 - discountPercentage / 100);
+                priceHtml = `
+                    <span class="old-price">₽${pPrice}</span>
+                    <span class="new-price">₽${discountedPrice.toFixed(2)}</span> / ${pDays} дн.
+                `;
+            }
+
             card.innerHTML = `
                 <h2>${icon} ${pName}</h2>
-                <p class="price">₽${pPrice} / ${pDays} дн.</p>
+                <p class="price">${priceHtml}</p>
                 <p class="description">${pDesc}</p>
                 <ul>
                     <li>Сеансов: ${pSessions}</li>
@@ -57,7 +77,39 @@ async function loadPlans() {
     }
 }
 
-// --- 2. Buy Subscription ---
+// --- 2. Get Active Subscription ---
+async function getActiveSubscription() {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userId = userData.userUid || userData.uid;
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const isStaff = localStorage.getItem('isStaff') === 'true';
+
+    if (!isLoggedIn || !userId) return null;
+    if (isStaff) return null;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/UserSubscriptionsAdvanced/active/${userId}`);
+
+        if (response.ok) {
+            const activeSub = await response.json();
+            // Сохраняем скидку в localStorage для других страниц
+            const discount = activeSub.discountPercentage || 0;
+            localStorage.setItem('userDiscount', discount);
+            return activeSub;
+        } else if (response.status === 404) {
+            localStorage.setItem('userDiscount', '0');
+            console.log('Активная подписка не найдена, скидка сброшена');
+            return null;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Ошибка проверки подписки:', error);
+        return null;
+    }
+}
+
+// --- 3. Buy Subscription ---
 async function buySubscription(planId, planName, validityDays, sessionsCount) {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -114,7 +166,7 @@ async function buySubscription(planId, planName, validityDays, sessionsCount) {
     }
 }
 
-// --- 3. Check Active Subscription ---
+// --- 4. Check Active Subscription ---
 async function checkActiveSubscription() {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const userId = userData.userUid || userData.uid;
@@ -152,7 +204,7 @@ async function checkActiveSubscription() {
     }
 }
 
-// --- 4. Update UI ---
+// --- 5. Update UI ---
 function updateButtonsUI(activePlanId) {
     if (!activePlanId) {
         resetButtonsUI();
