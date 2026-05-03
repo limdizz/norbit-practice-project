@@ -61,11 +61,12 @@ async function loadPlans() {
 
             card.innerHTML = `
                 <h2>${icon} ${pName}</h2>
-                <p class="price">${priceHtml}</p>
+                <p class="price">₽${pPrice}</p>
                 <p class="description">${pDesc}</p>
                 <ul>
                     <li>Сеансов: ${pSessions}</li>
                     <li>Действует: ${pDays} дней</li>
+                    <li>Скидка: ${discountPercentage}%</li>
                 </ul>
                 ${buttonHtml}
             `;
