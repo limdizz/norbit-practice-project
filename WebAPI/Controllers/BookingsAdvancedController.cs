@@ -293,6 +293,40 @@ namespace WebAPI.Controllers
             });
         }
 
+        // GET: api/BookingsAdvanced/userHistory/{userUid}
+        [HttpGet("userHistory/{userUid}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetUserBookingsHistory(Guid userUid)
+        {
+            await RefreshBookingStatusesByEndTimeAsync();
+
+            var bookings = await _context.BookingsAdvanceds
+                .Where(b => b.UserUid == userUid)
+                .Select(b => new
+                {
+                    b.BookingUid,
+                    b.UserUid,
+                    b.RoomId,
+                    b.InstrumentId,
+                    b.StartTime,
+                    b.EndTime,
+                    b.Status,
+                    b.CreationDate,
+                    // Достаем итоговую сумму из счета, который был сформирован при создании брони
+                    TotalSum = _context.BillsAdvanceds
+                        .Where(bill => bill.BookingUid == b.BookingUid)
+                        .Select(bill => bill.TotalSum)
+                        .FirstOrDefault(),
+                    // Узнаем, был ли применен абонемент исторически
+                    SubscriptionUsed = _context.BillsAdvanceds
+                        .Where(bill => bill.BookingUid == b.BookingUid)
+                        .Select(bill => bill.SubscriptionUsed)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return Ok(bookings);
+        }
+
         // PUT: api/BookingsAdvanced/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

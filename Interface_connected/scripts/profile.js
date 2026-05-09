@@ -112,13 +112,9 @@ async function loadBookingsFromAPI(userData, currentContainer, archiveContainer,
     if (!userId) return;
 
     try {
-        const response = await fetch(`https://localhost:7123/api/BookingsAdvanced`);
+        const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/userHistory/${userId}`);
         if (!response.ok) throw new Error('Ошибка загрузки бронирований');
-
-        const allBookings = await response.json();
-
-        // Фильтруем только бронирования текущего пользователя
-        const userBookings = allBookings.filter(b => b.userUid === userId);
+        const userBookings = await response.json();
 
         // Загружаем скидку пользователя
         let discountPercent = 0;
@@ -139,7 +135,7 @@ async function loadBookingsFromAPI(userData, currentContainer, archiveContainer,
         }
 
         // Преобразуем в формат для отображения
-        const formattedBookings = await enrichBookingsWithDetails(userBookings, userData, discountPercent);
+        const formattedBookings = await enrichBookingsWithDetails(userBookings, userData);
 
         currentBookings = formattedBookings;
 
@@ -212,8 +208,7 @@ async function enrichBookingsWithDetails(bookings, userData, discountPercent = 0
             imageUrl = instrument?.imageUrl || 'img/instruments/default_instrument.jpg';
         }
 
-        // Расчет длительности и стоимости
-        let totalPrice = 0;
+        let originalTotal = 0;
         let hours = 1;
         let days = 1;
 
@@ -223,19 +218,22 @@ async function enrichBookingsWithDetails(bookings, userData, discountPercent = 0
             days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
         }
 
-        // Для комнат — по часам, для инструментов — по дням
         if (booking.roomId) {
-            totalPrice = pricePerHour * hours;
+            originalTotal = pricePerHour * hours;
         } else {
-            totalPrice = dailyPrice * days;
+            originalTotal = dailyPrice * days;
         }
 
-        // Сохраняем оригинальную цену до скидки
-        const originalTotal = totalPrice;
+        // --- НОВАЯ ЛОГИКА ---
+        // Берем итоговую цену из базы данных. Если ее почему-то нет, берем базовую
+        let finalPrice = booking.totalSum !== undefined && booking.totalSum !== null
+            ? booking.totalSum
+            : originalTotal;
 
-        // Применяем скидку абонемента
-        if (discountPercent > 0) {
-            totalPrice = Math.round(totalPrice * (1 - discountPercent / 100));
+        // Высчитываем, какая скидка была применена исторически (исключительно для визуала)
+        let appliedDiscountPercent = 0;
+        if (booking.subscriptionUsed && finalPrice < originalTotal && originalTotal > 0) {
+            appliedDiscountPercent = Math.round((1 - (finalPrice / originalTotal)) * 100);
         }
 
         return {
@@ -252,13 +250,16 @@ async function enrichBookingsWithDetails(bookings, userData, discountPercent = 0
             days: days,
             dailyPrice: dailyPrice,
             pricePerHour: pricePerHour,
-            totalPrice: totalPrice,
+
+            // Записываем правильные цены
+            totalPrice: finalPrice,
             originalTotal: originalTotal,
-            discountPercent: discountPercent,
+            discountPercent: appliedDiscountPercent, // Сохраняем ИСТОРИЧЕСКУЮ скидку
+
             status: booking.status,
             bookingDate: booking.creationDate || new Date().toISOString(),
             image: imageUrl,
-            orderId: booking.bookingUid.substring(0, 4).toUpperCase()
+            orderId: booking.bookingUid ? booking.bookingUid.substring(0, 4).toUpperCase() : 'N/A'
         };
     });
 }
