@@ -157,19 +157,44 @@ async function enrichBookingsWithDetails(bookings, userData) {
     let rooms = [];
     let roomTypes = [];
 
+    // Загружаем дополнительное оборудование для бронирований
+    let bookingEquipments = [];
+
     try {
-        const [instrResponse, roomsResponse, roomTypesResponse] = await Promise.all([
+        const [instrResponse, roomsResponse, roomTypesResponse, bookingEquipResponse] = await Promise.all([
             fetch('https://localhost:7123/api/Equipments'),
             fetch('https://localhost:7123/api/Rooms'),
-            fetch('https://localhost:7123/api/RoomTypes')
+            fetch('https://localhost:7123/api/RoomTypes'),
+            fetch('https://localhost:7123/api/BookingEquipments')
         ]);
 
         if (instrResponse.ok) instruments = await instrResponse.json();
         if (roomsResponse.ok) rooms = await roomsResponse.json();
         if (roomTypesResponse.ok) roomTypes = await roomTypesResponse.json();
+        if (bookingEquipResponse.ok) bookingEquipments = await bookingEquipResponse.json();
     } catch (error) {
         console.error('Ошибка загрузки справочников:', error);
     }
+
+    // Группируем оборудование по bookingUid
+    const equipmentByBooking = {};
+    bookingEquipments.forEach(eq => {
+        if (!equipmentByBooking[eq.bookingUid]) {
+            equipmentByBooking[eq.bookingUid] = [];
+        }
+        const equipment = instruments.find(i => i.equipmentId === eq.equipmentId);
+        if (equipment) {
+            // Проверяем, не добавлено ли уже это оборудование (защита от дублирования)
+            const alreadyExists = equipmentByBooking[eq.bookingUid].some(e => e.id === equipment.equipmentId);
+            if (!alreadyExists) {
+                equipmentByBooking[eq.bookingUid].push({
+                    id: equipment.equipmentId,
+                    name: equipment.name,
+                    price: equipment.rentalPrice || 0
+                });
+            }
+        }
+    });
 
     const roomTypePriceMap = {};
     roomTypes.forEach(type => {
@@ -194,11 +219,13 @@ async function enrichBookingsWithDetails(bookings, userData) {
         let instrImg = '';
         let originalTotal = 0;
 
-        // --- ВЕРНУЛИ ПЕРЕМЕННЫЕ ЦЕН ---
         let pricePerHour = 0;
         let dailyPrice = 0;
 
-        // 1. Обработка помещения и прикрепленного к нему оборудования
+        // Получаем дополнительное оборудование для этого бронирования ТОЛЬКО из одного источника
+        const extraEquipment = equipmentByBooking[booking.bookingUid] || [];
+
+        // 1. Обработка помещения
         if (booking.roomId) {
             const room = rooms.find(r => r.roomId === booking.roomId);
             if (room) {
@@ -207,41 +234,88 @@ async function enrichBookingsWithDetails(bookings, userData) {
                 originalTotal += pricePerHour * hours;
                 roomImg = getRoomImageWithSync(room.roomTypeId, room.roomId, roomName);
             }
+        }
 
-            // --- НОВОЕ: Обработка доп. оборудования (из новой таблицы) ---
-            if (booking.extraEquipmentIds && booking.extraEquipmentIds.length > 0) {
-                booking.extraEquipmentIds.forEach(eqId => {
-                    const eq = instruments.find(i => i.equipmentId === eqId);
-                    if (eq) {
-                        instrName += (instrName ? ' + ' : '') + eq.name;
-                        // Согласно логике вашего бэкенда, доп. оборудование считается как 1 единица
-                        originalTotal += (eq.rentalPrice || 600);
-                    }
+        // 2. Обработка инструмента (если арендован ТОЛЬКО инструмент, НЕ как дополнительное оборудование)
+        // ВАЖНО: instrumentId не должен дублироваться с extraEquipment
+        if (booking.instrumentId) {
+            // Проверяем, не является ли этот инструмент уже добавленным как дополнительное оборудование
+            const isInstrumentInExtra = extraEquipment.some(eq => eq.id === booking.instrumentId);
+            if (!isInstrumentInExtra) {
+                const instr = instruments.find(i => i.equipmentId === booking.instrumentId);
+                if (instr) {
+                    instrName = instr.name || `Инструмент #${instr.equipmentId}`;
+                    dailyPrice = instr.rentalPrice || 600;
+                    originalTotal += dailyPrice * days;
+                    instrImg = instr.imageUrl;
+                }
+            }
+        }
+
+        // 3. Добавляем стоимость дополнительного оборудования (только если оно не было учтено как instrumentId)
+        let equipmentTotal = 0;
+        const equipmentList = [];
+        for (const eq of extraEquipment) {
+            // Проверяем, не является ли это оборудование основным инструментом бронирования
+            if (booking.instrumentId !== eq.id) {
+                equipmentTotal += eq.price;
+                equipmentList.push({
+                    name: eq.name,
+                    price: eq.price
                 });
             }
         }
+        originalTotal += equipmentTotal;
 
-        // 2. Обработка инструмента (если арендован ТОЛЬКО инструмент)
-        if (booking.instrumentId) {
-            const instr = instruments.find(i => i.equipmentId === booking.instrumentId);
-            if (instr) {
-                instrName = instr.name || `Инструмент #${instr.equipmentId}`;
-                dailyPrice = instr.rentalPrice || 600;
-                originalTotal += dailyPrice * days;
-                instrImg = instr.imageUrl;
-            }
+        // Формируем название и итоговую цену
+        let combinedName = '';
+        if (roomName && instrName) {
+            combinedName = `${roomName} + ${instrName}`;
+        } else if (roomName) {
+            combinedName = roomName;
+        } else if (instrName) {
+            combinedName = instrName;
+        } else {
+            combinedName = "Услуга";
         }
 
-        const combinedName = (roomName && instrName) ? `${roomName} + ${instrName}` : (roomName || instrName || "Услуга");
+        // Добавляем информацию о дополнительном оборудовании в название (если есть)
+        if (equipmentList.length > 0) {
+            const eqNames = equipmentList.map(eq => eq.name).join(', ');
+            combinedName += ` + оборудование (${eqNames})`;
+        }
+
         const finalImage = roomImg || instrImg || 'img/no-image.png';
 
-        let finalPrice = (booking.totalSum !== undefined && booking.totalSum !== null)
+        let finalPrice = (booking.totalSum !== undefined && booking.totalSum !== null && booking.totalSum > 0)
             ? booking.totalSum
             : originalTotal;
 
+        // Рассчитываем скидку ТОЛЬКО если она была применена
         let appliedDiscountPercent = 0;
-        if (booking.subscriptionUsed && originalTotal > finalPrice && originalTotal > 0) {
-            appliedDiscountPercent = Math.round((1 - (finalPrice / originalTotal)) * 100);
+        if (booking.subscriptionUsed === true && originalTotal > finalPrice && originalTotal > 0) {
+            const rawDiscount = (1 - (finalPrice / originalTotal)) * 100;
+            appliedDiscountPercent = Math.round(rawDiscount);
+            
+            // Дополнительная проверка: скидка не должна превышать 30% (если максимальная скидка в системе 15-20%)
+            // Это поможет отловить дублирование
+            if (appliedDiscountPercent > 30) {
+                console.warn(`[WARNING] Подозрительно высокая скидка ${appliedDiscountPercent}% для ${combinedName}, original=${originalTotal}, final=${finalPrice}`);
+                // Если скидка подозрительно высокая, возможно, это из-за дублирования
+                // Пробуем пересчитать без оборудования
+                const recalculatedTotal = originalTotal - equipmentTotal;
+                if (recalculatedTotal > 0 && recalculatedTotal > finalPrice) {
+                    const recalculatedDiscount = Math.round((1 - (finalPrice / recalculatedTotal)) * 100);
+                    if (recalculatedDiscount <= 20) {
+                        appliedDiscountPercent = recalculatedDiscount;
+                    }
+                }
+            }
+        }
+
+        // Логирование для отладки
+        if (equipmentList.length > 0) {
+            console.log(`[DEBUG] Бронирование ${combinedName}: original=${originalTotal}, final=${finalPrice}, discount=${appliedDiscountPercent}%, subscriptionUsed=${booking.subscriptionUsed}`);
         }
 
         return {
@@ -253,10 +327,13 @@ async function enrichBookingsWithDetails(bookings, userData) {
             totalPrice: finalPrice,
             originalTotal: originalTotal,
             discountPercent: appliedDiscountPercent,
-            subscriptionUsed: booking.subscriptionUsed,
+            subscriptionUsed: booking.subscriptionUsed || false,
             status: booking.status,
 
-            // --- ВЕРНУЛИ В ОБЪЕКТ ---
+            // Дополнительное оборудование
+            extraEquipment: equipmentList,
+            equipmentTotal: equipmentTotal,
+
             pricePerHour: pricePerHour,
             dailyPrice: dailyPrice,
 
@@ -316,7 +393,9 @@ function updateLocalStorage(userData, bookings) {
         discountPercent: b.discountPercent,
         status: b.status,
         bookingDate: b.bookingDate,
-        image: b.image
+        image: b.image,
+        extraEquipment: b.extraEquipment,
+        equipmentTotal: b.equipmentTotal
     }));
 
     localStorage.setItem(storageKey, JSON.stringify(localStorageBookings));
@@ -364,20 +443,13 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
     }
 
     function isActiveBooking(b) {
-        // Если статус отменен - всегда в архив
         if (b.status === 'cancelled') return false;
-
-        // Если статус завершен - в архив
         if (b.status === 'completed') return false;
-
-        // Если статус in progress - проверяем по дате
         if (b.status === 'in progress') {
             const endMs = getBookingEndMs(b);
             if (endMs === null) return true;
             return endMs > Date.now();
         }
-
-        // Для бронирований без статуса (старые данные) - проверяем по дате
         const endMs = getBookingEndMs(b);
         if (endMs === null) return true;
         return endMs > Date.now();
@@ -389,7 +461,6 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
 
     bookings.forEach(b => {
         const endMs = getBookingEndMs(b);
-        // Активные: статус "in progress" или дата окончания еще не прошла
         if (isActiveBooking(b)) {
             currentItems.push(b);
         } else {
@@ -439,6 +510,24 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
                 `;
             }
 
+            // Добавляем блок с дополнительным оборудованием
+            let equipmentHTML = '';
+            if (b.extraEquipment && b.extraEquipment.length > 0) {
+                equipmentHTML = `
+                    <div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid #eee;">
+                        <strong>Дополнительное оборудование:</strong>
+                        <ul style="margin: 5px 0 0 0; padding-left: 20px; list-style: none;">
+                            ${b.extraEquipment.map(eq => `
+                                <li style="display: flex; justify-content: space-between; font-size: 0.85em;">
+                                    <span>${escapeHtml(eq.name)}</span>
+                                    <span style="color: #e44d26;">+${eq.price} ₽</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
             const statusText = b.status === 'in progress' ? 'Активно' :
                 b.status === 'completed' ? 'Завершено' :
                     b.status === 'cancelled' ? 'Отменено' : 'Неизвестно';
@@ -446,24 +535,32 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
                 b.status === 'completed' ? 'status-completed' :
                     b.status === 'cancelled' ? 'status-cancelled' : '';
 
+            // Формируем отображение цены с учётом оборудования
+            let priceHtml = '';
+            if (b.discountPercent > 0) {
+                let totalWithEquipment = b.originalTotal;
+                priceHtml = `
+                    <span style="color:#888; text-decoration:line-through; margin-right:8px;">₽${totalWithEquipment}</span>
+                    <span style="color:#e44d26">₽${b.totalPrice}</span>
+                    <span style="color:#4CAF50; font-size:0.85em; display:block;">✓ Абонемент −${b.discountPercent}%</span>
+                `;
+            } else {
+                priceHtml = `<span style="color:#e44d26">₽${b.totalPrice}</span>`;
+            }
+
             card.innerHTML = `
                 ${b.status !== 'cancelled' && b.status !== 'completed' ?
                     `<button class="delete-booking" title="Отменить бронирование">✖</button>` : ''}
                 <img src="${image}" alt="${name}" onerror="this.src='img/no-image.png'">
                 <div class="booking-info">
-                    <h4>${name}</h4>
+                    <h4>${escapeHtml(name)}</h4>
                     <p style="font-size: 0.85em; color: #777;">ID: ${b.bookingId.substring(0, 8)}...</p>
                     <p><strong>Статус:</strong> <span class="status-badge ${statusClass}">${statusText}</span></p>
                     <p><strong>Оформлено:</strong> ${new Date(b.bookingDate).toLocaleString('ru-RU')}</p>
                     ${detailsHTML}
+                    ${equipmentHTML}
                     <p style="margin-top: 10px; font-size: 1.1em;">
-                        <strong>Итого:</strong> 
-                        ${b.discountPercent > 0
-                    ? `<span style="color:#888; text-decoration:line-through; margin-right:8px;">₽${b.originalTotal}</span>
-                               <span style="color:#e44d26">₽${b.totalPrice}</span>
-                               <span style="color:#4CAF50; font-size:0.85em; display:block;">✓ Абонемент −${b.discountPercent}%</span>`
-                    : `<span style="color:#e44d26">₽${b.totalPrice}</span>`
-                }
+                        <strong>Итого:</strong> ${priceHtml}
                     </p>
                 </div>`;
 
@@ -485,7 +582,6 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
 
                         if (response.ok) {
                             alert('Бронирование отменено');
-                            // Перезагружаем данные
                             await loadBookingsFromAPI(userData, currentContainer, archiveContainer, clearBtn);
                         } else {
                             throw new Error('Ошибка отмены');
@@ -561,7 +657,6 @@ async function renderUserProfile(userData, isStaff) {
             const planName = sub.planName || sub.PlanName || (sub.plan ? (sub.plan.planName || sub.plan.PlanName) : 'Тариф');
             const discountPercent = sub.discountPercentage || 0;
 
-            // Сохраняем скидку в localStorage для других страниц
             if (discountPercent > 0) {
                 localStorage.setItem('userDiscount', discountPercent);
             }
@@ -622,4 +717,14 @@ async function cancelSubscription(userId) {
         console.error(error);
         alert('Ошибка соединения.');
     }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
