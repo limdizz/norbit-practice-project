@@ -152,9 +152,7 @@ async function loadBookingsFromAPI(userData, currentContainer, archiveContainer,
     }
 }
 
-// Обогащение бронирований дополнительными данными
-async function enrichBookingsWithDetails(bookings, userData, discountPercent = 0) {
-    // Загружаем инструменты, помещения и типы помещений
+async function enrichBookingsWithDetails(bookings, userData) {
     let instruments = [];
     let rooms = [];
     let roomTypes = [];
@@ -163,7 +161,7 @@ async function enrichBookingsWithDetails(bookings, userData, discountPercent = 0
         const [instrResponse, roomsResponse, roomTypesResponse] = await Promise.all([
             fetch('https://localhost:7123/api/Equipments'),
             fetch('https://localhost:7123/api/Rooms'),
-            fetch('https://localhost:7123/api/RoomTypes') // ← Новый эндпоинт!
+            fetch('https://localhost:7123/api/RoomTypes')
         ]);
 
         if (instrResponse.ok) instruments = await instrResponse.json();
@@ -173,7 +171,6 @@ async function enrichBookingsWithDetails(bookings, userData, discountPercent = 0
         console.error('Ошибка загрузки справочников:', error);
     }
 
-    // Создаём маппинг цены по roomTypeId
     const roomTypePriceMap = {};
     roomTypes.forEach(type => {
         roomTypePriceMap[type.roomTypeId] = type.rentalPricePerHour || 0;
@@ -183,83 +180,95 @@ async function enrichBookingsWithDetails(bookings, userData, discountPercent = 0
         const startDate = booking.startTime ? new Date(booking.startTime) : null;
         const endDate = booking.endTime ? new Date(booking.endTime) : null;
 
-        let itemName = 'Неизвестно';
-        let itemType = booking.roomId ? 'Room' : 'Instrument';
-        let imageUrl = 'img/no-image.png';
-        let roomTypeId = null;
-        let pricePerHour = 1000; // fallback
-        let dailyPrice = 600;   // fallback для инструментов
-
-        if (booking.roomId) {
-            const room = rooms.find(r => r.roomId === booking.roomId);
-            itemName = room?.name || `Помещение #${booking.roomId}`;
-            roomTypeId = room?.roomTypeId;
-
-            // Берём цену из RoomType, а не из хардкода
-            if (roomTypeId && roomTypePriceMap[roomTypeId]) {
-                pricePerHour = roomTypePriceMap[roomTypeId];
-            }
-
-            imageUrl = roomTypeId ? getRoomImageWithSync(roomTypeId, booking.roomId, itemName) : 'img/rooms/default_room.jpg';
-        } else if (booking.instrumentId) {
-            const instrument = instruments.find(i => i.equipmentId === booking.instrumentId);
-            itemName = instrument?.name || `Инструмент #${booking.instrumentId}`;
-            dailyPrice = instrument?.rentalPrice || 600; // если инструмент — по его цене
-            imageUrl = instrument?.imageUrl || 'img/instruments/default_instrument.jpg';
-        }
-
-        let originalTotal = 0;
-        let hours = 1;
-        let days = 1;
-
+        let hours = 0;
+        let days = 0;
         if (startDate && endDate) {
             const diffMs = endDate - startDate;
             hours = Math.ceil(diffMs / (1000 * 60 * 60));
             days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
         }
 
+        let roomName = '';
+        let instrName = '';
+        let roomImg = '';
+        let instrImg = '';
+        let originalTotal = 0;
+
+        // --- ВЕРНУЛИ ПЕРЕМЕННЫЕ ЦЕН ---
+        let pricePerHour = 0;
+        let dailyPrice = 0;
+
+        // 1. Обработка помещения и прикрепленного к нему оборудования
         if (booking.roomId) {
-            originalTotal = pricePerHour * hours;
-        } else {
-            originalTotal = dailyPrice * days;
+            const room = rooms.find(r => r.roomId === booking.roomId);
+            if (room) {
+                roomName = room.name || `Помещение #${room.roomId}`;
+                pricePerHour = roomTypePriceMap[room.roomTypeId] || 1000;
+                originalTotal += pricePerHour * hours;
+                roomImg = getRoomImageWithSync(room.roomTypeId, room.roomId, roomName);
+            }
+
+            // --- НОВОЕ: Обработка доп. оборудования (из новой таблицы) ---
+            if (booking.extraEquipmentIds && booking.extraEquipmentIds.length > 0) {
+                booking.extraEquipmentIds.forEach(eqId => {
+                    const eq = instruments.find(i => i.equipmentId === eqId);
+                    if (eq) {
+                        instrName += (instrName ? ' + ' : '') + eq.name;
+                        // Согласно логике вашего бэкенда, доп. оборудование считается как 1 единица
+                        originalTotal += (eq.rentalPrice || 600);
+                    }
+                });
+            }
         }
 
-        // --- НОВАЯ ЛОГИКА ---
-        // Берем итоговую цену из базы данных. Если ее почему-то нет, берем базовую
-        let finalPrice = booking.totalSum !== undefined && booking.totalSum !== null
+        // 2. Обработка инструмента (если арендован ТОЛЬКО инструмент)
+        if (booking.instrumentId) {
+            const instr = instruments.find(i => i.equipmentId === booking.instrumentId);
+            if (instr) {
+                instrName = instr.name || `Инструмент #${instr.equipmentId}`;
+                dailyPrice = instr.rentalPrice || 600;
+                originalTotal += dailyPrice * days;
+                instrImg = instr.imageUrl;
+            }
+        }
+
+        const combinedName = (roomName && instrName) ? `${roomName} + ${instrName}` : (roomName || instrName || "Услуга");
+        const finalImage = roomImg || instrImg || 'img/no-image.png';
+
+        let finalPrice = (booking.totalSum !== undefined && booking.totalSum !== null)
             ? booking.totalSum
             : originalTotal;
 
-        // Высчитываем, какая скидка была применена исторически (исключительно для визуала)
         let appliedDiscountPercent = 0;
-        if (booking.subscriptionUsed && finalPrice < originalTotal && originalTotal > 0) {
+        if (booking.subscriptionUsed && originalTotal > finalPrice && originalTotal > 0) {
             appliedDiscountPercent = Math.round((1 - (finalPrice / originalTotal)) * 100);
         }
 
         return {
             bookingId: booking.bookingUid,
-            itemType: itemType,
-            itemName: itemName,
+            orderId: booking.bookingUid ? booking.bookingUid.substring(0, 4).toUpperCase() : 'N/A',
+            itemType: booking.roomId ? 'Room' : 'Instrument',
+            itemName: combinedName,
+            image: finalImage,
+            totalPrice: finalPrice,
+            originalTotal: originalTotal,
+            discountPercent: appliedDiscountPercent,
+            subscriptionUsed: booking.subscriptionUsed,
+            status: booking.status,
+
+            // --- ВЕРНУЛИ В ОБЪЕКТ ---
+            pricePerHour: pricePerHour,
+            dailyPrice: dailyPrice,
+
+            date: startDate ? formatDate(startDate) : '',
+            time: startDate ? formatTime(startDate) : '',
             startDate: startDate ? formatDate(startDate) : '',
             endDate: endDate ? formatDate(endDate) : '',
             startTime: startDate ? formatTime(startDate) : '',
             endTime: endDate ? formatTime(endDate) : '',
-            date: startDate ? formatDate(startDate) : '',
-            time: startDate ? formatTime(startDate) : '',
             hours: hours,
             days: days,
-            dailyPrice: dailyPrice,
-            pricePerHour: pricePerHour,
-
-            // Записываем правильные цены
-            totalPrice: finalPrice,
-            originalTotal: originalTotal,
-            discountPercent: appliedDiscountPercent, // Сохраняем ИСТОРИЧЕСКУЮ скидку
-
-            status: booking.status,
-            bookingDate: booking.creationDate || new Date().toISOString(),
-            image: imageUrl,
-            orderId: booking.bookingUid ? booking.bookingUid.substring(0, 4).toUpperCase() : 'N/A'
+            bookingDate: booking.creationDate || new Date().toISOString()
         };
     });
 }

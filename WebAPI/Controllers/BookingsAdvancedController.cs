@@ -307,16 +307,22 @@ namespace WebAPI.Controllers
                     b.UserUid,
                     b.RoomId,
                     b.InstrumentId,
+                    
+                    // --- НОВОЕ ПОЛЕ: передаем ID дополнительного оборудования ---
+                    ExtraEquipmentIds = _context.BookingEquipments
+                        .Where(be => be.BookingUid == b.BookingUid)
+                        .Select(be => be.EquipmentId)
+                        .Distinct()
+                        .ToList(),
+
                     b.StartTime,
                     b.EndTime,
                     b.Status,
                     b.CreationDate,
-                    // Достаем итоговую сумму из счета, который был сформирован при создании брони
                     TotalSum = _context.BillsAdvanceds
                         .Where(bill => bill.BookingUid == b.BookingUid)
                         .Select(bill => bill.TotalSum)
                         .FirstOrDefault(),
-                    // Узнаем, был ли применен абонемент исторически
                     SubscriptionUsed = _context.BillsAdvanceds
                         .Where(bill => bill.BookingUid == b.BookingUid)
                         .Select(bill => bill.SubscriptionUsed)
