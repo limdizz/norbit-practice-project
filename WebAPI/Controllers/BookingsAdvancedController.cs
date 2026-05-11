@@ -408,7 +408,42 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
+            // Сохраняем информацию для уведомления
+            var roomName = "";
+            var instrumentName = "";
+            if (booking.RoomId.HasValue)
+            {
+                var room = await _context.Rooms.FindAsync(booking.RoomId);
+                roomName = room?.Name ?? "Помещение";
+            }
+            else if (booking.InstrumentId.HasValue)
+            {
+                var instrument = await _context.Equipment.FindAsync(booking.InstrumentId);
+                instrumentName = instrument?.Name ?? "Инструмент";
+            }
+
+            var itemType = booking.RoomId.HasValue ? "помещения" : "инструмента";
+            var itemName = string.IsNullOrWhiteSpace(roomName) ? instrumentName : roomName;
+            var startTimeStr = booking.StartTime?.ToString("dd.MM.yyyy HH:mm") ?? "";
+            var endTimeStr = booking.EndTime?.ToString("dd.MM.yyyy HH:mm") ?? "";
+
+            // Меняем статус
             booking.Status = "cancelled";
+            await _context.SaveChangesAsync();
+
+            // === СОЗДАНИЕ УВЕДОМЛЕНИЯ ОБ ОТМЕНЕ БРОНИРОВАНИЯ ===
+            var cancellationNotification = new Notification
+            {
+                UserUid = booking.UserUid.Value,
+                BookingUid = booking.BookingUid,
+                NotificationType = "booking_cancelled",
+                Title = "Бронирование отменено",
+                Message = $"Ваше бронирование {itemType} \"{itemName}\" на {startTimeStr} – {endTimeStr} было отменено администратором.",
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(cancellationNotification);
             await _context.SaveChangesAsync();
 
             return NoContent();
