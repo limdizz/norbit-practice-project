@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     const userInfoDiv = document.getElementById('user-info');
     const bookingContainerCurrent = document.getElementById('booking-content-current');
     const bookingContainerArchive = document.getElementById('booking-content-archive');
@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let currentNotifications = [];
 
-
     // Для администратора скрываем блоки, связанные с бронированиями
     if (isStaff && profileBookingsSection) {
         profileBookingsSection.style.display = 'none';
@@ -43,15 +42,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Обработчик клика на кнопку колокольчика
     if (notificationsToggleBtn && notificationsDropdown) {
-        notificationsToggleBtn.addEventListener('click', function(e) {
+        notificationsToggleBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             const isOpen = notificationsDropdown.classList.contains('open');
-            
+
             if (isOpen) {
                 notificationsDropdown.classList.remove('open');
             } else {
                 // Загружаем уведомления при открытии
-                if (currentNotifications.length === 0 && userId) {
+                if (userId) {
                     loadUserNotificationsForDropdown(userId);
                 }
                 notificationsDropdown.classList.add('open');
@@ -60,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Закрытие dropdown при клике вне его
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (notificationsDropdown && !notificationsDropdown.contains(e.target)) {
             notificationsDropdown.classList.remove('open');
         }
@@ -85,6 +84,41 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (profileNotificationsSection) {
                             await loadUserNotifications(userId);
                         }
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось отметить уведомления как прочитанные');
+                }
+            });
+        }
+    }
+
+    if (!isStaff && userId) {
+        if (profileNotificationsSection) {
+            profileNotificationsSection.style.display = 'block';
+        }
+
+        // Загружаем количество непрочитанных уведомлений для бейджа при загрузке страницы
+        await loadUnreadNotificationsCount(userId);
+
+        // Также периодически обновляем (каждые 30 секунд)
+        setInterval(() => {
+            if (userId && window.location.pathname.includes('profile.html')) {
+                loadUnreadNotificationsCount(userId);
+                loadUserNotificationsForDropdown(userId);
+            }
+        }, 5000);
+
+        if (markAllNotificationsReadBtn) {
+            markAllNotificationsReadBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`https://localhost:7123/api/Notifications/user/${userId}/mark-all-read`, {
+                        method: 'PUT'
+                    });
+                    if (response.ok) {
+                        await loadUserNotificationsForDropdown(userId);
+                        await loadUserNotifications(userId);
+                        await loadUnreadNotificationsCount(userId);
                     }
                 } catch (error) {
                     console.error('Ошибка:', error);
@@ -362,7 +396,7 @@ async function enrichBookingsWithDetails(bookings, userData) {
         if (booking.subscriptionUsed === true && originalTotal > finalPrice && originalTotal > 0) {
             const rawDiscount = (1 - (finalPrice / originalTotal)) * 100;
             appliedDiscountPercent = Math.round(rawDiscount);
-            
+
             // Дополнительная проверка: скидка не должна превышать 30% (если максимальная скидка в системе 15-20%)
             // Это поможет отловить дублирование
             if (appliedDiscountPercent > 30) {
@@ -907,6 +941,7 @@ window.markNotificationAsRead = async function (notificationId) {
             const userUid = userData.userUid || userData.uid;
             if (userUid) {
                 await loadUserNotificationsForDropdown(userUid);
+                await loadUnreadNotificationsCount(userUid);
                 const profileNotificationsSection = document.getElementById('profile-notifications-section');
                 if (profileNotificationsSection && profileNotificationsSection.style.display !== 'none') {
                     await loadUserNotifications(userUid);
@@ -919,9 +954,33 @@ window.markNotificationAsRead = async function (notificationId) {
     }
 };
 
+// Загрузка количества непрочитанных уведомлений для бейджа
+async function loadUnreadNotificationsCount(userUid) {
+    const unreadBadge = document.getElementById('unread-badge');
+    if (!unreadBadge) return;
+
+    try {
+        const response = await fetch(`https://localhost:7123/api/Notifications/user/${userUid}/unread`);
+        if (!response.ok) {
+            throw new Error('Не удалось загрузить количество уведомлений');
+        }
+
+        const count = await response.json();
+        if (count > 0) {
+            unreadBadge.textContent = count > 99 ? '99+' : count;
+            unreadBadge.style.display = 'inline-block';
+        } else {
+            unreadBadge.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки количества уведомлений:', error);
+    }
+}
+
 // Загрузка уведомлений для dropdown (короткая версия)
 async function loadUserNotificationsForDropdown(userUid) {
     try {
+        // Загружаем уведомления для отображения
         const response = await fetch(`https://localhost:7123/api/Notifications/user/${userUid}`);
         if (!response.ok) {
             throw new Error('Не удалось загрузить уведомления');
@@ -929,7 +988,12 @@ async function loadUserNotificationsForDropdown(userUid) {
 
         currentNotifications = await response.json();
         renderNotificationsDropdown(currentNotifications);
-        updateUnreadBadge(currentNotifications);
+
+        // Обновляем количество непрочитанных в бейдже
+        await loadUnreadNotificationsCount(userUid);
+
+        // Также обновляем на странице профиля, если она открыта
+        await loadUserNotifications(userUid);
     } catch (error) {
         console.error('Ошибка загрузки уведомлений:', error);
         if (window.notificationsDropdownContent) {
@@ -952,7 +1016,7 @@ function renderNotificationsDropdown(notifications) {
     }
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
-    
+
     let html = `
         <div class="dropdown-header">
             <h4>🔔 Уведомления ${unreadCount > 0 ? `<span style="color: #f44336;">(${unreadCount})</span>` : ''}</h4>
@@ -991,7 +1055,7 @@ function renderNotificationsDropdown(notifications) {
 // Обновление бейджа непрочитанных
 function updateUnreadBadge(notifications) {
     if (!window.unreadBadge) return;
-    
+
     const unreadCount = notifications.filter(n => !n.isRead).length;
     if (unreadCount > 0) {
         unreadBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
@@ -1002,7 +1066,7 @@ function updateUnreadBadge(notifications) {
 }
 
 // Отметить все как прочитанные (для dropdown)
-window.markAllNotificationsRead = async function() {
+window.markAllNotificationsRead = async function () {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const userUid = userData.userUid || userData.uid;
     if (!userUid) return;
