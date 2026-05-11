@@ -439,7 +439,7 @@ namespace WebAPI.Controllers
                 NotificationType = "booking_cancelled",
                 Title = "Бронирование отменено",
                 Message = $"Ваше бронирование {itemType} \"{itemName}\" на {startTimeStr} – {endTimeStr} было отменено администратором.",
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 IsRead = false
             };
 
@@ -552,7 +552,7 @@ namespace WebAPI.Controllers
                 NotificationType = "booking_rescheduled",
                 Title = "Бронирование перенесено",
                 Message = $"Ваше бронирование {itemType} \"{itemName}\" перенесено с {oldStartTimeStr} – {oldEndTimeStr} на {newStartTimeStr} – {newEndTimeStr}.",
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 IsRead = false
             };
 
@@ -698,7 +698,7 @@ namespace WebAPI.Controllers
                 NotificationType = "new_booking",
                 Title = "Бронирование подтверждено",
                 Message = $"Ваше бронирование {itemType} \"{itemName}\" на {startTimeStr} – {endTimeStr} успешно создано.",
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 IsRead = false
             };
 
