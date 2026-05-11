@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профиль</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="scripts/notifications.js" defer></script>
     <script src="scripts/profile.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
@@ -24,20 +25,6 @@
                 <a class="menu__item" href="contacts.html">Контакты</a>
 
                 <div id="user-controls" class="menu">
-                    <div id="notifications-dropdown-container" style="position: relative; display: inline-block;">
-                        <button id="notifications-toggle-btn" class="menu__item__button"
-                            style="position: relative; padding: 8px 12px;">
-                            🔔
-                            <span id="unread-badge" class="badge" style="display: none;">0</span>
-                        </button>
-                        <div id="notifications-dropdown"
-                            style="display: none; position: absolute; top: 100%; right: 0; width: 350px; max-height: 400px; overflow-y: auto; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 1000; margin-top: 5px;">
-                            <div id="notifications-dropdown-content" style="padding: 15px;">
-                                <p style="color: #999; text-align: center;">Загрузка...</p>
-                            </div>
-                        </div>
-                    </div>
-
                     <button class="menu__item__button" onclick="location.href='profile.html'">Профиль</button>
                     <button class="menu__item__button" onclick="location.href='log_out.html'">Выйти</button>
                 </div>
