@@ -63,6 +63,8 @@ public partial class PracticeProjectContext : DbContext
 
     public virtual DbSet<UsersAdvanced> UsersAdvanceds { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=practice_project;Username=postgres;Password=1234");
 
@@ -687,6 +689,46 @@ public partial class PracticeProjectContext : DbContext
             entity.Property(e => e.Surname)
                 .HasColumnType("character varying")
                 .HasColumnName("surname");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.NotificationId).HasName("notifications_pkey");
+
+            entity.ToTable("notifications");
+
+            entity.Property(e => e.NotificationId)
+                .HasDefaultValueSql("uuid_generate_v4()")
+                .HasColumnName("notification_id");
+            entity.Property(e => e.UserUid)
+                .HasColumnName("user_uid");
+            entity.Property(e => e.BookingUid)
+                .HasColumnName("booking_uid");
+            entity.Property(e => e.NotificationType)
+                .HasColumnType("character varying")
+                .HasColumnName("notification_type");
+            entity.Property(e => e.Title)
+                .HasColumnType("character varying")
+                .HasColumnName("title");
+            entity.Property(e => e.Message)
+                .HasColumnType("text")
+                .HasColumnName("message");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.IsRead)
+                .HasDefaultValue(false)
+                .HasColumnName("is_read");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.UserUid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("notifications_users_fkey");
+
+            entity.HasOne(d => d.BookingU).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.BookingUid)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("notifications_bookings_fkey");
         });
 
         OnModelCreatingPartial(modelBuilder);

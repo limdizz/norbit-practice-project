@@ -4,12 +4,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const bookingContainerArchive = document.getElementById('booking-content-archive');
     const clearBtn = document.getElementById('clear-history');
     const profileBookingsSection = document.getElementById('profile-bookings-section');
+    const profileNotificationsSection = document.getElementById('profile-notifications-section');
+    const notificationsContent = document.getElementById('notifications-content');
+    const markAllNotificationsReadBtn = document.getElementById('mark-all-notifications-read-btn');
+    const notificationsToggleBtn = document.getElementById('notifications-toggle-btn');
+    const notificationsDropdown = document.getElementById('notifications-dropdown');
+    const notificationsDropdownContent = document.getElementById('notifications-dropdown-content');
+    const unreadBadge = document.getElementById('unread-badge');
+
+    // Глобальные переменные для уведомлений
+    window.notificationsDropdownContent = notificationsDropdownContent;
+    window.unreadBadge = unreadBadge;
 
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const userInfo = document.getElementById('user-info');
     const adminControls = document.getElementById('admin-controls');
     const isStaff = localStorage.getItem('isStaff') === 'true';
+    const userId = userData.userUid || userData.uid;
+
+    let currentNotifications = [];
 
 
     // Для администратора скрываем блоки, связанные с бронированиями
@@ -22,11 +36,63 @@ document.addEventListener('DOMContentLoaded', function () {
         if (bookingContainerCurrent) bookingContainerCurrent.innerHTML = '';
         if (bookingContainerArchive) bookingContainerArchive.innerHTML = '';
         if (clearBtn) clearBtn.style.display = 'none';
+        if (profileNotificationsSection) profileNotificationsSection.style.display = 'none';
+        if (notificationsToggleBtn) notificationsToggleBtn.style.display = 'none';
         return;
     }
 
+    // Обработчик клика на кнопку колокольчика
+    if (notificationsToggleBtn && notificationsDropdown) {
+        notificationsToggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = notificationsDropdown.classList.contains('open');
+            
+            if (isOpen) {
+                notificationsDropdown.classList.remove('open');
+            } else {
+                // Загружаем уведомления при открытии
+                if (currentNotifications.length === 0 && userId) {
+                    loadUserNotificationsForDropdown(userId);
+                }
+                notificationsDropdown.classList.add('open');
+            }
+        });
+    }
+
+    // Закрытие dropdown при клике вне его
+    document.addEventListener('click', function(e) {
+        if (notificationsDropdown && !notificationsDropdown.contains(e.target)) {
+            notificationsDropdown.classList.remove('open');
+        }
+    });
+
     // Загружаем актуальные данные из API
     loadBookingsFromAPI(userData, bookingContainerCurrent, bookingContainerArchive, clearBtn);
+
+    // Загружаем уведомления (только для обычных пользователей)
+    if (!isStaff && userId) {
+        if (profileNotificationsSection) {
+            profileNotificationsSection.style.display = 'block';
+        }
+        if (markAllNotificationsReadBtn) {
+            markAllNotificationsReadBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`https://localhost:7123/api/Notifications/user/${userId}/mark-all-read`, {
+                        method: 'PUT'
+                    });
+                    if (response.ok) {
+                        await loadUserNotificationsForDropdown(userId);
+                        if (profileNotificationsSection) {
+                            await loadUserNotifications(userId);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось отметить уведомления как прочитанные');
+                }
+            });
+        }
+    }
 
     // Отображаем профиль пользователя
     renderUserProfile(userData, isStaff);
@@ -728,3 +794,231 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
+
+// ============================================
+// Функции для работы с уведомлениями
+// ============================================
+
+// Загрузка уведомлений пользователя
+async function loadUserNotifications(userUid) {
+    const notificationsContent = document.getElementById('notifications-content');
+    if (!notificationsContent) return;
+
+    try {
+        const response = await fetch(`https://localhost:7123/api/Notifications/user/${userUid}`);
+        if (!response.ok) {
+            throw new Error('Не удалось загрузить уведомления');
+        }
+
+        const notifications = await response.json();
+        renderNotifications(notifications);
+    } catch (error) {
+        console.error('Ошибка загрузки уведомлений:', error);
+        notificationsContent.innerHTML = `
+            <div class="booking-card">
+                <p style="color: #999; text-align: center;">Не удалось загрузить уведомления</p>
+            </div>
+        `;
+    }
+}
+
+// Отрисовка уведомлений
+function renderNotifications(notifications) {
+    const notificationsContent = document.getElementById('notifications-content');
+    if (!notificationsContent) return;
+
+    if (notifications.length === 0) {
+        notificationsContent.innerHTML = `
+            <div class="booking-card">
+                <p style="color: #999; text-align: center;">Уведомлений нет</p>
+            </div>
+        `;
+        return;
+    }
+
+    notificationsContent.innerHTML = notifications.map(notification => {
+        const typeClass = `notification-type-${notification.notificationType}`;
+        const typeLabel = getNotificationTypeLabel(notification.notificationType);
+        const timeAgo = getTimeAgo(notification.createdAt);
+        const unreadClass = notification.isRead ? '' : 'unread-notification';
+
+        return `
+            <div class="booking-card ${unreadClass}" style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <span class="status-badge ${typeClass}" style="margin-bottom: 8px; display: inline-block;">
+                            ${typeLabel}
+                        </span>
+                        <h4 style="margin: 8px 0 5px 0;">${escapeHtml(notification.title)}</h4>
+                        <p style="margin: 0 0 8px 0; color: #666; line-height: 1.4;">
+                            ${escapeHtml(notification.message)}
+                        </p>
+                        <p style="margin: 0; font-size: 0.85em; color: #999;">
+                            ${timeAgo}
+                        </p>
+                    </div>
+                    ${!notification.isRead ? `
+                        <button onclick="markNotificationAsRead('${notification.notificationId}')" 
+                                style="padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;">
+                            Прочитано
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Метка типа уведомления
+function getNotificationTypeLabel(type) {
+    const labels = {
+        'new_booking': 'Новое бронирование',
+        'booking_rescheduled': 'Перенос бронирования',
+        'booking_cancelled': 'Отмена бронирования'
+    };
+    return labels[type] || type;
+}
+
+// Форматирование времени
+function getTimeAgo(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Только что';
+    if (diffMins < 60) return `${diffMins} мин. назад`;
+    if (diffHours < 24) return `${diffHours} ч. назад`;
+    if (diffDays < 7) return `${diffDays} дн. назад`;
+    return date.toLocaleDateString('ru-RU');
+}
+
+// Отметить уведомление как прочитанное (глобальная функция)
+window.markNotificationAsRead = async function (notificationId) {
+    try {
+        const response = await fetch(`https://localhost:7123/api/Notifications/${notificationId}/read`, {
+            method: 'PUT'
+        });
+
+        if (response.ok) {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const userUid = userData.userUid || userData.uid;
+            if (userUid) {
+                await loadUserNotificationsForDropdown(userUid);
+                const profileNotificationsSection = document.getElementById('profile-notifications-section');
+                if (profileNotificationsSection && profileNotificationsSection.style.display !== 'none') {
+                    await loadUserNotifications(userUid);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Не удалось обновить статус уведомления');
+    }
+};
+
+// Загрузка уведомлений для dropdown (короткая версия)
+async function loadUserNotificationsForDropdown(userUid) {
+    try {
+        const response = await fetch(`https://localhost:7123/api/Notifications/user/${userUid}`);
+        if (!response.ok) {
+            throw new Error('Не удалось загрузить уведомления');
+        }
+
+        currentNotifications = await response.json();
+        renderNotificationsDropdown(currentNotifications);
+        updateUnreadBadge(currentNotifications);
+    } catch (error) {
+        console.error('Ошибка загрузки уведомлений:', error);
+        if (window.notificationsDropdownContent) {
+            window.notificationsDropdownContent.innerHTML = `
+                <p style="color: #999; text-align: center;">Не удалось загрузить уведомления</p>
+            `;
+        }
+    }
+}
+
+// Отрисовка уведомлений в dropdown
+function renderNotificationsDropdown(notifications) {
+    if (!window.notificationsDropdownContent) return;
+
+    if (notifications.length === 0) {
+        window.notificationsDropdownContent.innerHTML = `
+            <p style="color: #999; text-align: center; padding: 20px;">Уведомлений нет</p>
+        `;
+        return;
+    }
+
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    
+    let html = `
+        <div class="dropdown-header">
+            <h4>🔔 Уведомления ${unreadCount > 0 ? `<span style="color: #f44336;">(${unreadCount})</span>` : ''}</h4>
+            ${unreadCount > 0 ? `<span class="mark-all-read-link" onclick="event.stopPropagation(); markAllNotificationsRead()">Все прочитано</span>` : ''}
+        </div>
+    `;
+
+    html += notifications.slice(0, 10).map(notification => {
+        const typeClass = `type-${notification.notificationType}`;
+        const typeLabel = getNotificationTypeLabel(notification.notificationType);
+        const timeAgo = getTimeAgo(notification.createdAt);
+        const unreadClass = notification.isRead ? '' : 'unread';
+
+        return `
+            <div class="notification-dropdown-item ${unreadClass}" data-id="${notification.notificationId}">
+                <span class="notification-type-badge ${typeClass}">${typeLabel}</span>
+                <div class="notification-title-small">${escapeHtml(notification.title)}</div>
+                <div class="notification-message-small">${escapeHtml(notification.message)}</div>
+                <div class="notification-time-small">${timeAgo}</div>
+                ${!notification.isRead ? `
+                    <button class="notification-mark-read-btn" onclick="event.stopPropagation(); window.markNotificationAsRead('${notification.notificationId}')">
+                        Прочитано
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+
+    if (notifications.length > 10) {
+        html += `<p style="text-align: center; color: #999; font-size: 0.85em; padding: 10px;">Показано 10 из ${notifications.length}</p>`;
+    }
+
+    window.notificationsDropdownContent.innerHTML = html;
+}
+
+// Обновление бейджа непрочитанных
+function updateUnreadBadge(notifications) {
+    if (!window.unreadBadge) return;
+    
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    if (unreadCount > 0) {
+        unreadBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        unreadBadge.style.display = 'inline-block';
+    } else {
+        unreadBadge.style.display = 'none';
+    }
+}
+
+// Отметить все как прочитанные (для dropdown)
+window.markAllNotificationsRead = async function() {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userUid = userData.userUid || userData.uid;
+    if (!userUid) return;
+
+    try {
+        const response = await fetch(`https://localhost:7123/api/Notifications/user/${userUid}/mark-all-read`, {
+            method: 'PUT'
+        });
+        if (response.ok) {
+            await loadUserNotificationsForDropdown(userUid);
+            const profileNotificationsSection = document.getElementById('profile-notifications-section');
+            if (profileNotificationsSection && profileNotificationsSection.style.display !== 'none') {
+                await loadUserNotifications(userUid);
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+    }
+};

@@ -433,6 +433,10 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
+            // Сохраняем старые значения для уведомления
+            var oldStartTime = booking.StartTime;
+            var oldEndTime = booking.EndTime;
+
             if (request.StartTime.HasValue)
             {
                 booking.StartTime = request.StartTime.Value.ToLocalTime();
@@ -483,6 +487,41 @@ namespace WebAPI.Controllers
                 booking.Status = "completed";
             }
 
+            await _context.SaveChangesAsync();
+
+            // === СОЗДАНИЕ УВЕДОМЛЕНИЯ О ПЕРЕНОСЕ БРОНИРОВАНИЯ ===
+            var roomName = "";
+            var instrumentName = "";
+            if (booking.RoomId.HasValue)
+            {
+                var room = await _context.Rooms.FindAsync(booking.RoomId);
+                roomName = room?.Name ?? "Помещение";
+            }
+            else if (booking.InstrumentId.HasValue)
+            {
+                var instrument = await _context.Equipment.FindAsync(booking.InstrumentId);
+                instrumentName = instrument?.Name ?? "Инструмент";
+            }
+
+            var itemType = booking.RoomId.HasValue ? "помещения" : "инструмента";
+            var itemName = string.IsNullOrWhiteSpace(roomName) ? instrumentName : roomName;
+            var oldStartTimeStr = oldStartTime?.ToString("dd.MM.yyyy HH:mm") ?? "";
+            var oldEndTimeStr = oldEndTime?.ToString("dd.MM.yyyy HH:mm") ?? "";
+            var newStartTimeStr = booking.StartTime?.ToString("dd.MM.yyyy HH:mm") ?? "";
+            var newEndTimeStr = booking.EndTime?.ToString("dd.MM.yyyy HH:mm") ?? "";
+
+            var rescheduleNotification = new Notification
+            {
+                UserUid = booking.UserUid.Value,
+                BookingUid = booking.BookingUid,
+                NotificationType = "booking_rescheduled",
+                Title = "Бронирование перенесено",
+                Message = $"Ваше бронирование {itemType} \"{itemName}\" перенесено с {oldStartTimeStr} – {oldEndTimeStr} на {newStartTimeStr} – {newEndTimeStr}.",
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(rescheduleNotification);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -596,6 +635,39 @@ namespace WebAPI.Controllers
             _context.BookingsAdvanceds.Add(booking);
             _context.BillsAdvanceds.Add(bill);
 
+            await _context.SaveChangesAsync();
+
+            // === СОЗДАНИЕ УВЕДОМЛЕНИЯ О НОВОМ БРОНИРОВАНИИ ===
+            var roomName = "";
+            var instrumentName = "";
+            if (booking.RoomId.HasValue)
+            {
+                var room = await _context.Rooms.FindAsync(booking.RoomId);
+                roomName = room?.Name ?? "Помещение";
+            }
+            else if (booking.InstrumentId.HasValue)
+            {
+                var instrument = await _context.Equipment.FindAsync(booking.InstrumentId);
+                instrumentName = instrument?.Name ?? "Инструмент";
+            }
+
+            var itemType = booking.RoomId.HasValue ? "помещения" : "инструмента";
+            var itemName = string.IsNullOrWhiteSpace(roomName) ? instrumentName : roomName;
+            var startTimeStr = booking.StartTime?.ToString("dd.MM.yyyy HH:mm") ?? "";
+            var endTimeStr = booking.EndTime?.ToString("dd.MM.yyyy HH:mm") ?? "";
+
+            var notification = new Notification
+            {
+                UserUid = booking.UserUid.Value,
+                BookingUid = booking.BookingUid,
+                NotificationType = "new_booking",
+                Title = "Бронирование подтверждено",
+                Message = $"Ваше бронирование {itemType} \"{itemName}\" на {startTimeStr} – {endTimeStr} успешно создано.",
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
 
             // === ДОБАВЛЕНИЕ ОБОРУДОВАНИЯ ===

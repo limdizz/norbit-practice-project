@@ -1654,3 +1654,125 @@ input[type="range"] {
 #clear-date-filter:hover {
     background: #5a6268;
 }
+
+.badge {
+    background: #f44336;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7em;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 18px;
+    text-align: center;
+}
+
+#notifications-toggle-btn:hover {
+    background: #f0f0f0;
+}
+
+#notifications-dropdown.open {
+    display: block !important;
+}
+
+.notification-dropdown-item {
+    background: white;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 3px solid #ccc;
+    transition: all 0.2s ease;
+}
+
+.notification-dropdown-item.unread {
+    background: #f9fff9;
+    border-left-color: #4CAF50;
+}
+
+.notification-dropdown-item:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.notification-type-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.type-new_booking {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.type-booking_rescheduled {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.type-booking_cancelled {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+.notification-title-small {
+    font-size: 0.95em;
+    font-weight: bold;
+    margin: 5px 0;
+    color: #333;
+}
+
+.notification-message-small {
+    font-size: 0.85em;
+    color: #666;
+    line-height: 1.4;
+    margin: 5px 0;
+}
+
+.notification-time-small {
+    font-size: 0.75em;
+    color: #999;
+}
+
+.notification-mark-read-btn {
+    padding: 4px 8px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75em;
+    margin-top: 8px;
+}
+
+.notification-mark-read-btn:hover {
+    background: #45a049;
+}
+
+.dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+.dropdown-header h4 {
+    margin: 0;
+    font-size: 1em;
+}
+
+.mark-all-read-link {
+    font-size: 0.8em;
+    color: #4CAF50;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.mark-all-read-link:hover {
+    color: #45a049;
+}

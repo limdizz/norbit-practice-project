@@ -29,6 +29,8 @@ public partial class BookingsAdvanced
 
     public virtual ICollection<BookingEquipment> BookingEquipments { get; set; } = new List<BookingEquipment>();
 
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
     public virtual Room? Room { get; set; }
 
     public virtual Equipment? Instrument { get; set; }

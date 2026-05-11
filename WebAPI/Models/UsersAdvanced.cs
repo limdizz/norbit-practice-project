@@ -30,4 +30,6 @@ public partial class UsersAdvanced
     public virtual ICollection<StaffAdvanced> StaffAdvanceds { get; set; } = new List<StaffAdvanced>();
 
     public virtual ICollection<UserSubscriptionsAdvanced> UserSubscriptionsAdvanceds { get; set; } = new List<UserSubscriptionsAdvanced>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }
