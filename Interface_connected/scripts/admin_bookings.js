@@ -81,6 +81,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const status = String(b.status || '').toLowerCase();
             const canEdit = status !== 'completed' && status !== 'cancelled';
+
+            // Сокращаем UUID до первых 4 символов (номер заказа)
+            const shortBookingId = b.bookingUid ? b.bookingUid.substring(0, 4).toUpperCase() : 'N/A';
+
             const actionsHtml = canEdit
                 ? `
                     <button class="admin-cancel-btn" data-id="${b.bookingUid}">Отменить</button>
@@ -89,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 : '<span style="color:#777;">Действия недоступны</span>';
 
             tr.innerHTML = `
-                <td>${b.bookingUid}</td>
+                <td>${shortBookingId}</td>
                 <td>${userInfo}</td>
                 <td>${itemInfo}</td>
                 <td>${b.startTime ? new Date(b.startTime).toLocaleString('ru-RU') : ''}</td>
