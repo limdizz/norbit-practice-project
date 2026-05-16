@@ -51,8 +51,8 @@ function createNotificationsUI() {
 
     container.innerHTML = `
         <button id="notifications-toggle-btn" class="menu__item__button"
-            style="position: relative; padding: 8px 12px;">
-            🔔
+            style="position: relative">
+            ✉︎
             <span id="unread-badge" class="badge" style="display: none;">0</span>
         </button>
         <div id="notifications-dropdown"
@@ -167,37 +167,37 @@ function renderNotificationsDropdown(notifications) {
     if (!content) return;
 
     if (notifications.length === 0) {
-        content.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Уведомлений нет</p>';
+        content.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">Уведомлений нет</p>';
         return;
     }
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     let html = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-            <h4 style="margin: 0;">🔔 Уведомления ${unreadCount > 0 ? `<span style="color: #f44336;">(${unreadCount})</span>` : ''}</h4>
-            ${unreadCount > 0 ? `<button onclick="event.stopPropagation(); markAllNotificationsRead()" style="padding: 4px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8em;">Все прочитано</button>` : ''}
+        <div class="dropdown-header">
+            <h4>Уведомления ${unreadCount > 0 ? `<span style="color: #888;">(${unreadCount})</span>` : ''}</h4>
+            ${unreadCount > 0 ? `<button class="mark-all-read-link" onclick="event.stopPropagation(); markAllNotificationsRead()">Все прочитано</button>` : ''}
         </div>
     `;
 
     html += notifications.map(notification => {
         const typeLabel = getNotificationTypeLabel(notification.notificationType);
         const timeAgo = getTimeAgo(notification.createdAt);
+        const isUnread = !notification.isRead;
 
         return `
-            <div style="padding: 10px; margin-bottom: 8px; border: 1px solid #eee; border-radius: 6px; ${!notification.isRead ? 'background-color: #f0f7ff; border-left: 3px solid #2196F3;' : ''}">
+            <div class="notification-dropdown-item ${isUnread ? 'unread' : ''}" style="padding: 12px; margin-bottom: 10px; border: 1px solid #eee; border-radius: 8px; ${isUnread ? 'background-color: #fafafa; border-left: 3px solid #000;' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div style="flex: 1;">
-                        <span style="display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1976d2; border-radius: 4px; font-size: 0.75em; margin-bottom: 5px;">
+                        <span class="notification-type-badge type-${notification.notificationType}">
                             ${typeLabel}
                         </span>
-                        <div style="font-weight: 500; margin: 5px 0 3px 0;">${escapeHtml(notification.title)}</div>
-                        <div style="color: #666; font-size: 0.85em; margin-bottom: 5px;">${escapeHtml(notification.message)}</div>
-                        <div style="color: #999; font-size: 0.75em;">${timeAgo}</div>
+                        <div class="notification-title-small">${escapeHtml(notification.title)}</div>
+                        <div class="notification-message-small">${escapeHtml(notification.message)}</div>
+                        <div class="notification-time-small">${timeAgo}</div>
                     </div>
-                    ${!notification.isRead ? `
-                        <button onclick="event.stopPropagation(); markNotificationAsRead('${notification.notificationId}')"
-                            style="padding: 4px 8px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; white-space: nowrap; margin-left: 10px;">
+                    ${isUnread ? `
+                        <button class="notification-mark-read-btn" onclick="event.stopPropagation(); markNotificationAsRead('${notification.notificationId}')">
                             Прочитано
                         </button>
                     ` : ''}

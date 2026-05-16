@@ -37,7 +37,7 @@ async function loadPlans() {
 
             let icon = '💀';
             if (pName.includes('Dark')) icon = '☠';
-            if (pName.includes('Lord')) icon = '👑';
+            if (pName.includes('Lord')) icon = '✟';
 
             const buttonHtml = (isStaff && isLoggedIn)
                 ? `<button class="subscribe-btn" onclick="location.href='admin_subscription_plans.html'">Управление абонементами</button>`
@@ -221,10 +221,10 @@ function updateButtonsUI(activePlanId) {
         if (cardPlanId === activePlanId) {
             // Активный план
             btn.textContent = 'Активно';
-            btn.style.backgroundColor = '#4CAF50';
+            btn.style.backgroundColor = 'black';
             btn.style.color = 'white';
             btn.disabled = true;
-            card.style.border = '3px solid #4CAF50';
+            card.style.border = '3px solid black';
             card.style.transform = 'scale(1.02)';
         } else {
             // Недоступные планы

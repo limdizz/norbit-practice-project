@@ -154,7 +154,7 @@
 }
 
 #clear-history.button.logout {
-    background: #e44d26;
+    background: black;
     color: white;
     margin-top: 20px;
 }
@@ -214,7 +214,7 @@
 
 .plan-card .price {
     font-size: 28px;
-    color: #e44d26;
+    color: black;
     margin: 10px 0;
     font-weight: bold;
 }
@@ -239,7 +239,7 @@
     content: "✓";
     position: absolute;
     left: 0;
-    color: #4CAF50;
+    color: black;
     font-weight: bold;
 }
 
@@ -265,7 +265,6 @@
 
 .plan-card .subscribe-btn:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
     background-color: #999;
 }
 
@@ -489,7 +488,7 @@
 
 /* Стили для страницы выхода */
 .logout-page {
-    font-family: "Segoe UI", Tahoma, sans-serif;
+    font-family: Inter, sans-serif;
     background: #f8f8f8;
     display: flex;
     justify-content: center;
@@ -522,7 +521,7 @@
 }
 
 .logout-box .redirect {
-    color: #4CAF50;
+    color: black;
     font-weight: bold;
     margin-top: 20px;
     font-size: 14px;
@@ -594,7 +593,7 @@
 }
 
 .price-card p {
-    color: #e44d26;
+    color: black;
     margin-bottom: 10px;
     font-size: 20px;
     line-height: 1.4;
@@ -1656,9 +1655,9 @@ input[type="range"] {
 }
 
 .badge {
-    background: #f44336;
-    color: white;
-    padding: 2px 6px;
+    background: white;
+    color: black;
+    border: 1px solid black;
     border-radius: 10px;
     font-size: 0.7em;
     position: absolute;
@@ -1685,15 +1684,16 @@ input[type="range"] {
     transition: all 0.2s ease;
 }
 
-.notification-dropdown-item.unread {
-    background: #f9fff9;
-    border-left-color: #4CAF50;
-}
-
 .notification-dropdown-item:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.notification-dropdown-item.unread {
+    background: #f5f5f5;
+    border-left-color: #000;
+}
+
+/* Бейджи типов уведомлений */
 .notification-type-badge {
     display: inline-block;
     padding: 3px 8px;
@@ -1701,78 +1701,112 @@ input[type="range"] {
     font-size: 0.75em;
     font-weight: bold;
     margin-bottom: 5px;
+    font-family: Inter;
 }
 
 .type-new_booking {
-    background: #e3f2fd;
-    color: #1976d2;
+    background: #e0e0e0;
+    color: #000;
 }
 
 .type-booking_rescheduled {
-    background: #fff3e0;
-    color: #f57c00;
+    background: #d0d0d0;
+    color: #000;
 }
 
 .type-booking_cancelled {
-    background: #ffebee;
-    color: #d32f2f;
+    background: #c0c0c0;
+    color: #000;
 }
 
+/* Заголовок уведомления */
 .notification-title-small {
     font-size: 0.95em;
     font-weight: bold;
     margin: 5px 0;
-    color: #333;
+    color: #000;
+    font-family: Inter;
 }
 
+/* Текст уведомления */
 .notification-message-small {
     font-size: 0.85em;
-    color: #666;
+    color: #444;
     line-height: 1.4;
     margin: 5px 0;
+    font-family: Inter;
 }
 
+/* Время уведомления */
 .notification-time-small {
     font-size: 0.75em;
-    color: #999;
+    color: #888;
+    font-family: Inter;
 }
 
+/* Кнопка "Прочитано" в уведомлении */
 .notification-mark-read-btn {
     padding: 4px 8px;
-    background: #4CAF50;
-    color: white;
-    border: none;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.75em;
     margin-top: 8px;
+    transition: all 0.3s ease;
 }
 
 .notification-mark-read-btn:hover {
-    background: #45a049;
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
 }
 
+/* Шапка выпадающего списка уведомлений */
 .dropdown-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #ddd;
     margin-bottom: 10px;
 }
 
 .dropdown-header h4 {
     margin: 0;
     font-size: 1em;
+    color: #000;
+    font-family: Inter;
 }
 
+/* Ссылка "Отметить все как прочитанные" */
 .mark-all-read-link {
     font-size: 0.8em;
-    color: #4CAF50;
+    background-color: black;
+    border: 1px solid #000;
+    border-radius: 4px;
+    color: white;
     cursor: pointer;
-    text-decoration: underline;
+    transition: color 0.3s ease;
+    font-family: Inter;
 }
 
 .mark-all-read-link:hover {
-    color: #45a049;
+    background-color: white;
+    color: black;
+}
+
+/* Базовые стили для кнопки отмены подписки (чтобы сбросить инлайновые стили и задать плавность) */
+#cancel-sub-btn {
+    background-color: black !important;
+    color: white !important;
+    border: 1px solid transparent;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+#cancel-sub-btn:hover {
+    background-color: white !important;
+    color: red !important;
+    border-color: red !important;
 }

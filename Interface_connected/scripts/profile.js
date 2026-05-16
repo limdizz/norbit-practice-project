@@ -530,7 +530,7 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
                             ${b.extraEquipment.map(eq => `
                                 <li style="display: flex; justify-content: space-between; font-size: 0.85em;">
                                     <span>${escapeHtml(eq.name)}</span>
-                                    <span style="color: #e44d26;">+${eq.price} ₽</span>
+                                    <span style="color: black;">+${eq.price} ₽</span>
                                 </li>
                             `).join('')}
                         </ul>
@@ -551,11 +551,11 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
                 let totalWithEquipment = b.originalTotal;
                 priceHtml = `
                     <span style="color:#888; text-decoration:line-through; margin-right:8px;">₽${totalWithEquipment}</span>
-                    <span style="color:#e44d26">₽${b.totalPrice}</span>
-                    <span style="color:#4CAF50; font-size:0.85em; display:block;">✓ Абонемент −${b.discountPercent}%</span>
+                    <span style="color:black">₽${b.totalPrice}</span>
+                    <span style="color:#888; font-size:0.85em; display:block;">✓ Абонемент −${b.discountPercent}%</span>
                 `;
             } else {
-                priceHtml = `<span style="color:#e44d26">₽${b.totalPrice}</span>`;
+                priceHtml = `<span style="color:black">₽${b.totalPrice}</span>`;
             }
 
             card.innerHTML = `
@@ -672,17 +672,17 @@ async function renderUserProfile(userData, isStaff) {
             }
 
             const discountInfo = discountPercent > 0
-                ? `<p><strong>Скидка:</strong> <span style="color: #4CAF50; font-weight: bold;">${discountPercent}%</span> на все бронирования</p>`
+                ? `<p><strong>Скидка:</strong> <span style="color: black; font-weight: bold;">${discountPercent}%</span> на все бронирования</p>`
                 : '';
 
             userHTML += `
-                <div style="margin-top: 20px; padding: 15px; border: 1px solid #4CAF50; border-radius: 8px; background-color: #f9fff9;">
-                    <h3 style="color: #2E7D32; margin-top:0;">Ваш абонемент: ${planName}</h3>
-                    <p><strong>Статус:</strong> <span style="color: #4CAF50; font-weight: bold;">АКТИВЕН</span></p>
+                <div style="margin-top: 20px; padding: 15px; border: 1px solid black; border-radius: 8px; background-color: white">
+                    <h3 style="color: black; margin-top:0;">Ваш абонемент: ${planName}</h3>
+                    <p><strong>Статус:</strong> <span style="color: black; font-weight: bold;">АКТИВЕН</span></p>
                     <p><strong>Осталось сеансов:</strong> ${sessions}</p>
                     <p><strong>Действует до:</strong> ${validDate}</p>
                     ${discountInfo}
-                    <button id="cancel-sub-btn" class="button logout" style="background:#dc3545; margin-top: 10px;">
+                    <button id="cancel-sub-btn" class="button logout" style="background: black; margin-top: 10px;">
                         Отменить подписку
                     </button>
                 </div>
@@ -727,115 +727,4 @@ async function cancelSubscription(userId) {
         console.error(error);
         alert('Ошибка соединения.');
     }
-}
-
-// ============================================
-// Функции для работы с уведомлениями на странице профиля
-// ============================================
-
-// Загрузка уведомлений пользователя для отображения на странице профиля
-async function loadUserNotifications(userUid) {
-    const notificationsContent = document.getElementById('notifications-content');
-    if (!notificationsContent) return;
-
-    try {
-        const response = await fetch(`https://localhost:7123/api/Notifications/user/${userUid}`);
-        if (!response.ok) {
-            throw new Error('Не удалось загрузить уведомления');
-        }
-
-        const notifications = await response.json();
-        renderNotifications(notifications);
-    } catch (error) {
-        console.error('Ошибка загрузки уведомлений:', error);
-        notificationsContent.innerHTML = `
-            <div class="booking-card">
-                <p style="color: #999; text-align: center;">Не удалось загрузить уведомления</p>
-            </div>
-        `;
-    }
-}
-
-// Отрисовка уведомлений на странице профиля
-function renderNotifications(notifications) {
-    const notificationsContent = document.getElementById('notifications-content');
-    if (!notificationsContent) return;
-
-    if (notifications.length === 0) {
-        notificationsContent.innerHTML = `
-            <div class="booking-card">
-                <p style="color: #999; text-align: center;">Уведомлений нет</p>
-            </div>
-        `;
-        return;
-    }
-
-    notificationsContent.innerHTML = notifications.map(notification => {
-        const typeClass = `notification-type-${notification.notificationType}`;
-        const typeLabel = getNotificationTypeLabel(notification.notificationType);
-        const timeAgo = getTimeAgo(notification.createdAt);
-        const unreadClass = notification.isRead ? '' : 'unread-notification';
-
-        return `
-            <div class="booking-card ${unreadClass}" style="margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="flex: 1;">
-                        <span class="status-badge ${typeClass}" style="margin-bottom: 8px; display: inline-block;">
-                            ${typeLabel}
-                        </span>
-                        <h4 style="margin: 8px 0 5px 0;">${escapeHtml(notification.title)}</h4>
-                        <p style="margin: 0 0 8px 0; color: #666; line-height: 1.4;">
-                            ${escapeHtml(notification.message)}
-                        </p>
-                        <p style="margin: 0; font-size: 0.85em; color: #999;">
-                            ${timeAgo}
-                        </p>
-                    </div>
-                    ${!notification.isRead ? `
-                        <button onclick="markNotificationAsRead('${notification.notificationId}')" 
-                                style="padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;">
-                            Прочитано
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// Вспомогательные функции для уведомлений на странице профиля
-// (эти функции также есть в notifications.js, но нужны здесь для отрисовки на странице профиля)
-
-function getNotificationTypeLabel(type) {
-    const labels = {
-        'new_booking': 'Новое бронирование',
-        'booking_rescheduled': 'Перенос бронирования',
-        'booking_cancelled': 'Отмена бронирования'
-    };
-    return labels[type] || type;
-}
-
-function getTimeAgo(isoString) {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'Только что';
-    if (diffMins < 60) return `${diffMins} мин. назад`;
-    if (diffHours < 24) return `${diffHours} ч. назад`;
-    if (diffDays < 7) return `${diffDays} дн. назад`;
-    return date.toLocaleDateString('ru-RU');
-}
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
 }

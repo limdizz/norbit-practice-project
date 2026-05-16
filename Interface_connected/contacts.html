@@ -50,7 +50,7 @@
                     <h2>Контактная информация</h2>
                     <div class="info-cards">
                         <div class="info-card">
-                            <div class="info-card-icon">📍</div>
+                            <div class="info-card-icon">⚲</div>
                             <div class="info-card-content">
                                 <div class="info-card-title">Адрес</div>
                                 <div class="info-card-text">г. Нижний Новгород, проспект Гагарина, 23</div>
@@ -59,7 +59,7 @@
                             </div>
                         </div>
                         <div class="info-card">
-                            <div class="info-card-icon">📞</div>
+                            <div class="info-card-icon">☏</div>
                             <div class="info-card-content">
                                 <div class="info-card-title">Телефон</div>
                                 <div class="info-card-text">+7 (495) 123-45-67</div>
@@ -67,7 +67,7 @@
                             </div>
                         </div>
                         <div class="info-card">
-                            <div class="info-card-icon">✉️</div>
+                            <div class="info-card-icon">🖂</div>
                             <div class="info-card-content">
                                 <div class="info-card-title">Email</div>
                                 <div class="info-card-text">vlad.klimenko.mmv@bk.ru</div>
@@ -75,7 +75,7 @@
                             </div>
                         </div>
                         <div class="info-card">
-                            <div class="info-card-icon">🕒</div>
+                            <div class="info-card-icon">◴</div>
                             <div class="info-card-content">
                                 <div class="info-card-title">Режим работы</div>
                                 <div class="info-card-text">
@@ -89,17 +89,23 @@
                     <p><strong>Социальные сети:</strong></p>
                     <div class="social-cards">
                         <a href="https://github.com/limdizz" class="social-card">
-                            <div class="social-card-icon">🐙</div>
+                            <div class="social-card-icon">
+                                <img src="img/social_cards/github.png" alt="👨🏻‍💻" width="" height="70px">
+                            </div>
                             <div class="social-card-title">GitHub</div>
                             <div class="social-card-desc">Код и проекты</div>
                         </a>
                         <a href="https://vk.com/limdizz" class="social-card">
-                            <div class="social-card-icon">📱</div>
+                            <div class="social-card-icon">
+                                <img src="img/social_cards/vk.png" alt="📱" width="" height="70px">
+                            </div>
                             <div class="social-card-title">VK</div>
                             <div class="social-card-desc">Новости и фото</div>
                         </a>
                         <a href="https://www.youtube.com/@Limdizz" class="social-card">
-                            <div class="social-card-icon">🎥</div>
+                            <div class="social-card-icon">
+                                <img src="img/social_cards/youtube.png" alt="🎥" width="" height="70px">
+                            </div>
                             <div class="social-card-title">YouTube</div>
                             <div class="social-card-desc">Видео и трансляции</div>
                         </a>
@@ -190,10 +196,10 @@
             const statusElement = document.getElementById('status-open-now');
             if (isOpen) {
                 statusElement.textContent = 'Открыто сейчас';
-                statusElement.style.color = '#4CAF50'; // зелёный
+                statusElement.style.color = 'black';
             } else {
                 statusElement.textContent = 'Закрыто';
-                statusElement.style.color = '#f44336'; // красный
+                statusElement.style.color = '#888';
             }
         }
 

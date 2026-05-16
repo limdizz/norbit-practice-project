@@ -150,13 +150,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function formatCardTitle(name) {
+        if (name.includes(" от")) {
+            return name.replace(" от", "");
+        }
+        return name;
+    }
+
     function createCardElement(data, type, isCustom, index = null) {
         const div = document.createElement("div");
         div.className = "price-card";
         div.dataset.custom = isCustom;
         div.dataset.index = index;
         div.dataset.type = type;
-        div.dataset.name = data.name; // для поиска при сохранении
+        div.dataset.name = data.name;
 
         if (isEditing) {
             div.innerHTML = `
@@ -169,15 +176,20 @@ document.addEventListener("DOMContentLoaded", function () {
             ${isCustom ? `<button class="delete-custom" style="color:red; background:none; border:none; font-size:18px; cursor:pointer;">×</button>` : ''}
         `;
 
-            // Удаление только для кастомных
             if (isCustom) {
                 div.querySelector(".delete-custom").onclick = () => removeCustomCard(index);
             }
         } else {
+            // Определяем, нужно ли показывать "от"
+            const showFrom = data.name.includes(" от");
+            const displayName = formatCardTitle(data.name);
+
             div.innerHTML = `
-            <h3>${data.name}</h3>
-            <p class="price">₽${data.price} / ${data.unit}</p>
-            ${isCustom ? '<span style="font-size:0.8em; color:#999;"></span>' : ''}
+            <h3>${displayName}</h3>
+            <p class="price">
+                ${showFrom ? '<span class="price-from">от</span> ' : ''}
+                ₽${data.price} / ${data.unit}
+            </p>
         `;
         }
 
