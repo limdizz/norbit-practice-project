@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Зарегистрироваться</title>
     <link rel="stylesheet" href="css\style.css">
-    <script src="scripts/notifications.js" defer></script>
     <script src="scripts/sign_up.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
@@ -59,12 +58,15 @@
                 </label>
                 <input class="register_p" placeholder="21313@example.com" type="email" id="regEmail">
 
-                <label for="regFirstName" class="register_p" id="regPasswordLabel">
+                <label for="regPassword" class="register_p" id="regPasswordLabel">
                     Пароль:
                 </label>
-                <input class="register_p" placeholder="*************" type="password" id="regPassword">
+                <div class="password-wrapper">
+                    <input class="register_p" type="password" id="regPassword" name="password" required>
+                    <button type="button" id="togglePassword" class="password-toggle-btn">👁</button>
+                </div>
 
-                <br><a href="log_in.html">Я уже бывал здесь прежде</a>
+                <a href="log_in.html" style="color: #888">Я уже бывал здесь прежде</a>
 
                 <button class="register_button" id="register_button">Зарегистрироваться</button>
             </section>

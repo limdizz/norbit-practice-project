@@ -8,37 +8,53 @@ document.addEventListener('DOMContentLoaded', function () {
     const phoneField = document.getElementById('phone-field');
     const emailInput = document.getElementById('loginEmail');
     const phoneInput = document.getElementById('loginPhone');
-    const radioButtons = document.querySelectorAll('input[name="loginType"]');
+    const typeToggle = document.getElementById('login-type-toggle');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const loginPasswordInput = document.getElementById('loginPassword');
+
+    if (togglePasswordBtn && loginPasswordInput) {
+        togglePasswordBtn.addEventListener('click', function () {
+            // Проверяем текущий тип инпута
+            if (loginPasswordInput.type === 'password') {
+                loginPasswordInput.type = 'text';
+                this.textContent = '✕'; // Меняем иконку на крестик или другой символ, когда пароль виден
+            } else {
+                loginPasswordInput.type = 'password';
+                this.textContent = '👁'; // Возвращаем глазик
+            }
+        });
+    }
 
     // Убираем встроенный onclick
     loginButton.removeAttribute('onclick');
 
-    // Переключение между способами входа
-    radioButtons.forEach(radio => {
-        radio.addEventListener('change', function () {
-            if (this.value === 'email') {
-                emailField.style.display = 'block';
-                phoneField.style.display = 'none';
-                emailInput.required = true;
-                phoneInput.required = false;
-                phoneInput.value = ''; // Очищаем поле телефона
-            } else {
-                emailField.style.display = 'none';
-                phoneField.style.display = 'block';
+    if (typeToggle) {
+        typeToggle.addEventListener('change', function () {
+            if (this.checked) {
+                // Выбран Телефон: скрываем email, показываем телефон
+                emailField.classList.add('hidden-field');
+                phoneField.classList.remove('hidden-field');
+
                 emailInput.required = false;
                 phoneInput.required = true;
                 emailInput.value = ''; // Очищаем поле email
+            } else {
+                // Выбран Email: показываем email, скрываем телефон
+                emailField.classList.remove('hidden-field');
+                phoneField.classList.add('hidden-field');
+
+                emailInput.required = true;
+                phoneInput.required = false;
+                phoneInput.value = ''; // Очищаем поле телефона
             }
         });
-    });
+    }
 
     loginForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
+        const loginType = typeToggle && typeToggle.checked ? 'phone' : 'email';
         const password = passwordInput.value.trim();
-
-        // Определяем, какой способ входа выбран
-        const loginType = document.querySelector('input[name="loginType"]:checked').value;
 
         let loginData = { password: password };
 

@@ -203,6 +203,18 @@ function initSearch() {
             applyFilters();
         }
     });
+
+    searchButton.addEventListener('mouseenter', function () {
+        this.style.color = 'black';
+        this.style.backgroundColor = 'white';
+        this.style.transition = '0.3s';
+    });
+
+    searchButton.addEventListener('mouseleave', function () {
+        this.style.backgroundColor = 'black';
+        this.style.color = 'white';
+        this.style.transition = '0.3s';
+    });
 }
 
 function initPriceRange() {
@@ -508,8 +520,8 @@ function addAvailabilityFilterInfo() {
     if (availabilityFilter.enabled && availabilityFilter.date) {
         const infoDiv = document.createElement('div');
         infoDiv.className = 'availability-filter-info';
-        infoDiv.style.cssText = 'margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 8px; text-align: center;';
-        infoDiv.innerHTML = `📅 <strong>Фильтр по дате и времени:</strong> показаны только помещения, свободные <strong>${formatDateForDisplay(availabilityFilter.date)} с ${availabilityFilter.startTime} до ${availabilityFilter.endTime}</strong>`;
+        infoDiv.style.cssText = 'margin-bottom: 15px; padding: 10px; background: #fafafa; border-radius: 8px; text-align: center;';
+        infoDiv.innerHTML = ` <strong>Фильтр по дате и времени:</strong> показаны только помещения, свободные <strong>${formatDateForDisplay(availabilityFilter.date)} с ${availabilityFilter.startTime} до ${availabilityFilter.endTime}</strong>`;
         productList.parentNode.insertBefore(infoDiv, productList);
     }
 }
@@ -563,7 +575,7 @@ function renderRooms(rooms) {
         </div>
         <h3 style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">Добавить помещение</h3>
         <div style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
-            <span class="condition-badge" style="background: #2196F3; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
+            <span class="condition-badge" style="background: black; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
                 Новое
             </span>
         </div>
@@ -586,6 +598,16 @@ function renderRooms(rooms) {
         showAddRoomForm();
     });
 
+    addCard.addEventListener('mouseenter', function () {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+    });
+
+    addCard.addEventListener('mouseleave', function () {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    });
+
     productList.appendChild(addCard);
 }
 
@@ -598,8 +620,8 @@ function createRoomCard(room) {
         const discountedPrice = Math.round(room.price * (1 - discountPercent / 100));
         priceDisplayHtml = `
             <span style="text-decoration: line-through; color: #888; font-size: 0.8em;">${room.price} ₽</span>
-            <span style="color: #e44d26;">${discountedPrice} ₽/час</span>
-            <div style="color: #4CAF50; font-size: 0.75em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+            <span style="color: black;">${discountedPrice} ₽/час</span>
+            <div style="color: black; font-size: 0.75em; font-weight: normal; margin-top: 2px;">Скидка ${discountPercent}%</div>
         `;
     }
 
@@ -622,7 +644,7 @@ function createRoomCard(room) {
         position: relative;
     `;
 
-    const statusColor = room.isFree ? '#4CAF50' : '#F44336';
+    const statusColor = room.isFree ? '#000' : '#F44336';
     const statusText = room.isFree ? 'Свободно' : 'Занято';
 
     // Получаем статус staff
@@ -662,7 +684,7 @@ function createRoomCard(room) {
 
         <div style="margin-top: auto;">
             <a href="room.html?id=${room.id}" 
-               style="color: #e44d26; font-weight: bold; font-size: 1.1em; text-decoration: none; display: block; padding: 8px 0;">
+               style="color: black; font-weight: bold; font-size: 1.1em; text-decoration: none; display: block; padding: 8px 0;">
                 ${priceDisplayHtml}
             </a>
             <small style="color: #888; font-size: 0.8em;">Нажмите для бронирования</small>
@@ -675,6 +697,16 @@ function createRoomCard(room) {
             sessionStorage.setItem('selectedRoomImage', room.image);
             window.location.href = `room.html?id=${room.id}`;
         }
+    });
+
+    cardContainer.addEventListener('mouseenter', function () {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+    });
+
+    cardContainer.addEventListener('mouseleave', function () {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     });
 
     // Обработчик удаления
@@ -745,12 +777,12 @@ function initNavigation() {
 function showAddRoomForm() {
     // Создаем модальное окно добавления
     const modalHtml = `
-    <div id="add-room-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+    <div id="add-room-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; font-family: Inter;">
         <div style="background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90vw;">
             <h3 style="margin-top: 0;">Добавить новое помещение</h3>
             <form id="add-room-form">
                 <div style="margin-bottom: 10px;">
-                    <label for="new-name" style="display: inline-block; width: 120px;">Название:</label>
+                    <label for="new-name" style="display: inline-block; width: 120px">Название:</label>
                     <input type="text" id="new-name" name="name" required style="width: 200px; padding: 5px;">
                 </div>
                 <div style="margin-bottom: 10px;">
@@ -766,8 +798,8 @@ function showAddRoomForm() {
                     <input type="checkbox" id="new-isFree" name="isFree" checked>
                 </div>
                 <div style="margin-top: 15px; text-align: right;">
-                    <button type="button" id="cancel-add" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Отмена</button>
-                    <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Сохранить</button>
+                    <button type="button" id="cancel-add">Отмена</button>
+                    <button type="submit" id="submit-add">Сохранить</button>
                 </div>
             </form>
         </div>

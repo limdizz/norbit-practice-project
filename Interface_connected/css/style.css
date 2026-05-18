@@ -46,11 +46,49 @@
     background-color: black;
     color: white;
     font-family: Inter;
+    border: 1px solid black;
+    border-radius: 4px;
 }
 
 #site-search {
     font-family: Inter;
     margin-left: 10px;
+    border: 1px solid black;
+    border-radius: 4px;
+}
+
+/* Стили кнопок в меню добавления нового помещения/инструмента */
+#submit-add {
+    padding: 8px 16px;
+    background: black;
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#submit-add:hover {
+    color: black;
+    background: white;
+    border: 1px solid black;
+    transition: 0.3s;
+}
+
+#cancel-add {
+    padding: 8px 16px;
+    background: black;
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+#cancel-add:hover {
+    color: black;
+    background: white;
+    border: 1px solid black;
+    transition: 0.3s;
 }
 
 /* Стили для страницы "Мои бронирования" */
@@ -911,6 +949,7 @@ h2 {
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 1px solid #eee;
+    text-align: center;
 }
 
 .price_block span {
@@ -1096,6 +1135,7 @@ h2 {
     border: none;
     cursor: pointer;
     transition: 0.3s;
+    border-radius: 4px;
 }
 
 .about_p {
@@ -1133,6 +1173,7 @@ h2 {
     border: none;
     cursor: pointer;
     transition: 0.3s;
+    border-radius: 4px;
 }
 
 .about_button:hover {
@@ -1189,6 +1230,15 @@ h2 {
     padding: 10px 20px;
     cursor: pointer;
     transition: 0.3s;
+}
+
+.register>input.register_p {
+    display: block;
+    margin-bottom: 20px;
+}
+
+#regPassword {
+    margin-bottom: 20px;
 }
 
 .register_button:hover {
@@ -1405,7 +1455,18 @@ input[type="range"] {
 
 .login-field {
     transition: all 0.3s ease;
+    margin-bottom: 20px;
 }
+
+.login-field label.register_p {
+    display: block;
+    /* Превращаем в блочный элемент, чтобы он занял всю ширину */
+    text-align: center;
+    /* Выравниваем текст надписи по центру */
+    margin-bottom: 5px;
+    /* Делаем аккуратный отступ до инпута */
+}
+
 
 .faq-info h2 {
     text-align: center;
@@ -1809,4 +1870,159 @@ input[type="range"] {
     background-color: white !important;
     color: red !important;
     border-color: red !important;
+}
+
+/* Контейнер, собирающий текст и слайдер в одну линию */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.toggle-label-text {
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+/* Сам контейнер переключателя */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+/* Прячем дефолтный чекбокс */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Фон слайдера (В положении "Email" он белый с чёрной рамкой) */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fff;
+    border: 2px solid #000;
+    transition: .3s ease-in-out;
+    border-radius: 34px;
+}
+
+/* Кругляшок внутри слайдера (Изначально чёрный, прижат влево) */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #000;
+    transition: .3s ease-in-out;
+    border-radius: 50%;
+}
+
+/* --- СОСТОЯНИЕ КОГДА ЧЕКБОКС АКТИВЕН (Выбран Телефон) --- */
+
+/* Меняем фон самого слайдера на чёрный */
+.switch input:checked+.slider {
+    background-color: #000;
+}
+
+/* Кругляшок меняет цвет на белый и плавно уезжает вправо */
+.switch input:checked+.slider:before {
+    transform: translateX(24px);
+    background-color: #fff;
+}
+
+.hidden-field {
+    display: none !important;
+}
+
+/* Контейнер для относительного позиционирования глазика */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    /* Чтобы ширина совпадала с остальными инпутами */
+    margin: 0 auto;
+    /* Центрируем контейнер, если форма отцентрирована */
+}
+
+/* Корректируем инпут пароля, чтобы текст не залезал под глазик */
+.password-wrapper input.register_p {
+    width: 100%;
+    padding-right: 40px;
+    /* Делаем отступ справа под кнопку */
+    box-sizing: border-box;
+}
+
+/* Стили самой кнопки-глазика */
+.password-toggle-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 0;
+    margin: 0;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    transition: opacity 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+    opacity: 0.6;
+    /* Деликатный интерактив при наведении */
+}
+
+/* Выравнивание полей ввода даты в фильтрах */
+
+#availability-date {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: white;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+#availability-date:focus {
+    outline: none;
+    border-color: #000;
+}
+
+/* Для кнопки "Очистить" под датой */
+#clear-date-filter {
+    width: 100%;
+    padding: 8px 12px;
+    margin-top: 8px;
+    background-color: #000;
+    color: white;
+    border: 1px solid #000;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+#clear-date-filter:hover {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
 }

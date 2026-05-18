@@ -277,7 +277,7 @@ function renderInstrumentDetails(instrument) {
             <span style="text-decoration: line-through; color: #888; font-size: 0.85em; margin-right: 5px;">
                 ${instrument.price} ₽
             </span> 
-            <b style="color: #e44d26;">${discountedPrice} ₽ / сутки</b>
+            <b style="color: black;">${discountedPrice} ₽ / сутки</b>
         `;
         } else {
             priceDisplay.textContent = `${instrument.price} ₽ / сутки`;
@@ -482,8 +482,8 @@ function updatePriceCalculation() {
             const originalTotal = days * currentInstrument.price;
             totalPriceElement.innerHTML = `
                 <span style="text-decoration: line-through; color: #888; font-size: 0.9em;">${originalTotal} ₽</span>
-                <b style="color: #e44d26; margin-left: 5px;">${totalPrice} ₽</b>
-                <div style="color: #4CAF50; font-size: 0.75em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+                <b style="color: black; margin-left: 5px;">${totalPrice} ₽</b>
+                <div style="color: #888; font-size: 0.75em; font-weight: normal; margin-top: 2px;">Скидка ${discountPercent}%</div>
             `;
         } else {
             totalPriceElement.textContent = `₽${totalPrice}`;

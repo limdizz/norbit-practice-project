@@ -174,9 +174,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                     <div style="border-top: 1px solid #eee; padding-top: 10px;">
                         <div style="color: #888; font-size: 0.95em;">Старая цена: ${originalTotal} ₽</div>
                         <div style="font-size: 1.4em; margin-top: 5px;">
-                            <strong>К оплате: <span style="color: #e44d26;">${Math.round(total)} ₽</span></strong>
+                            <strong>К оплате: <span style="color: black;">${Math.round(total)} ₽</span></strong>
                         </div>
-                        <div style="color: #4CAF50; font-size: 0.85em; margin-top: 5px;">
+                        <div style="color: #888; font-size: 0.85em; margin-top: 5px;">
                             ✓ Применен абонемент (скидка ${discount}%)
                         </div>
                     </div>

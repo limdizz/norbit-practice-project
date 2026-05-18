@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Войти</title>
     <link rel="stylesheet" href="css\style.css">
-    <script src="scripts/notifications.js" defer></script>
     <script src="scripts/log_in.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
@@ -40,38 +39,35 @@
             <form id="loginForm">
                 <h1 class="register_h">Войти</h1>
                 <section class="register">
-                    <!-- Добавляем переключатель способа входа -->
-                    <div class="login-type-selector" style="margin-bottom: 20px; text-align: center;">
-                        <label style="margin-right: 15px;">
-                            <input type="radio" name="loginType" value="email" checked> По email
+                    <div class="toggle-container">
+                        <span class="toggle-label-text">Email</span>
+
+                        <label class="switch">
+                            <input type="checkbox" id="login-type-toggle">
+                            <span class="slider"></span>
                         </label>
-                        <label>
-                            <input type="radio" name="loginType" value="phone"> По телефону
-                        </label>
+
+                        <span class="toggle-label-text">Телефон</span>
                     </div>
 
-                    <!-- Поле для email (изначально видимо) -->
                     <div id="email-field" class="login-field">
-                        <label for="loginEmail" class="register_p">
-                            Email:
-                        </label>
+                        <label for="loginEmail" class="register_p">Email:</label>
                         <input class="register_p" placeholder="21313@example.com" type="email" id="loginEmail" required>
                     </div>
 
-                    <!-- Поле для телефона (изначально скрыто) -->
-                    <div id="phone-field" class="login-field" style="display: none;">
-                        <label for="loginPhone" class="register_p">
-                            Номер телефона:
-                        </label>
+                    <div id="phone-field" class="login-field hidden-field">
+                        <label for="loginPhone" class="register_p">Номер телефона:</label>
                         <input class="register_p" placeholder="+79991234567" type="tel" id="loginPhone">
                     </div>
 
-                    <label for="loginPassword" class="register_p">
-                        Пароль:
-                    </label>
-                    <input class="register_p" placeholder="*************" type="password" id="loginPassword" required>
+                    <label for="loginPassword" class="register_p">Пароль:</label>
+                    <div class="password-wrapper">
+                        <input class="register_p" type="password" id="loginPassword" required>
+                        <button type="button" id="togglePassword" class="password-toggle-btn"
+                            aria-label="Показать/скрыть пароль">👁</button>
+                    </div>
 
-                    <p>В первый раз здесь?<br> <a href="sign_up.html">Зарегистрируйтесь</a></p>
+                    <p>В первый раз здесь?<br> <a href="sign_up.html" style="color: #888">Зарегистрируйтесь</a></p>
 
                     <button class="register_button" id="loginButton">Войти</button>
                 </section>

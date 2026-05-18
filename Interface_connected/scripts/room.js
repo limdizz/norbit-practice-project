@@ -647,8 +647,8 @@ function calculatePrice() {
             const originalTotal = (hours * currentRoom.price) + equipmentTotal;
             totalEl.innerHTML = `
                 <span style="text-decoration: line-through; color: #888; font-size: 0.9em;">${originalTotal} ₽</span>
-                <b style="color: #e44d26; margin-left: 5px;">${total} ₽</b>
-                <div style="color: #4CAF50; font-size: 0.75em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+                <b style="color: black; margin-left: 5px;">${total} ₽</b>
+                <div style="color: #888; font-size: 0.75em; font-weight: normal; margin-top: 2px;">Скидка ${discountPercent}%</div>
             `;
         } else {
             totalEl.textContent = `${total} ₽`;
@@ -663,7 +663,7 @@ function calculatePrice() {
                 <span style="text-decoration: line-through; color: #888; font-size: 0.85em; font-weight: normal; margin-right: 5px;">
                     ${currentRoom.price} ₽
                 </span> 
-                <b style="color: #e44d26;">${discountedUnitPrice} ₽ / час</b>
+                <b style="color: black;">${discountedUnitPrice} ₽ / час</b>
             `;
         } else {
             priceDisplay.textContent = `${currentRoom.price} ₽ / час`;
@@ -781,7 +781,7 @@ function renderRoomDetails(room) {
     const btn = document.getElementById('book_button');
     if (statusEl) {
         if (!room.isFree) {
-            statusEl.innerHTML = '<span style="color:red">Временно занято</span>';
+            statusEl.innerHTML = '<span style="color:grey">Временно занято</span>';
             roomBaseStatusHTML = statusEl.innerHTML;
 
             if (btn) {
@@ -789,7 +789,7 @@ function renderRoomDetails(room) {
                 btn.style.background = '#ccc';
             }
         } else {
-            statusEl.innerHTML = '<span style="color:green">Свободно для бронирования</span>';
+            statusEl.innerHTML = '<span style="color:black">Свободно для бронирования</span>';
             roomBaseStatusHTML = statusEl.innerHTML;
         }
     }

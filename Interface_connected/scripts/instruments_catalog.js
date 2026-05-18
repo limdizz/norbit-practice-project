@@ -246,6 +246,25 @@ function initSearch() {
             applyFilters();
         }
     });
+
+    searchButton.addEventListener('mouseenter', function () {
+        this.style.color = 'black';
+        this.style.backgroundColor = 'white';
+        this.style.transition = '0.3s';
+    });
+
+    searchButton.addEventListener('mouseleave', function () {
+        this.style.backgroundColor = 'black';
+        this.style.color = 'white';
+        this.style.transition = '0.3s';
+    });
+
+    searchInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            applyFilters();
+        }
+    });
 }
 
 function initPriceRange() {
@@ -456,8 +475,8 @@ function addAvailabilityFilterInfo() {
     if (availabilityFilter.enabled && availabilityFilter.date) {
         const infoDiv = document.createElement('div');
         infoDiv.className = 'availability-filter-info';
-        infoDiv.style.cssText = 'margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 8px; text-align: center;';
-        infoDiv.innerHTML = `📅 <strong>Фильтр по дате:</strong> показаны только инструменты, свободные на <strong>${formatDateForDisplay(availabilityFilter.date)}</strong>`;
+        infoDiv.style.cssText = 'margin-bottom: 15px; padding: 10px; background: #fafafa; border-radius: 8px; text-align: center;';
+        infoDiv.innerHTML = `<strong>Фильтр по дате:</strong> показаны только инструменты, свободные на <strong>${formatDateForDisplay(availabilityFilter.date)}</strong>`;
         productList.parentNode.insertBefore(infoDiv, productList);
     }
 }
@@ -560,7 +579,7 @@ function renderInstruments(instruments) {
         </div>
         <h3 style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">Добавить инструмент</h3>
         <div style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
-            <span class="condition-badge" style="background: #2196F3; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
+            <span class="condition-badge" style="background: black; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
                 Новый
             </span>
         </div>
@@ -579,6 +598,16 @@ function renderInstruments(instruments) {
     addCard.addEventListener('click', function (e) {
         e.preventDefault();
         showAddInstrumentForm();
+    });
+
+    addCard.addEventListener('mouseenter', function () {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+    });
+
+    addCard.addEventListener('mouseleave', function () {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     });
 
     productList.appendChild(addCard);
@@ -601,9 +630,9 @@ function createInstrumentCard(instrument) {
         priceHtml = `
         <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 5px;">
             <span style="text-decoration: line-through; color: #888; font-size: 0.9em; font-weight: normal;">₽${instrument.price}</span>
-            <span style="color: #e44d26; font-weight: bold; font-size: 1.1em;">₽${discountedPrice}</span>
+            <span style="color: black; font-weight: bold; font-size: 1.1em;">₽${discountedPrice}</span>
         </div>
-        <div style="color: #4CAF50; font-size: 0.7em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+        <div style="color: black; font-size: 0.7em; margin-top: 2px;">Скидка ${discountPercent}%</div>
     `;
     }
 
@@ -639,17 +668,17 @@ function createInstrumentCard(instrument) {
         </button>
     ` : '';
 
-    let conditionColor = '#2196F3';
+    let conditionColor = '';
 
     switch (instrument.condition) {
         case 'Отличное состояние':
-            conditionColor = '#128816ff';
+            conditionColor = '#000';
             break;
         case 'Хорошее состояние':
-            conditionColor = '#07ce0eff';
+            conditionColor = '#444';
             break;
         case 'Незначительные дефекты':
-            conditionColor = '#FFC107';
+            conditionColor = '#888';
             break;
         case 'В ремонте':
             conditionColor = '#F44336';
@@ -792,8 +821,8 @@ function setupAddInstrumentButton() {
 function showAddInstrumentForm() {
     const modalHtml = `
     <div id="add-instrument-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
-        <div style="background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90vw;">
-            <h3 style="margin-top: 0;">Добавить новый инструмент</h3>
+        <div style="background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90vw; font-family: Inter;">
+            <h3 style="margin-top: 0; ">Добавить новый инструмент</h3>
             <form id="add-instrument-form">
                 <div style="margin-bottom: 10px;">
                     <label for="new-name" style="display: inline-block; width: 120px;">Название:</label>
@@ -848,8 +877,8 @@ function showAddInstrumentForm() {
                     <input type="checkbox" id="new-isRentable" name="isRentable" checked>
                 </div>
                 <div style="margin-top: 15px; text-align: right;">
-                    <button type="button" id="cancel-add" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Отмена</button>
-                    <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Сохранить</button>
+                    <button type="button" id="cancel-add">Отмена</button>
+                    <button type="submit" id="submit-add">Сохранить</button>
                 </div>
             </form>
         </div>

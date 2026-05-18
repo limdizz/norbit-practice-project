@@ -1,5 +1,20 @@
 document.addEventListener('DOMContentLoaded', function () {
     const registerButton = document.querySelector('.register_button');
+    const registerPasswordInput = document.getElementById('regPassword');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+
+    if (togglePasswordBtn && registerPasswordInput) {
+        togglePasswordBtn.addEventListener('click', function () {
+            // Проверяем текущий тип инпута
+            if (registerPasswordInput.type === 'password') {
+                registerPasswordInput.type = 'text';
+                this.textContent = '✕';
+            } else {
+                registerPasswordInput.type = 'password';
+                this.textContent = '👁';
+            }
+        });
+    }
 
     if (registerButton) {
         registerButton.removeAttribute('onclick');
