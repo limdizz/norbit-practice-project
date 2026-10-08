@@ -672,7 +672,7 @@ function createRoomCard(room) {
             </div>
         </div>
         
-        <h3 style="margin: 10px 0 5px 0; font-size: 1.1em; height: 40px; overflow: hidden;">${room.name}</h3>
+        <h3 class="room-card-name" style="margin: 10px 0 5px 0; font-size: 1.1em; height: 40px; overflow: hidden;">${room.name}</h3>
         
         <div style="color: #666; font-size: 0.9em; margin-bottom: 5px; font-weight:bold;">
             ${room.category}

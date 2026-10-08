@@ -219,20 +219,14 @@ function updateButtonsUI(activePlanId) {
         const cardPlanId = parseInt(card.dataset.planId);
 
         if (cardPlanId === activePlanId) {
-            // Активный план
             btn.textContent = 'Активно';
-            btn.style.backgroundColor = 'black';
-            btn.style.color = 'white';
             btn.disabled = true;
             card.style.border = '3px solid black';
             card.style.transform = 'scale(1.02)';
         } else {
-            // Недоступные планы
             btn.textContent = 'Недоступно';
-            btn.style.backgroundColor = '#ccc';
-            btn.style.color = '#666';
-            btn.style.cursor = 'not-allowed';
             btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
             card.style.opacity = '0.7';
             card.style.border = '1px solid #ddd';
             card.style.transform = 'none';
@@ -246,10 +240,8 @@ function resetButtonsUI() {
         const btn = card.querySelector('button');
         if (btn) {
             btn.textContent = 'Выбрать';
-            btn.style.backgroundColor = 'black';
-            btn.style.color = 'white';
-            btn.style.cursor = 'pointer';
             btn.disabled = false;
+            btn.style.cursor = 'pointer';
         }
         card.style.opacity = '1';
         card.style.border = '1px solid #ddd';

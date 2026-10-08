@@ -530,7 +530,7 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
                             ${b.extraEquipment.map(eq => `
                                 <li style="display: flex; justify-content: space-between; font-size: 0.85em;">
                                     <span>${escapeHtml(eq.name)}</span>
-                                    <span style="color: black;">+${eq.price} ₽</span>
+                                    <span class="equipment-price">+${eq.price} ₽</span>
                                 </li>
                             `).join('')}
                         </ul>
@@ -550,12 +550,12 @@ function renderBookings(bookings, currentContainer, archiveContainer, clearBtn, 
             if (b.discountPercent > 0) {
                 let totalWithEquipment = b.originalTotal;
                 priceHtml = `
-                    <span style="color:#888; text-decoration:line-through; margin-right:8px;">₽${totalWithEquipment}</span>
-                    <span style="color:black">₽${b.totalPrice}</span>
-                    <span style="color:#888; font-size:0.85em; display:block;">✓ Абонемент −${b.discountPercent}%</span>
+                    <span class="old-price-inline">₽${totalWithEquipment}</span>
+                    <span class="total-price">₽${b.totalPrice}</span>
+                    <span class="discount-info">✓ Абонемент −${b.discountPercent}%</span>
                 `;
             } else {
-                priceHtml = `<span style="color:black">₽${b.totalPrice}</span>`;
+                priceHtml = `<span class="total-price">₽${b.totalPrice}</span>`;
             }
 
             card.innerHTML = `

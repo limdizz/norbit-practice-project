@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Контакты</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="scripts/theme.js"></script>
     <script src="scripts/notifications.js" defer></script>
     <script src="scripts/auth_state.js" defer></script>
 </head>
@@ -22,6 +23,10 @@
                 <a class="menu__item" href="subscription_plans.html">Абонементы</a>
                 <a class="menu__item" href="prices.html">Цены</a>
                 <a class="menu__item active" href="contacts.html">Контакты</a>
+
+                <button id="theme-toggle-btn" class="menu__item__button theme-toggle" title="Переключить тему">
+                    🌙
+                </button>
 
                 <div id="user-controls" class="menu">
                     <!-- <a class="menu__item" href="my_bookings.html">Мои бронирования</a> -->
@@ -196,10 +201,8 @@
             const statusElement = document.getElementById('status-open-now');
             if (isOpen) {
                 statusElement.textContent = 'Открыто сейчас';
-                statusElement.style.color = 'black';
             } else {
                 statusElement.textContent = 'Закрыто';
-                statusElement.style.color = '#888';
             }
         }
 

@@ -2026,3 +2026,601 @@ input[type="range"] {
     color: #000;
     border: 1px solid #000;
 }
+
+/* ===================== Тёмная тема ===================== */
+
+body.dark-theme {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.dark-theme .header {
+    border-bottom-color: #555;
+}
+
+body.dark-theme .menu__item {
+    color: #e0e0e0;
+}
+
+body.dark-theme .menu__item__button {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-theme .menu__item__button:hover {
+    background-color: #555;
+    color: #fff;
+    border-color: #888;
+}
+
+body.dark-theme .main {
+    color: #e0e0e0;
+}
+
+body.dark-theme .about_p {
+    color: #ccc;
+}
+
+body.dark-theme .footer {
+    border-top-color: #555;
+}
+
+body.dark-theme .rooms,
+body.dark-theme .instruments,
+body.dark-theme .contacts {
+    color: #e0e0e0;
+}
+
+body.dark-theme .footer_menu__item {
+    color: #ccc;
+}
+
+body.dark-theme .footer_menu__item_h {
+    color: #e0e0e0;
+}
+
+body.dark-theme .booking-card {
+    background: #2a2a2a;
+    border-color: #444;
+    border-bottom-color: #333;
+}
+
+body.dark-theme .booking-card:hover {
+    border-color: #888;
+}
+
+body.dark-theme .booking-card img {
+    background-color: #333;
+    border-color: #444;
+}
+
+body.dark-theme .booking-info h2 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .booking-info h3,
+body.dark-theme .booking-info p {
+    color: #bbb;
+}
+
+body.dark-theme .booking-info strong {
+    color: #e0e0e0;
+}
+
+body.dark-theme .no-bookings {
+    color: #999;
+    border-color: #555;
+}
+
+body.dark-theme .plan-card {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-theme .plan-card:hover {
+    border-color: #888;
+}
+
+body.dark-theme .plan-card h2 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .plan-card ul li {
+    color: #bbb;
+}
+
+body.dark-theme .plan-card ul li:before {
+    color: #4caf50;
+}
+
+body.dark-theme .plan-card .subscribe-btn {
+    background-color: #222;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-theme .plan-card .subscribe-btn:hover {
+    background-color: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+}
+
+body.dark-theme .plan-card .price {
+    color: #ffffff;
+}
+
+body.dark-theme .instrument_card {
+    background: transparent;
+}
+
+body.dark-theme .card_column_image img {
+    background-color: #333;
+    border-color: #444;
+}
+
+body.dark-theme #room-name,
+body.dark-theme .card_column_info h2 {
+    color: #e0e0e0;
+}
+
+body.dark-theme #room-category,
+body.dark-theme #room-features,
+body.dark-theme .card_column_info ul {
+    color: #999;
+}
+
+body.dark-theme #room-desc,
+body.dark-theme #room-details-extra,
+body.dark-theme .card_column_info p {
+    color: #bbb;
+}
+
+body.dark-theme .card_column_buy {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-theme .card_column_buy label {
+    color: #ccc;
+}
+
+body.dark-theme .card_column_buy select {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+body.dark-theme #room-price-display,
+body.dark-theme #inst-price-display {
+    color: #e44d26;
+}
+
+body.dark-theme #total-price {
+    color: #e44d26;
+}
+
+body.dark-theme #days-count {
+    color: #e0e0e0;
+}
+
+body.dark-theme #book_button {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-theme #book_button:hover {
+    background-color: #555;
+    color: #fff;
+    border-color: #888;
+}
+
+body.dark-theme .price_block {
+    border-bottom-color: #444;
+}
+
+body.dark-theme .total_calc {
+    border-top-color: #444;
+    border-bottom-color: #444;
+}
+
+body.dark-theme .container {
+    background: #2a2a2a;
+}
+
+body.dark-theme .container h1,
+body.dark-theme .container h2,
+body.dark-theme .container h3 {
+    color: #e0e0e0;
+    border-bottom-color: #444;
+}
+
+body.dark-theme .user-info {
+    background: #333;
+    border-color: #555;
+}
+
+body.dark-theme .user-info p {
+    color: #bbb;
+}
+
+body.dark-theme .user-info strong {
+    color: #e0e0e0;
+}
+
+body.dark-theme .logout-box {
+    background: #2a2a2a;
+}
+
+body.dark-theme .logout-box h1 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .logout-box p {
+    color: #bbb;
+}
+
+body.dark-theme .logout-box .redirect {
+    color: #ccc;
+}
+
+body.dark-theme .main--prices h1,
+body.dark-theme .main--prices h2,
+body.dark-theme .price-section h2 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .price-card {
+    background-color: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-theme .price-card:hover {
+    background-color: #333;
+    border-color: #888;
+}
+
+body.dark-theme .price-card h3 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .price-card p {
+    color: #e0e0e0;
+}
+
+body.dark-theme .price-card .category {
+    color: #888;
+}
+
+body.dark-theme .price-card .type {
+    color: #999;
+}
+
+body.dark-theme h1,
+body.dark-theme h2 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .social-card {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-theme .social-card {
+    color: #e0e0e0;
+}
+
+body.dark-theme .social-card-title {
+    color: #e0e0e0;
+}
+
+body.dark-theme .social-card-desc {
+    color: #999;
+}
+
+body.dark-theme .info-card {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-theme .info-card-title {
+    color: #e0e0e0;
+}
+
+body.dark-theme .info-card-text {
+    color: #bbb;
+}
+
+body.dark-theme .contact-info,
+body.dark-theme .contact-form {
+    background: #2a2a2a;
+}
+
+body.dark-theme .contact-info p {
+    color: #bbb;
+}
+
+body.dark-theme .contact-info a {
+    color: #ccc;
+}
+
+body.dark-theme .contact-form input,
+body.dark-theme .contact-form textarea {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+body.dark-theme .contact-form button:hover {
+    background-color: #555;
+    color: #fff;
+    border-color: #888;
+}
+
+body.dark-theme .filters {
+    background: #2a2a2a;
+}
+
+body.dark-theme .filters_h {
+    color: #e0e0e0;
+    border-bottom-color: #888;
+}
+
+body.dark-theme select {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+body.dark-theme .cards {
+    background: #2a2a2a;
+}
+
+body.dark-theme .cards>input[type="search"] {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+body.dark-theme .cards-grid {
+    background: transparent;
+}
+
+body.dark-theme .card {
+    background: #333;
+}
+
+body.dark-theme .card:hover {
+    border-color: #888;
+}
+
+body.dark-theme .card img {
+    background-color: #444;
+}
+
+body.dark-theme .card a {
+    color: #e0e0e0;
+}
+
+body.dark-theme .card_item {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-theme .card_item:hover {
+    background-color: #555;
+    color: #fff;
+    border-color: #888;
+}
+
+body.dark-theme .register {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-theme .login-type-selector {
+    background: #333;
+}
+
+body.dark-theme .login-type-selector label:hover {
+    background-color: #444;
+}
+
+body.dark-theme .faq-item {
+    background-color: #2a2a2a;
+}
+
+body.dark-theme .bookings-table {
+    background-color: #2a2a2a;
+}
+
+body.dark-theme .bookings-table th {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+body.dark-theme .bookings-table td {
+    color: #bbb;
+    border-bottom-color: #444;
+}
+
+body.dark-theme .bookings-table tr:hover {
+    background-color: #333;
+}
+
+body.dark-theme .notification-dropdown-item {
+    background: #333;
+    border-left-color: #666;
+}
+
+body.dark-theme .notification-dropdown-item.unread {
+    background: #3a3a3a;
+}
+
+body.dark-theme .notification-title-small {
+    color: #e0e0e0;
+}
+
+body.dark-theme .notification-message-small {
+    color: #bbb;
+}
+
+body.dark-theme .dropdown-header {
+    border-bottom-color: #555;
+}
+
+body.dark-theme .dropdown-header h4 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .order-equipment-list li {
+    border-bottom-color: #444;
+}
+
+body.dark-theme .order-equipment-list .equipment-price {
+    color: #e44d26;
+}
+
+body.dark-theme .additional-equipment-order h4 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .date-picker {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+body.dark-theme .availability-filter-info {
+    background: #1a2a3a;
+}
+
+body.dark-theme .badge {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-theme #notifications-toggle-btn:hover {
+    background: #333;
+}
+
+body.dark-theme .switch input:checked+.slider {
+    background-color: #555;
+}
+
+body.dark-theme .switch input:checked+.slider:before {
+    background-color: #e0e0e0;
+}
+
+body.dark-theme .slider {
+    background-color: #333;
+    border-color: #555;
+}
+
+body.dark-theme .slider:before {
+    background-color: #e0e0e0;
+}
+
+body.dark-theme .password-toggle-btn {
+    color: #e0e0e0;
+}
+
+body.dark-theme #availability-date {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+body.dark-theme .theme-toggle {
+    background: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-theme .theme-toggle:hover {
+    background: #555;
+    color: #fff;
+    border-color: #888;
+}
+
+#status-open-now {
+    color: black;
+    font-weight: bold;
+}
+
+body.dark-theme #status-open-now {
+    color: #ffffff;
+}
+
+body.dark-theme #status-open-now {
+    color: #999;
+}
+
+body.dark-theme .social-card-icon img {
+    filter: invert(1);
+}
+
+/* ===================== Booking card labels ===================== */
+body.dark-theme .booking-info strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+body.dark-theme .booking-card h4 {
+    color: #e0e0e0;
+}
+
+/* ===================== Цены в бронированиях ===================== */
+.old-price-inline {
+    color: #888;
+    text-decoration: line-through;
+    margin-right: 8px;
+}
+
+.total-price {
+    color: #000;
+    font-weight: bold;
+}
+
+.discount-info {
+    color: #888;
+    font-size: 0.85em;
+    display: block;
+}
+
+/* Тёмная тема */
+body.dark-theme .old-price-inline {
+    color: #777;
+}
+
+body.dark-theme .total-price {
+    color: #ffffff !important;
+}
+
+body.dark-theme .discount-info {
+    color: #888;
+}
+
+/* ===================== Дополнительное оборудование ===================== */
+.equipment-price {
+    color: #000;
+    font-weight: 500;
+}
+
+/* Тёмная тема */
+body.dark-theme .equipment-price {
+    color: #ffffff;
+}
+
+/* ===================== Карточки помещений ===================== */
+.room-card-name {
+    color: #000;
+}
+
+/* Тёмная тема — названия тёмные (как в светлой) */
+body.dark-theme .room-card-name {
+    color: #000;
+}
