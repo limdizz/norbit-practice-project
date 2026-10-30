@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 YaBrowser/26.8.0.0 Safari/537.36" pages="3">
   <diagram name="Диаграмма вариантов использования (Use Case Diagram)" id="n4CU2mUcKqa8VCm-lkvX">
-    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="3320" dy="1407" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -606,11 +606,555 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="F1CM1wVOxNp_GzdV7u6g" name="Диаграмма последовательностей">
-    <mxGraphModel dx="723" dy="408" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+  <diagram id="F1CM1wVOxNp_GzdV7u6g" name="Диаграмма последовательностей (Sequence Diagram)">
+    <mxGraphModel dx="3238" dy="1950" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-107" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-102" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" target="kXUzAT3JW7-yVXkB6uA3-43" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="396.00000000000006" y="644.5" as="sourcePoint" />
+            <mxPoint x="1268.5702419051204" y="644.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-106" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="456" y="394.5" as="sourcePoint" />
+            <mxPoint x="1236" y="394.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-103" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="456" y="323.5" as="sourcePoint" />
+            <mxPoint x="1236" y="323.47" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-38" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;sequenceEdgeStyle&quot;,&quot;libavoidRouting&quot;:0,&quot;curved&quot;:0,&quot;rounded&quot;:0};rounded=1;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" value="&lt;font face=&quot;Times New Roman&quot;&gt;order.js&lt;/font&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;(клиентский скрипт)&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="1776" width="100" x="626" y="259" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-40" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;sequenceEdgeStyle&quot;,&quot;libavoidRouting&quot;:0,&quot;curved&quot;:0,&quot;rounded&quot;:0};rounded=1;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" value="&lt;font face=&quot;Times New Roman&quot;&gt;BookingsController (REST API)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="1776" width="100" x="816" y="259" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-42" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;sequenceEdgeStyle&quot;,&quot;libavoidRouting&quot;:0,&quot;curved&quot;:0,&quot;rounded&quot;:0};rounded=1;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" value="&lt;font face=&quot;Times New Roman&quot;&gt;ProjectContext&lt;br&gt;(EF Core)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="1776" width="100" x="971" y="259" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-43" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;sequenceEdgeStyle&quot;,&quot;libavoidRouting&quot;:0,&quot;curved&quot;:0,&quot;rounded&quot;:0};rounded=1;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" value="&lt;font face=&quot;Times New Roman&quot;&gt;База данных PostgreSQL&lt;/font&gt;" vertex="1">
+          <mxGeometry height="1776" width="100" x="1131" y="259" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-49" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-40" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" x="-0.5803" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="936" y="480" />
+            </Array>
+            <mxPoint x="841" y="480" as="sourcePoint" />
+            <mxPoint x="1016" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-96" connectable="0" parent="kXUzAT3JW7-yVXkB6uA3-49" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];inheritText=1;fontFamily=Verdana;fontSize=12;labelBackgroundColor=none;defaultLabelBackgroundColor=page;" value="&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;HasConflictAsync&lt;br&gt;&lt;br&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0291" y="3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-51" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: SELECT ...&lt;/font&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;FROM bookings&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;WHERE room_id = ...&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;AND status != &#39;cancelled&#39;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;AND start_time &amp;lt; endTime&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;AND end_time &amp;gt; startTime&lt;/font&gt;&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0345" as="geometry">
+            <mxPoint x="1026" y="489" as="sourcePoint" />
+            <mxPoint x="1176" y="489" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-54" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-42" value="&lt;font face=&quot;Times New Roman&quot;&gt;Найти активный &lt;br&gt;абонемент пользователя&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="865.5" y="699.9999999999998" as="sourcePoint" />
+            <mxPoint x="1018.5" y="699.9999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-61" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-38" value="&lt;font face=&quot;Times New Roman&quot;&gt;Нажать &quot;Подтвердить бронирование&quot;&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1" as="offset" />
+            <mxPoint x="475.5" y="350" as="sourcePoint" />
+            <mxPoint x="671" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-62" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-38" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;POST /api/Bookings&amp;nbsp;&lt;/font&gt;">
+          <mxGeometry relative="1" x="-0.1526" as="geometry">
+            <mxPoint x="681" y="370" as="sourcePoint" />
+            <mxPoint x="865.5" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-78" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;sequenceEdgeStyle&quot;,&quot;libavoidRouting&quot;:0,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;" value="&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Клиент" vertex="1">
+          <mxGeometry height="1791" width="20" x="466" y="244" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-83" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-42" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-40" value="&lt;font face=&quot;Times New Roman&quot;&gt;Конфликты найдены/&lt;br&gt;не найдены&lt;/font&gt;">
+          <mxGeometry relative="1" x="-0.0323" as="geometry">
+            <Array as="points">
+              <mxPoint x="939" y="533.75" />
+              <mxPoint x="969" y="533.75" />
+            </Array>
+            <mxPoint x="1016" y="564.25" as="sourcePoint" />
+            <mxPoint x="841" y="533.75" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-84" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Результат запроса&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1180.5" y="525" as="sourcePoint" />
+            <mxPoint x="1020.5" y="525" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;Инициирование бронирования&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-91">
+          <mxCell parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="766" y="309" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-93" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-40" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;409 Conflict&lt;/font&gt;">
+          <mxGeometry relative="1" x="0.1784" y="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points" />
+            <mxPoint x="831" y="570" as="sourcePoint" />
+            <mxPoint x="681" y="570.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-81" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-40" style="edgeStyle=sequenceEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;libavoidRouting=0;curved=0;defaultLabelBackgroundColor=page;endArrow=blockThin;endFill=1;" target="kXUzAT3JW7-yVXkB6uA3-40">
+          <mxGeometry relative="1" x="0.0052" as="geometry">
+            <Array as="points">
+              <mxPoint x="906.0000000000002" y="414.20000000000016" />
+              <mxPoint x="906.0000000000002" y="444.20000000000005" />
+            </Array>
+            <mxPoint x="881.5" y="399" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-82" connectable="0" parent="kXUzAT3JW7-yVXkB6uA3-81" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];inheritText=1;defaultLabelBackgroundColor=page;" value="&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;StartTime &amp;lt; EndTime&lt;/span&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0666" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-98" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-38" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-78" value="&lt;font face=&quot;Times New Roman&quot;&gt;Показать сообщение об ошибке&lt;/font&gt;">
+          <mxGeometry relative="1" x="-0.005" as="geometry">
+            <mxPoint x="1" as="offset" />
+            <Array as="points">
+              <mxPoint x="616" y="610" />
+              <mxPoint x="659" y="610" />
+            </Array>
+            <mxPoint x="626" y="620" as="sourcePoint" />
+            <mxPoint x="485.4999999999999" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-99" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" value="&lt;b&gt;alt&lt;/b&gt;" vertex="1">
+          <mxGeometry height="1251" width="775" x="456" y="539" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-100" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;font face=&quot;Times New Roman&quot;&gt;[Конфликт найден]&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="110" x="546" y="539" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-101" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;rounded=0;defaultLabelBackgroundColor=page;exitX=0.007;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.309;entryDx=0;entryDy=0;entryPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="457.55499999999995" y="623" as="sourcePoint" />
+            <mxPoint x="1231" y="622.999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-102" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;b style=&quot;forced-color-adjust: none; color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(236, 236, 236); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;&quot;&gt;&lt;font face=&quot;Times New Roman&quot; style=&quot;forced-color-adjust: none;&quot;&gt;[Конфликтов нет]&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="100" x="456" y="620" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Валидация и проверка конфликтов&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-104">
+          <mxCell parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="766" y="380" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;Проверка абонемента&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-105">
+          <mxCell parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="766" y="630" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-108" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-43" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: SELECT ...&lt;/font&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;FROM user_subscriptions&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;WHERE user_uid = ...&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;AND is_active = true&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;AND valid_until &amp;gt; now&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Times New Roman&quot;&gt;AND sessions_remaining &amp;gt; 0&lt;/font&gt;&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.068" as="geometry">
+            <mxPoint x="1026" y="750" as="sourcePoint" />
+            <mxPoint x="1176" y="750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-109" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Данные абонемента&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1180.5000000000002" y="780" as="sourcePoint" />
+            <mxPoint x="1020.5000000000002" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-110" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-42" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Активный абонемент&lt;br&gt;&amp;nbsp;(или null)&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1026" y="800" as="sourcePoint" />
+            <mxPoint x="866" y="800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-111" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="475.4999999999998" y="820" as="sourcePoint" />
+            <mxPoint x="1180.5" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;Списание сеанса (если абонемент найден)&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-112">
+          <mxCell parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="768.5" y="809" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-116" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" value="&lt;b&gt;&lt;font face=&quot;Times New Roman&quot;&gt;opt&lt;/font&gt;&lt;/b&gt;" vertex="1" visible="0">
+          <mxGeometry height="160" width="352.5" x="843.5" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-117" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;font face=&quot;Times New Roman&quot;&gt;[Абонемент найден]&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="140" x="916" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-118" edge="1" parent="1" style="edgeStyle=sequenceEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;libavoidRouting=0;curved=0;defaultLabelBackgroundColor=page;endArrow=blockThin;endFill=1;">
+          <mxGeometry relative="1" x="0.0052" as="geometry">
+            <Array as="points">
+              <mxPoint x="936" y="890" />
+              <mxPoint x="936" y="920" />
+            </Array>
+            <mxPoint x="866" y="890" as="sourcePoint" />
+            <mxPoint x="866" y="920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-119" connectable="0" parent="kXUzAT3JW7-yVXkB6uA3-118" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];inheritText=1;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Определить discountFactor&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0666" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-122" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Списать один сеанс&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="866" y="960" as="sourcePoint" />
+            <mxPoint x="1021.5" y="960.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-123" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-42" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: UPDATE user_subscriptions&lt;br&gt;SET sessions_remaining -= 1&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1026" y="970" as="sourcePoint" />
+            <mxPoint x="1181.5" y="970.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-124" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-43" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Подтверждение&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1186" y="990" as="sourcePoint" />
+            <mxPoint x="1026" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-125" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Сеанс списан&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1021" y="1000" as="sourcePoint" />
+            <mxPoint x="866" y="1000" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-126" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-43" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="916" y="1043.8970588235295" as="sourcePoint" />
+            <mxPoint x="1181.0000000000002" y="1040" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-128" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-78" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="476" y="1040" as="sourcePoint" />
+            <mxPoint x="766" y="1043.9726027397262" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-130" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-129" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=horizontal;startArrow=none;endArrow=none;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-116" value="" visible="0">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;Создание записей о бронировании&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-129">
+          <mxCell collapsed="1" parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="766" y="1030" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-131" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Создать запись в bookings&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="866" y="1080" as="sourcePoint" />
+            <mxPoint x="1021.5" y="1080.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-132" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Создать запись в bills&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="866" y="1140" as="sourcePoint" />
+            <mxPoint x="1021.5" y="1140.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-133" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-43" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: INSERT INTO bookings (...)&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1026" y="1100" as="sourcePoint" />
+            <mxPoint x="1186.5" y="1100.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-134" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-42" value="&lt;font face=&quot;Times New Roman&quot;&gt;bookingUid&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1181" y="1120" as="sourcePoint" />
+            <mxPoint x="1026" y="1120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-135" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: INSERT INTO bills (...)&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1026" y="1160" as="sourcePoint" />
+            <mxPoint x="1181" y="1160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-136" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;billUid&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1176" y="1180" as="sourcePoint" />
+            <mxPoint x="1016" y="1180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-137" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" value="&lt;font face=&quot;Times New Roman&quot;&gt;&lt;b&gt;opt&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="170" width="350" x="846" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-138" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" value="&lt;font face=&quot;Times New Roman&quot;&gt;&lt;b&gt;opt&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="350" x="846" y="1190" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-139" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font face=&quot;Times New Roman&quot;&gt;&lt;b&gt;[Есть SelectedEquipment]&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="150" x="906" y="1190" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-142" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Создать запись в &lt;br&gt;booking_equipment&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="866" y="1244.5" as="sourcePoint" />
+            <mxPoint x="1021.5" y="1244.5000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-143" edge="1" parent="1" source="kXUzAT3JW7-yVXkB6uA3-42" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: INSERT INTO&amp;nbsp;&lt;/font&gt;&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;booking_equipment&lt;/span&gt;&lt;font face=&quot;Times New Roman&quot;&gt;&amp;nbsp;(...)&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1026" y="1260" as="sourcePoint" />
+            <mxPoint x="1181" y="1260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-144" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-42" value="&lt;font face=&quot;Times New Roman&quot;&gt;Подтверждение&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1186" y="1280" as="sourcePoint" />
+            <mxPoint x="1026" y="1280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-146" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="916" y="1353.8970588235295" as="sourcePoint" />
+            <mxPoint x="1181" y="1354" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-147" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="476" y="1354" as="sourcePoint" />
+            <mxPoint x="766" y="1353.9726027397262" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;Расчет стоимости и позиций счета&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-148">
+          <mxCell collapsed="1" parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="766" y="1340" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-149" edge="1" parent="1" style="edgeStyle=sequenceEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;libavoidRouting=0;curved=0;defaultLabelBackgroundColor=page;endArrow=blockThin;endFill=1;">
+          <mxGeometry relative="1" x="0.0052" as="geometry">
+            <Array as="points">
+              <mxPoint x="933" y="1390" />
+              <mxPoint x="933" y="1420" />
+            </Array>
+            <mxPoint x="863" y="1390" as="sourcePoint" />
+            <mxPoint x="863" y="1420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-150" connectable="0" parent="kXUzAT3JW7-yVXkB6uA3-149" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];inheritText=1;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Рассчитать стоимость каждого &lt;br&gt;пункта счета с учетом скидки&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0666" y="-1" as="geometry">
+            <mxPoint x="12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-151" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Создать запись в bill_items&lt;/font&gt;">
+          <mxGeometry relative="1" x="0.0032" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="866" y="1440" as="sourcePoint" />
+            <mxPoint x="1021.5" y="1440.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-154" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: INSERT INTO&amp;nbsp;&lt;/font&gt;&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;bill_items&lt;/span&gt;&lt;font face=&quot;Times New Roman&quot;&gt;&amp;nbsp;(...)&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1026" y="1460" as="sourcePoint" />
+            <mxPoint x="1186" y="1460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-155" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Подтверждение&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1181" y="1480" as="sourcePoint" />
+            <mxPoint x="1016" y="1480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-156" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="916" y="1503.8970588235295" as="sourcePoint" />
+            <mxPoint x="1181" y="1504" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-157" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="476" y="1504" as="sourcePoint" />
+            <mxPoint x="766" y="1503.9726027397262" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;Создание уведомления&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-158">
+          <mxCell collapsed="1" parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="766" y="1490" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-159" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Создать уведомление&lt;br&gt;&amp;nbsp;new_booking&lt;/font&gt;">
+          <mxGeometry relative="1" x="0.0032" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="866" y="1550" as="sourcePoint" />
+            <mxPoint x="1021.5" y="1550.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-160" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: INSERT INTO notifications&lt;/font&gt;&lt;font face=&quot;Times New Roman&quot;&gt;&amp;nbsp;(...)&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1026" y="1580" as="sourcePoint" />
+            <mxPoint x="1186" y="1580" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-161" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Подтверждение&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1181" y="1600" as="sourcePoint" />
+            <mxPoint x="1016" y="1600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-162" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="916" y="1633.8970588235295" as="sourcePoint" />
+            <mxPoint x="1181" y="1634" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-163" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="476" y="1634" as="sourcePoint" />
+            <mxPoint x="766" y="1633.9726027397262" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;Завершение транзакции&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-164">
+          <mxCell collapsed="1" parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="766" y="1620" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-165" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;COMMIT&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1181" y="1660" as="sourcePoint" />
+            <mxPoint x="1016" y="1660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-166" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-40" value="&lt;font face=&quot;Times New Roman&quot;&gt;Все записи сохранены&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1021" y="1680" as="sourcePoint" />
+            <mxPoint x="856" y="1680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-167" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-38" value="&lt;font face=&quot;Times New Roman&quot;&gt;201 Created&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="861" y="1694" as="sourcePoint" />
+            <mxPoint x="706" y="1694" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-168" edge="1" parent="1" style="edgeStyle=sequenceEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;libavoidRouting=0;curved=0;defaultLabelBackgroundColor=page;endArrow=blockThin;endFill=1;">
+          <mxGeometry relative="1" x="0.0052" as="geometry">
+            <Array as="points">
+              <mxPoint x="746" y="1710" />
+              <mxPoint x="746" y="1740" />
+            </Array>
+            <mxPoint x="676" y="1710" as="sourcePoint" />
+            <mxPoint x="676" y="1740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-169" connectable="0" parent="kXUzAT3JW7-yVXkB6uA3-168" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];inheritText=1;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Сохранить данные в sessionStorage&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0666" y="-1" as="geometry">
+            <mxPoint x="12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-170" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Перейти на booking_confirmed.html&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="671" y="1760" as="sourcePoint" />
+            <mxPoint x="486" y="1760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-171" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="916" y="1823.8970588235295" as="sourcePoint" />
+            <mxPoint x="1181" y="1824" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-172" edge="1" parent="1" style="shape=link;html=1;rounded=0;defaultLabelBackgroundColor=page;" value="">
+          <mxGeometry relative="1" width="100" as="geometry">
+            <mxPoint x="476" y="1824" as="sourcePoint" />
+            <mxPoint x="766" y="1823.9726027397262" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;b&gt;Просмотр уведомления в профиле&lt;/b&gt;" treeRoot="1" id="kXUzAT3JW7-yVXkB6uA3-173">
+          <mxCell collapsed="1" parent="1" style="whiteSpace=wrap;html=1;align=center;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1">
+            <mxGeometry height="30" width="150" x="766" y="1810" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-174" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-38" value="&lt;font face=&quot;Times New Roman&quot;&gt;Открыть профиль&lt;/font&gt;">
+          <mxGeometry relative="1" x="-0.218" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="476" y="1860" as="sourcePoint" />
+            <mxPoint x="631.5" y="1860.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-175" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-40" value="&lt;font face=&quot;Times New Roman&quot;&gt;GET /api/Notifications/user/{uid}&lt;/font&gt;">
+          <mxGeometry relative="1" x="-0.0501" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="676" y="1870" as="sourcePoint" />
+            <mxPoint x="831.5" y="1870.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-176" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-42" value="&lt;font face=&quot;Times New Roman&quot;&gt;Получить уведомления&lt;/font&gt;">
+          <mxGeometry relative="1" x="0.0356" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="866" y="1890" as="sourcePoint" />
+            <mxPoint x="1056" y="1890" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-177" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;SQL: SELECT ... FROM notifications&lt;br&gt;WHERE user_uid = ...&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1026" y="1910" as="sourcePoint" />
+            <mxPoint x="1186" y="1910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-178" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Список уведомлений&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1181" y="1930" as="sourcePoint" />
+            <mxPoint x="1016" y="1930" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-179" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-40" value="&lt;font face=&quot;Times New Roman&quot;&gt;Список уведомлений&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1021" y="1940" as="sourcePoint" />
+            <mxPoint x="856" y="1940" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-180" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;" target="kXUzAT3JW7-yVXkB6uA3-38" value="&lt;font face=&quot;Times New Roman&quot;&gt;JSON-ответ&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="861" y="1960" as="sourcePoint" />
+            <mxPoint x="706" y="1960" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-181" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;labelBackgroundColor=none;fontFamily=Verdana;fontSize=12;rounded=0;defaultLabelBackgroundColor=page;entryX=0.5;entryY=0.969;entryDx=0;entryDy=0;entryPerimeter=0;" target="kXUzAT3JW7-yVXkB6uA3-78" value="&lt;font face=&quot;Times New Roman&quot;&gt;Отобразить уведомление в списке&lt;/font&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="671" y="1980" as="sourcePoint" />
+            <mxPoint x="486" y="1980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-182" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;labelPerimeter=1;" value="&lt;font face=&quot;Times New Roman&quot;&gt;Клиент&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="461" y="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-184" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;font face=&quot;Times New Roman&quot;&gt;order.js&lt;/font&gt;&lt;div style=&quot;font-family: Verdana;&quot;&gt;&lt;font face=&quot;Times New Roman&quot;&gt;(клиентский скрипт)&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="120" x="616" y="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-185" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;BookingsController (REST API)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="40" width="120" x="806" y="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-186" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;ProjectContext&lt;/span&gt;&lt;br style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;(EF Core)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="40" width="120" x="961" y="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-187" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;span style=&quot;font-family: &amp;quot;Times New Roman&amp;quot;;&quot;&gt;База данных PostgreSQL&lt;/span&gt;" vertex="1">
+          <mxGeometry height="40" width="120" x="1121" y="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-188" parent="1" style="shape=datastore;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="60" width="60" x="1151" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="kXUzAT3JW7-yVXkB6uA3-189" parent="1" style="shape=datastore;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="60" width="60" x="1151" y="2090" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
