@@ -23,7 +23,5 @@ public partial class SubscriptionPlan
     [Column("discount_percentage")]
     public int DiscountPercentage { get; set; }
 
-    public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
-
     public virtual ICollection<UserSubscriptionsAdvanced> UserSubscriptionsAdvanceds { get; set; } = new List<UserSubscriptionsAdvanced>();
 }

@@ -14,8 +14,6 @@ public partial class Room
 
     public bool? IsFree { get; set; }
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-
     public virtual ICollection<BookingsAdvanced> BookingsAdvanceds { get; set; } = new List<BookingsAdvanced>();
 
     public virtual ICollection<RoomEquipment> RoomEquipments { get; set; } = new List<RoomEquipment>();
