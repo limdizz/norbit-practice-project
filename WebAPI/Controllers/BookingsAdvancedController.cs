@@ -431,6 +431,24 @@ namespace WebAPI.Controllers
             booking.Status = "cancelled";
             await _context.SaveChangesAsync();
 
+            // === ВОЗВРАТ СЕАНСА АБОНЕМЕНТА ===
+            var bill = await _context.BillsAdvanceds
+                .FirstOrDefaultAsync(b => b.BookingUid == booking.BookingUid);
+
+            if (bill != null && bill.SubscriptionUsed == true && bill.SubscriptionUid.HasValue)
+            {
+                var subscription = await _context.UserSubscriptionsAdvanceds
+                    .FirstOrDefaultAsync(s => s.SubscriptionUid == bill.SubscriptionUid);
+
+                if (subscription != null)
+                {
+                    subscription.SessionsRemaining = (subscription.SessionsRemaining ?? 0) + 1;
+                    subscription.IsActive = true;
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine($"Возвращён сеанс абонемента {subscription.SubscriptionUid}: осталось {subscription.SessionsRemaining}");
+                }
+            }
+
             // === СОЗДАНИЕ УВЕДОМЛЕНИЯ ОБ ОТМЕНЕ БРОНИРОВАНИЯ ===
             var cancellationNotification = new Notification
             {
@@ -826,6 +844,22 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
+            // === ВОЗВРАТ СЕАНСА АБОНЕМЕНТА ===
+            var bill = await _context.BillsAdvanceds
+                .FirstOrDefaultAsync(b => b.BookingUid == bookingsAdvanced.BookingUid);
+
+            if (bill != null && bill.SubscriptionUsed == true && bill.SubscriptionUid.HasValue)
+            {
+                var subscription = await _context.UserSubscriptionsAdvanceds
+                    .FirstOrDefaultAsync(s => s.SubscriptionUid == bill.SubscriptionUid);
+
+                if (subscription != null)
+                {
+                    subscription.SessionsRemaining = (subscription.SessionsRemaining ?? 0) + 1;
+                    subscription.IsActive = true;
+                }
+            }
+
             _context.BookingsAdvanceds.Remove(bookingsAdvanced);
             await _context.SaveChangesAsync();
 
@@ -836,7 +870,6 @@ namespace WebAPI.Controllers
         [HttpDelete("byUser/{userUid}")]
         public async Task<IActionResult> DeleteBookingsByUser(Guid userUid)
         {
-            // Находим все бронирования этого пользователя
             var userBookings = await _context.BookingsAdvanceds
                 .Where(b => b.UserUid == userUid)
                 .ToListAsync();
@@ -844,6 +877,25 @@ namespace WebAPI.Controllers
             if (userBookings == null || !userBookings.Any())
             {
                 return NotFound("Бронирования для этого пользователя не найдены.");
+            }
+
+            // === ВОЗВРАТ СЕАНСОВ АБОНЕМЕНТОВ ===
+            var bills = await _context.BillsAdvanceds
+                .Where(b => userBookings.Any(booking => booking.BookingUid == b.BookingUid) &&
+                            b.SubscriptionUsed == true &&
+                            b.SubscriptionUid.HasValue)
+                .ToListAsync();
+
+            foreach (var bill in bills)
+            {
+                var subscription = await _context.UserSubscriptionsAdvanceds
+                    .FirstOrDefaultAsync(s => s.SubscriptionUid == bill.SubscriptionUid);
+
+                if (subscription != null)
+                {
+                    subscription.SessionsRemaining = (subscription.SessionsRemaining ?? 0) + 1;
+                    subscription.IsActive = true;
+                }
             }
 
             _context.BookingsAdvanceds.RemoveRange(userBookings);
