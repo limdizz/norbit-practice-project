@@ -68,10 +68,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // 4. Заполняем поля пользователя
     if (lastNameInput) {
-        lastNameInput.value = userData.lastName || '';
+        lastNameInput.textContent = userData.lastName || 'Гость';
     }
     if (firstNameInput) {
-        firstNameInput.value = userData.firstName || '';
+        firstNameInput.textContent = userData.firstName || 'Гость';
     }
 
     // 5. Заполняем детали заказа и отображаем оборудование
