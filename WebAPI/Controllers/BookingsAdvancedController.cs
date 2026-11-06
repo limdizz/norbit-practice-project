@@ -760,7 +760,7 @@ namespace WebAPI.Controllers
                     {
                         BillUid = bill.BillUid,
                         ItemType = "Room",
-                        ItemName = $"Аренда: {room.Name} (со скидкой)",
+                        ItemName = discountFactor < 1.0m ? $"Аренда: {room.Name} (со скидкой)" : $"Аренда: {room.Name}",
                         Quantity = hours,
                         UnitPrice = price * discountFactor,
                         TotalPrice = itemTotal
@@ -783,7 +783,7 @@ namespace WebAPI.Controllers
                     {
                         BillUid = bill.BillUid,
                         ItemType = "Instrument",
-                        ItemName = $"Аренда: {equipment.Name} (со скидкой)",
+                        ItemName = discountFactor < 1.0m ? $"Аренда: {equipment.Name} (со скидкой)" : $"Аренда: {equipment.Name}",
                         Quantity = days,
                         UnitPrice = price * discountFactor,
                         TotalPrice = itemTotal
