@@ -730,7 +730,8 @@ namespace WebAPI.Controllers
                 var equipmentLinks = uniqueIds.Select(id => new BookingEquipment
                 {
                     BookingUid = booking.BookingUid,
-                    EquipmentId = id
+                    EquipmentId = id,
+                    Quantity = 1
                 }).ToList();
 
                 _context.BookingEquipments.AddRange(equipmentLinks);

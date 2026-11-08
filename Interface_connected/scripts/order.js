@@ -261,29 +261,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const bookingUid = result.bookingUid || result.BookingUid;
                 console.log('BookingUid для оборудования:', bookingUid);
 
-                // 2. Если есть дополнительное оборудование, создаём записи в booking_equipment
-                if (selectedEquipmentIds.length > 0 && bookingUid) {
-                    // Фильтруем только уникальные ID
-                    const uniqueEquipmentIds = [...new Set(selectedEquipmentIds)];
-
-                    const equipmentPromises = uniqueEquipmentIds.map(equipmentId =>
-                        fetch('https://localhost:7123/api/BookingEquipments', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                BookingUid: bookingUid,
-                                EquipmentId: equipmentId
-                            })
-                        })
-                    );
-
-                    const equipmentResults = await Promise.all(equipmentPromises);
-                    const failed = equipmentResults.filter(r => !r.ok);
-                    if (failed.length > 0) {
-                        console.warn(`Не удалось сохранить ${failed.length} из ${uniqueEquipmentIds.length} позиций оборудования`);
-                    }
-                }
-
                 const orderId = generateOrderId(bookingUid);
 
                 // Обновляем данные бронирования
