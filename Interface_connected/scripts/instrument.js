@@ -18,6 +18,8 @@ let currentInstrument = null;
 let instrumentBookings = [];
 let instrumentBookingsLoaded = false;
 
+let maxDaysForBooking = 14;
+
 function setBookButtonState(enabled, reasonText) {
     const btn = document.getElementById('book_button');
     if (!btn) return;
@@ -369,7 +371,7 @@ function populateDateSelects(startSelect, endSelect) {
     startSelect.innerHTML = '';
     endSelect.innerHTML = '';
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < maxDaysForBooking; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
         const dateString = formatDate(date);
@@ -396,7 +398,7 @@ function updateEndDateOptions(selectedStartDate) {
 
     let firstEnabledValue = null;
 
-    for (let i = 1; i <= 30; i++) {
+    for (let i = 1; i <= maxDaysForBooking; i++) {
         const candidateEnd = new Date(startDate);
         candidateEnd.setDate(startDate.getDate() + i);
         const dateString = formatDate(candidateEnd);
