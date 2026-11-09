@@ -119,7 +119,11 @@ function getRoomImageWithSync(roomTypeId, roomId, roomName) {
 async function loadBookingsFromAPI(userData, currentContainer, archiveContainer, clearBtn) {
     const userId = userData.userUid;
 
-    if (!userId) return;
+    if (!userId) {
+        // Если пользователь не идентифицирован — показываем пустые состояния
+        renderBookings([], currentContainer, archiveContainer, clearBtn, userData);
+        return;
+    }
 
     try {
         const response = await fetch(`https://localhost:7123/api/BookingsAdvanced/userHistory/${userId}`);

@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Сохраняем факт входа
                 localStorage.setItem('userData', JSON.stringify({
+                    userUid: createdUser.userUid || createdUser.UserUid,
                     firstName: firstName,  // Было: name: firstName
                     lastName: lastName,    // Было: surname: lastName
                     email: email
