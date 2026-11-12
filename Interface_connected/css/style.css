@@ -183,12 +183,13 @@
     color: white;
     margin-top: 20px;
     margin-left: 10px;
+    border: 1px solid black;
 }
 
 #to-catalog.button:hover {
-    background: white;
-    color: black;
-    border: 1px solid black;
+    background: white !important;
+    color: black !important;
+    border: 1px solid black !important;
 }
 
 #clear-history.button.logout {
@@ -488,7 +489,7 @@
     color: white;
     border-radius: 6px;
     text-decoration: none;
-    border: none;
+    border: 1px solid black;
     cursor: pointer;
     font-size: 14px;
     transition: all 0.3s;
@@ -1170,7 +1171,7 @@ h2 {
     background-color: black;
     color: white;
     font-family: Inter;
-    border: none;
+    border: 1px solid black;
     cursor: pointer;
     transition: 0.3s;
     border-radius: 4px;
@@ -2623,4 +2624,70 @@ body.dark-theme .equipment-price {
 /* Тёмная тема — названия тёмные (как в светлой) */
 body.dark-theme .room-card-name {
     color: #000;
+}
+
+body.dark-theme .menu__item__button {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #fff;
+}
+
+body.dark-theme .menu__item__button:hover {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #fff;
+}
+
+body.dark-theme .button {
+    background: #fff;
+    color: #000;
+    border: 1px solid #fff;
+}
+
+body.dark-theme .button:hover {
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+}
+
+/* Плавная смена темы для страницы абонементов */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Тёмная тема — контейнер абонемента в профиле */
+body.dark-theme #user-info div[style*="background-color: white"] {
+    background-color: #2a2a2a !important;
+    border-color: #fff !important;
+}
+
+body.dark-theme #user-info h3[style*="color: black"],
+body.dark-theme #user-info span[style*="color: black"] {
+    color: #fff !important;
+}
+
+body.dark-theme #cancel-sub-btn {
+    background-color: #fff !important;
+    color: #000 !important;
+    border-color: #000 !important;
+}
+
+body.dark-theme #cancel-sub-btn:hover {
+    background-color: #fff !important;
+    color: red !important;
+    border-color: red !important;
+}
+
+/* Тёмная тема — кнопки хедера */
+body.dark-theme .menu__item__button:hover {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+}
+
+/* Тёмная тема — кнопка "Бронировать ещё" */
+body.dark-theme .button.logout:hover {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
 }
