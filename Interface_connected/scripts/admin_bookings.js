@@ -142,13 +142,42 @@ document.addEventListener('DOMContentLoaded', async function () {
             btn.addEventListener('click', async () => {
                 const bookingId = btn.getAttribute('data-id');
 
-                const newStart = await showDateTimePicker('Выберите новое время начала');
-                if (!newStart) return;
-                const newEnd = await showDateTimePicker('Выберите новое время окончания');
-                if (!newEnd) return;
+                // Находим бронирование, чтобы определить тип
+                const booking = bookings.find(b => b.bookingUid === bookingId);
+                const isInstrument = booking.instrumentId && !booking.roomId;
 
-                const startDate = new Date(newStart.replace(' ', 'T'));
-                const endDate = new Date(newEnd.replace(' ', 'T'));
+                let newStart, newEnd;
+
+                if (isInstrument) {
+                    // Для инструментов — только дата (время берётся из оригинала)
+                    newStart = await showDatePicker('Выберите новую дату начала');
+                    if (!newStart) return;
+                    newEnd = await showDatePicker('Выберите новую дату окончания');
+                    if (!newEnd) return;
+
+                    // Берём время из оригинального бронирования
+                    const originalStart = new Date(booking.startTime);
+                    const originalEnd = new Date(booking.endTime);
+                    const startHour = String(originalStart.getHours()).padStart(2, '0');
+                    const startMinute = String(originalStart.getMinutes()).padStart(2, '0');
+                    const endHour = String(originalEnd.getHours()).padStart(2, '0');
+                    const endMinute = String(originalEnd.getMinutes()).padStart(2, '0');
+
+                    newStart = `${newStart}T${startHour}:${startMinute}:00+03:00`;
+                    newEnd = `${newEnd}T${endHour}:${endMinute}:00+03:00`;
+                } else {
+                    // Для помещений — дата + время
+                    newStart = await showDateTimePicker('Выберите новое время начала');
+                    if (!newStart) return;
+                    newEnd = await showDateTimePicker('Выберите новое время окончания');
+                    if (!newEnd) return;
+
+                    newStart = newStart.replace(' ', 'T');
+                    newEnd = newEnd.replace(' ', 'T');
+                }
+
+                const startDate = new Date(newStart);
+                const endDate = new Date(newEnd);
 
                 if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
                     alert('Неверный формат даты/времени. Проверьте ввод.');
