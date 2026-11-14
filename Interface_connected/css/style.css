@@ -2673,7 +2673,7 @@ body.dark-theme #cancel-sub-btn {
 }
 
 body.dark-theme #cancel-sub-btn:hover {
-    background-color: #fff !important;
+    background-color: black !important;
     color: red !important;
     border-color: red !important;
 }
@@ -2690,4 +2690,59 @@ body.dark-theme .button.logout:hover {
     background-color: #000 !important;
     color: #fff !important;
     border: 1px solid #fff !important;
+}
+
+body.dark-theme #notifications-dropdown {
+    background: #2a2a2a !important;
+    border-color: #555 !important;
+}
+
+body.dark-theme #notifications-dropdown-content p {
+    color: #888 !important;
+}
+
+/* Тёмная тема — сами уведомления */
+body.dark-theme .notification-dropdown-item {
+    background: #333 !important;
+    border-color: #555 !important;
+}
+
+body.dark-theme .notification-dropdown-item.unread {
+    background: #3a3a3a !important;
+    border-left: 3px solid #fff !important;
+}
+
+/* Тёмная тема — текст в уведомлениях */
+body.dark-theme .notification-title-small {
+    color: #e0e0e0 !important;
+}
+
+body.dark-theme .notification-message-small {
+    color: #bbb !important;
+}
+
+body.dark-theme .notification-time-small {
+    color: #888 !important;
+}
+
+body.dark-theme .notification-type-badge {
+    background: #555 !important;
+    color: #e0e0e0 !important;
+}
+
+/* Тёмная тема — кнопка "Прочитано" */
+body.dark-theme .notification-mark-read-btn {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #fff !important;
+}
+
+body.dark-theme .notification-mark-read-btn:hover {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid #000 !important;
+}
+
+body.dark-theme input[type="range"] {
+    accent-color: white;
 }

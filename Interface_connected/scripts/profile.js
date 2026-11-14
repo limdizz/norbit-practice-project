@@ -686,7 +686,7 @@ async function renderUserProfile(userData, isStaff) {
                     <p><strong>Осталось сеансов:</strong> ${sessions}</p>
                     <p><strong>Действует до:</strong> ${validDate}</p>
                     ${discountInfo}
-                    <button id="cancel-sub-btn" class="button logout" style="background: black; margin-top: 10px;">
+                    <button id="cancel-sub-btn" class="button logout">
                         Отменить подписку
                     </button>
                 </div>
