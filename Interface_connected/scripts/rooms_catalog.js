@@ -549,25 +549,7 @@ function renderRooms(rooms) {
 
     // Добавляем карточку для добавления нового помещения
     const addCard = document.createElement('div');
-    addCard.className = 'instrument-card';
-    addCard.style.cssText = `
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-family: Inter;
-        padding: 15px;
-        margin: 10px;
-        text-align: center;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        display: inline-block;
-        vertical-align: top;
-        width: 200px;
-        height: 320px;
-        background-color: #f8f9fa;
-        flex: 0 0 auto;
-    `;
+    addCard.className = 'room-card';
 
     addCard.innerHTML = `
         <div style="width: 100px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 0 auto; background-color: #e9ecef; border-radius: 4px;">
@@ -619,30 +601,14 @@ function createRoomCard(room) {
     if (discountPercent > 0) {
         const discountedPrice = Math.round(room.price * (1 - discountPercent / 100));
         priceDisplayHtml = `
-            <span style="text-decoration: line-through; color: #888; font-size: 0.8em;">${room.price} ₽</span>
-            <span style="color: black;">${discountedPrice} ₽/час</span>
-            <div style="color: black; font-size: 0.75em; font-weight: normal; margin-top: 2px;">Скидка ${discountPercent}%</div>
-        `;
+        <span style="text-decoration: line-through; color: #888; font-size: 0.8em;">${room.price} ₽</span>
+        <span class="room-price-discounted">${discountedPrice} ₽/час</span>
+        <div class="room-discount-badge" style="color: #888; font-size: 0.75em; font-weight: normal; margin-top: 2px;">Скидка ${discountPercent}%</div>
+    `;
     }
 
     const cardContainer = document.createElement('div');
-    cardContainer.className = 'instrument-card';
-    cardContainer.style.cssText = `
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px;
-        text-align: center;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        cursor: pointer;
-        transition: transform 0.2s;
-        display: inline-block;
-        vertical-align: top;
-        width: 200px;
-        height: 320px;
-        position: relative;
-    `;
+    cardContainer.className = 'room-card';
 
     const statusColor = room.isFree ? '#000' : '#F44336';
     const statusText = room.isFree ? 'Свободно' : 'Занято';
@@ -672,22 +638,23 @@ function createRoomCard(room) {
             </div>
         </div>
         
-        <h3 class="room-card-name" style="margin: 10px 0 5px 0; font-size: 1.1em; height: 40px; overflow: hidden;">${room.name}</h3>
+        <h3 class="room-card-name room-title" style="margin: 10px 0 5px 0; font-size: 1.1em; height: 40px; overflow: hidden;">${room.name}</h3>
         
-        <div style="color: #666; font-size: 0.9em; margin-bottom: 5px; font-weight:bold;">
+        <div class="room-category" style="color: #666; font-size: 0.9em; margin-bottom: 5px; font-weight:bold;">
             ${room.category}
         </div>
 
-        <p style="font-size: 0.75em; color: #666; height: 40px; overflow: hidden; margin-bottom:10px; line-height:1.4;">
+        <p class="room-desc" style="font-size: 0.75em; color: #666; height: 40px; overflow: hidden; margin-bottom:10px; line-height:1.4;">
             ${room.description}
         </p>
 
         <div style="margin-top: auto;">
             <a href="room.html?id=${room.id}" 
-               style="color: black; font-weight: bold; font-size: 1.1em; text-decoration: none; display: block; padding: 8px 0;">
+            class="room-price-link"
+            style="font-weight: bold; font-size: 1.1em; text-decoration: none; display: block; padding: 8px 0;">
                 ${priceDisplayHtml}
             </a>
-            <small style="color: #888; font-size: 0.8em;">Нажмите для бронирования</small>
+            <small class="room-hint" style="color: #888; font-size: 0.8em;">Нажмите для бронирования</small>
         </div>
     `;
 

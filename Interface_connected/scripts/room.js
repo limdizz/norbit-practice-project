@@ -661,9 +661,9 @@ function calculatePrice() {
         if (hasDiscount) {
             priceDisplay.innerHTML = `
                 <span style="text-decoration: line-through; color: #888; font-size: 0.85em; font-weight: normal; margin-right: 5px;">
-                    ${currentRoom.price} ₽
+                ${currentRoom.price} ₽
                 </span> 
-                <b style="color: black;">${discountedUnitPrice} ₽ / час</b>
+                <b class="discounted-price">${discountedUnitPrice} ₽ / час</b>
             `;
         } else {
             priceDisplay.textContent = `${currentRoom.price} ₽ / час`;
