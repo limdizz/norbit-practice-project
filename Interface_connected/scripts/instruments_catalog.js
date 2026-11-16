@@ -554,30 +554,12 @@ function renderInstruments(instruments) {
 
     const addCard = document.createElement('div');
     addCard.className = 'instrument-card';
-    addCard.style.cssText = `
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-family: Inter;
-        padding: 15px;
-        margin: 10px;
-        text-align: center;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        display: inline-block;
-        vertical-align: top;
-        width: 150px;
-        height: 275px;
-        background-color: #f8f9fa;
-        flex: 0 0 auto;
-    `;
 
     addCard.innerHTML = `
         <div style="width: 100px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 0 auto; background-color: #e9ecef; border-radius: 4px;">
             <span style="font-size: 48px; color: #6c757d;">+</span>
         </div>
-        <h3 style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">Добавить инструмент</h3>
+        <h3 class="add-card-title" style="margin: 10px 0 5px 0; font-size: 1em;">Добавить инструмент</h3>
         <div style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
             <span class="condition-badge" style="background: black; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
                 Новый
@@ -586,7 +568,7 @@ function renderInstruments(instruments) {
         <div style="color: #888; font-size: 0.75em; margin-bottom: 5px;">
             Нажмите для добавления
         </div>
-        <div style="color: black; font-weight: bold; font-size: 1em;">
+        <div class="add-card-price" style="font-weight: bold; font-size: 1em;">
             ₽0
         </div>
     `;
@@ -620,41 +602,24 @@ function createInstrumentCard(instrument) {
 
     // Базовый HTML для цены
     let priceHtml = `
-        <div style="color: black; font-weight: bold; font-size: 1em;">
-            ₽${instrument.price}
-        </div>`;
+    <div class="instrument-price" style="font-weight: bold; font-size: 1em;">
+        ₽${instrument.price}
+    </div>`;
 
     // Если есть скидка, показываем две цены
     if (discountPercent > 0) {
         const discountedPrice = Math.round(instrument.price * (1 - discountPercent / 100));
         priceHtml = `
-        <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 5px;">
-            <span style="text-decoration: line-through; color: #888; font-size: 0.9em; font-weight: normal;">₽${instrument.price}</span>
-            <span style="color: black; font-weight: bold; font-size: 1.1em;">₽${discountedPrice}</span>
-        </div>
-        <div style="color: black; font-size: 0.7em; margin-top: 2px;">Скидка ${discountPercent}%</div>
-    `;
+            <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 5px;">
+                <span style="text-decoration: line-through; color: #888; font-size: 0.9em; font-weight: normal;">₽${instrument.price}</span>
+                <span class="instrument-price-discounted" style="font-weight: bold; font-size: 1.1em;">₽${discountedPrice}</span>
+            </div>
+            <div class="instrument-discount-badge" style="font-size: 0.7em; margin-top: 2px;">Скидка ${discountPercent}%</div>
+        `;
     }
 
     const cardContainer = document.createElement('div');
     cardContainer.className = 'instrument-card';
-    cardContainer.style.cssText = `
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-family: Inter;
-        padding: 15px;
-        margin: 10px;
-        text-align: center;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        display: inline-block;
-        vertical-align: top;
-        width: 150px;
-        height: 275px;
-        position: relative;
-    `;
 
     const isStaff = localStorage.getItem('isStaff') === 'true';
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -703,15 +668,15 @@ function createInstrumentCard(instrument) {
         ${deleteButtonHtml}
         <img src="${imgSrc}" 
              alt="${instrument.name}" 
-             style="width: 100px; height: 150px; object-fit: contain; border-radius: 4px;">
-        <h3 style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">${instrument.name}</h3>
-        <div style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
+             style="width: 100px; height: 150px; object-fit: contain; border-radius: 4px; background: white">
+        <h3 class="instrument-name" style="margin: 10px 0 5px 0; color: #333; font-size: 1em;">${instrument.name}</h3>
+        <div class="instrument-condition" style="color: #666; font-size: 0.8em; margin-bottom: 8px;">
             <span class="condition-badge" style="background: ${conditionColor}; 
                   color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
                 ${instrument.condition}
             </span>
         </div>
-        <div style="color: #888; font-size: 0.75em; margin-bottom: 5px;">
+        <div class="instrument-details" style="color: #888; font-size: 0.75em; margin-bottom: 5px;">
             ${detailsText}
         </div>
         ${priceHtml}

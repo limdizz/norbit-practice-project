@@ -48,13 +48,15 @@
     font-family: Inter;
     border: 1px solid black;
     border-radius: 4px;
+    padding: 5px;
 }
 
 #site-search {
     font-family: Inter;
-    margin-left: 10px;
+    margin-left: 20px;
     border: 1px solid black;
     border-radius: 4px;
+    padding: 5px;
 }
 
 /* Стили кнопок в меню добавления нового помещения/инструмента */
@@ -2785,6 +2787,7 @@ body.dark-theme input[type="range"] {
     width: 200px;
     height: 320px;
     position: relative;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 /* Тёмная тема — карточки помещений */
@@ -2872,4 +2875,153 @@ body.dark-theme .room-discount-badge {
 
 body.dark-theme .discounted-price {
     color: white;
+}
+
+/* ===================== Каталог инструментов ===================== */
+.instrument-card {
+    background: white;
+    border-radius: 8px;
+    font-family: Inter;
+    padding: 15px;
+    margin: 10px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-block;
+    vertical-align: top;
+    width: 150px;
+    height: 275px;
+    flex: 0 0 auto;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    position: relative
+}
+
+.instrument-name {
+    color: #333;
+}
+
+.instrument-condition {
+    color: #666;
+}
+
+.instrument-details {
+    color: #888;
+}
+
+.instrument-price-discounted {
+    color: #000;
+}
+
+.instrument-discount-badge {
+    color: #000;
+}
+
+/* Тёмная тема — каталог инструментов */
+body.dark-theme .instrument-card {
+    background: #333 !important;
+    border-color: #444 !important;
+}
+
+body.dark-theme .instrument-name {
+    color: white !important;
+}
+
+body.dark-theme .instrument-condition {
+    color: #bbb !important;
+}
+
+body.dark-theme .instrument-details {
+    color: #999 !important;
+}
+
+body.dark-theme .instrument-price-discounted {
+    color: white !important;
+}
+
+body.dark-theme .instrument-discount-badge {
+    color: white !important;
+}
+
+.instrument-price {
+    color: #000;
+}
+
+body.dark-theme .instrument-price {
+    color: #fff !important;
+}
+
+.add-card-price {
+    color: #000;
+}
+
+body.dark-theme .add-card-price {
+    color: #fff !important;
+}
+
+.add-card-title {
+    color: #333;
+}
+
+body.dark-theme .add-card-title {
+    color: #e0e0e0 !important;
+}
+
+body.dark-theme .card_column_info h3 {
+    color: #fff;
+}
+
+/* Модальные окна добавления — тёмная тема */
+body.dark-theme #add-instrument-modal,
+body.dark-theme #add-room-modal {
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+body.dark-theme #add-instrument-modal>div,
+body.dark-theme #add-room-modal>div {
+    background: #2a2a2a !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-theme #add-instrument-modal h3,
+body.dark-theme #add-room-modal h3 {
+    color: #e0e0e0 !important;
+}
+
+body.dark-theme #add-instrument-modal label,
+body.dark-theme #add-room-modal label {
+    color: #ccc !important;
+}
+
+body.dark-theme #add-instrument-modal input,
+body.dark-theme #add-instrument-modal select,
+body.dark-theme #add-instrument-modal textarea,
+body.dark-theme #add-room-modal input,
+body.dark-theme #add-room-modal select,
+body.dark-theme #add-room-modal textarea {
+    background: #333 !important;
+    border-color: #555 !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-theme #add-instrument-modal input:focus,
+body.dark-theme #add-instrument-modal select:focus,
+body.dark-theme #add-instrument-modal textarea:focus,
+body.dark-theme #add-room-modal input:focus,
+body.dark-theme #add-room-modal select:focus,
+body.dark-theme #add-room-modal textarea:focus {
+    border-color: #888 !important;
+}
+
+/* Тёмная тема — кнопка поиска */
+body.dark-theme #search-button {
+    background-color: #fff !important;
+    color: #000 !important;
+    border: 1px solid #fff !important;
+}
+
+body.dark-theme #search-button:hover {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #000 !important;
 }

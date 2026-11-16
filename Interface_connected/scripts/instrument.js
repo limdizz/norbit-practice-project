@@ -279,7 +279,7 @@ function renderInstrumentDetails(instrument) {
             <span style="text-decoration: line-through; color: #888; font-size: 0.85em; margin-right: 5px;">
                 ${instrument.price} ₽
             </span> 
-            <b style="color: black;">${discountedPrice} ₽ / сутки</b>
+            <b class="discounted-price">${discountedPrice} ₽ / сутки</b>
         `;
         } else {
             priceDisplay.textContent = `${instrument.price} ₽ / сутки`;
