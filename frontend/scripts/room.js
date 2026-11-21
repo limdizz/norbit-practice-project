@@ -646,9 +646,9 @@ function calculatePrice() {
         if (hasDiscount) {
             const originalTotal = (hours * currentRoom.price) + equipmentTotal;
             totalEl.innerHTML = `
-                <span style="text-decoration: line-through; color: #888; font-size: 0.9em;">${originalTotal} ₽</span>
-                <b style="color: black; margin-left: 5px;">${total} ₽</b>
-                <div style="color: #888; font-size: 0.75em; font-weight: normal; margin-top: 2px;">Скидка ${discountPercent}%</div>
+            <span class="original-price">${originalTotal} ₽</span>
+            <b class="final-price" style="margin-left: 5px;">${total} ₽</b>
+            <div class="discount-info">Скидка ${discountPercent}%</div>
             `;
         } else {
             totalEl.textContent = `${total} ₽`;
@@ -781,7 +781,7 @@ function renderRoomDetails(room) {
     const btn = document.getElementById('book_button');
     if (statusEl) {
         if (!room.isFree) {
-            statusEl.innerHTML = '<span style="color:grey">Временно занято</span>';
+            statusEl.innerHTML = '<span class="status-busy">Временно занято</span>';
             roomBaseStatusHTML = statusEl.innerHTML;
 
             if (btn) {
@@ -789,7 +789,7 @@ function renderRoomDetails(room) {
                 btn.style.background = '#ccc';
             }
         } else {
-            statusEl.innerHTML = '<span style="color:black">Свободно для бронирования</span>';
+            statusEl.innerHTML = '<span class="status-free">Свободно для бронирования</span>';
             roomBaseStatusHTML = statusEl.innerHTML;
         }
     }

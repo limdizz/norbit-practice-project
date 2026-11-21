@@ -276,9 +276,7 @@ function renderInstrumentDetails(instrument) {
         if (discountPercent > 0) {
             const discountedPrice = Math.round(instrument.price * (1 - discountPercent / 100));
             priceDisplay.innerHTML = `
-            <span style="text-decoration: line-through; color: #888; font-size: 0.85em; margin-right: 5px;">
-                ${instrument.price} ₽
-            </span> 
+            <span class="original-price">${instrument.price} ₽</span>
             <b class="discounted-price">${discountedPrice} ₽ / сутки</b>
         `;
         } else {
@@ -310,14 +308,14 @@ function renderInstrumentDetails(instrument) {
 
     if (statusEl) {
         if (instrument.isRentable === false) { // Если API вернул false
-            statusEl.innerHTML = '<span style="color:red">Временно недоступен</span>';
+            statusEl.innerHTML = '<span class="status-unavailable">Временно недоступен</span>';
             if (btn) {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
             }
         } else {
-            statusEl.innerHTML = '<span style="color:green">В наличии</span>';
+            statusEl.innerHTML = '<span class="status-available">В наличии</span>';
             if (btn) {
                 btn.disabled = false;
                 btn.style.opacity = '1';
@@ -483,9 +481,9 @@ function updatePriceCalculation() {
         if (discountPercent > 0) {
             const originalTotal = days * currentInstrument.price;
             totalPriceElement.innerHTML = `
-                <span style="text-decoration: line-through; color: #888; font-size: 0.9em;">${originalTotal} ₽</span>
-                <b style="color: black; margin-left: 5px;">${totalPrice} ₽</b>
-                <div style="color: #888; font-size: 0.75em; font-weight: normal; margin-top: 2px;">Скидка ${discountPercent}%</div>
+                <span class="original-price">${originalTotal} ₽</span>
+                <b class="final-price" style="margin-left: 5px;">${totalPrice} ₽</b>
+                <div class="discount-info">Скидка ${discountPercent}%</div>
             `;
         } else {
             totalPriceElement.textContent = `₽${totalPrice}`;

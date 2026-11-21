@@ -2237,15 +2237,15 @@ body.dark-theme #days-count {
 }
 
 body.dark-theme #book_button {
-    background-color: #333;
-    color: #e0e0e0;
-    border: 1px solid #555;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #fff;
 }
 
 body.dark-theme #book_button:hover {
-    background-color: #555;
+    background-color: #000;
     color: #fff;
-    border-color: #888;
+    border: 1px solid white;
 }
 
 body.dark-theme .price_block {
@@ -3025,3 +3025,55 @@ body.dark-theme #search-button:hover {
     color: #fff !important;
     border: 1px solid #000 !important;
 }
+
+/* ===================== Статус и Итого ===================== */
+
+.original-price {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 0.9em;
+}
+
+.final-price {
+    color: #000;
+}
+
+.discount-info {
+    color: #888;
+    font-size: 0.75em;
+    font-weight: normal;
+}
+
+.status-busy,
+.status-unavailable {
+    color: #888;
+}
+
+.status-free,
+.status-available {
+    color: #000;
+}
+
+/* Тёмная тема */
+body.dark-theme .original-price {
+    color: #999 !important;
+}
+
+body.dark-theme .final-price {
+    color: #fff !important;
+}
+
+body.dark-theme .discount-info {
+    color: #999 !important;
+}
+
+body.dark-theme .status-busy,
+body.dark-theme .status-unavailable {
+    color: #999 !important;
+}
+
+body.dark-theme .status-free,
+body.dark-theme .status-available {
+    color: #fff !important;
+}
+
