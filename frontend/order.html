@@ -42,28 +42,70 @@
             </nav>
         </header>
         <main class="main">
-            <h1 class="register_h" id="order-title">Заказ №1323213</h1>
-            <section class="register">
-                <p class="register_p">
-                    Фамилия:
-                </p>
-                <p class="register_placeholder_ln">Иванов</p>
-                <p class="register_p">
-                    Имя:
-                </p>
-                <p class="register_placeholder_fn">Иван</p>
-                <p class="register_p">
-                    Детали заказа:
-                </p>
-                <p class="register_p" id="order-instrument">Аренда инструмента: Fender Jaguar</p>
-                <p class="register_p" id="order-dates">Срок бронирования: 04.11.2025-05.11.2025</p>
-                <h2 id="order-total">Итого: ₽2800</h2>
-                <div id="additional-equipment-list" class="additional-equipment-order"
-                    style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 8px;"></div>
-                <button class="register_button" id="confirm-booking-btn" type="button">
-                    Подтвердить бронирование
-                </button>
-            </section>
+            <div class="invoice-container">
+                <div class="invoice-header">
+                    <div class="invoice-logo-section">
+                        <img src="img/logo.png" alt="Логотип" class="invoice-logo">
+                        <div class="invoice-company">
+                            <h2>Студия "Black Circle"</h2>
+                            <p class="invoice-company-details">г. Нижний Новгород, пр. Гагарина, 23</p>
+                            <p class="invoice-company-details">Тел: +7 (495) 123-45-67</p>
+                        </div>
+                    </div>
+                    <div class="invoice-title-section">
+                        <h1 class="invoice-title">СЧЕТ</h1>
+                        <p class="invoice-number"><span id="order-title"></span></p>
+                        <p class="invoice-date">Дата: <span id="invoice-date"></span></p>
+                    </div>
+                </div>
+
+                <div class="invoice-parties">
+                    <div class="invoice-party">
+                        <h3>Заказчик:</h3>
+                        <p class="party-name"><span id="order-lastname">Иванов</span> <span
+                                id="order-firstname">Иван</span></p>
+                    </div>
+                </div>
+
+                <div class="invoice-items">
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th class="col-num">№</th>
+                                <th class="col-name">Наименование</th>
+                                <th class="col-qty">Кол-во</th>
+                                <th class="col-price">Цена</th>
+                                <th class="col-total">Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-items-body">
+                            <!-- Динамически заполняется из order.js -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="invoice-totals">
+                    <div class="total-row" id="invoice-subtotal">
+                        <span>Подытог:</span>
+                        <span id="subtotal-amount">0 ₽</span>
+                    </div>
+                    <div class="total-row discount-row" id="invoice-discount-row" style="display: none;">
+                        <span>Скидка по абонементу:</span>
+                        <span id="discount-amount">-0 ₽</span>
+                    </div>
+                    <div class="total-row total-final">
+                        <span>ИТОГО К ОПЛАТЕ:</span>
+                        <span id="order-total">0 ₽</span>
+                    </div>
+                </div>
+
+                <div class="invoice-footer">
+                    <p class="invoice-note">Бронирование будет подтверждено после нажатия кнопки ниже.</p>
+                    <button class="confirm-btn" id="confirm-booking-btn" type="button">
+                        Подтвердить бронирование
+                    </button>
+                </div>
+            </div>
         </main>
         <footer class="footer">
             <section class="instruments">

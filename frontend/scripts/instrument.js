@@ -469,12 +469,9 @@ function updatePriceCalculation() {
     const daysCountElement = document.getElementById('days-count');
     const totalPriceElement = document.getElementById('total-price');
 
-    let basePrice = currentInstrument.price;
-    if (discountPercent > 0) {
-        basePrice = Math.round(basePrice * (1 - discountPercent / 100));
-    }
-
-    const totalPrice = days * basePrice;
+    const totalPrice = discountPercent > 0
+        ? Math.round(days * currentInstrument.price * (100 - discountPercent) / 100)
+        : days * currentInstrument.price;
 
     if (daysCountElement && totalPriceElement) {
         daysCountElement.textContent = days;

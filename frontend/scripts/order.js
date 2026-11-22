@@ -38,15 +38,24 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // 3. Находим элементы на странице
-    const lastNameInput = document.querySelector('.register_placeholder_ln');
-    const firstNameInput = document.querySelector('.register_placeholder_fn');
+    const orderLastname = document.getElementById('order-lastname');
+    const orderFirstname = document.getElementById('order-firstname');
 
     const orderTitle = document.getElementById('order-title');
-    const orderInstrument = document.getElementById('order-instrument');
-    const orderDates = document.getElementById('order-dates');
+    const invoiceItemsBody = document.getElementById('invoice-items-body');
+    const subtotalAmount = document.getElementById('subtotal-amount');
+    const discountRow = document.getElementById('invoice-discount-row');
+    const discountAmount = document.getElementById('discount-amount');
     const orderTotal = document.getElementById('order-total');
     const additionalEquipmentContainer = document.getElementById('additional-equipment-list');
     const confirmBtn = document.getElementById('confirm-booking-btn');
+
+    // Устанавливаем текущую дату
+    const invoiceDate = document.getElementById('invoice-date');
+    if (invoiceDate) {
+        const now = new Date();
+        invoiceDate.textContent = now.toLocaleDateString('ru-RU');
+    }
 
     async function applySubscriptionDiscount(userId, currentTotal) {
         try {
@@ -57,7 +66,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             const discountPercent = activeSub.plan?.discountPercentage || activeSub.discountPercentage || 0;
 
             if (discountPercent > 0) {
-                const discountedTotal = currentTotal * (1 - discountPercent / 100);
+                // Используем целочисленную арифметику для избежания float-ошибок
+                const discountAmount = Math.round(currentTotal * discountPercent / 100);
+                const discountedTotal = currentTotal - discountAmount;
                 return { total: discountedTotal, discount: discountPercent };
             }
         } catch (e) {
@@ -67,127 +78,121 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // 4. Заполняем поля пользователя
-    if (lastNameInput) {
-        lastNameInput.textContent = userData.lastName || 'Гость';
+    if (orderLastname) {
+        orderLastname.textContent = userData.lastName || 'Гость';
     }
-    if (firstNameInput) {
-        firstNameInput.textContent = userData.firstName || 'Гость';
+    if (orderFirstname) {
+        orderFirstname.textContent = userData.firstName || 'Гость';
     }
 
     // 5. Заполняем детали заказа и отображаем оборудование
     if (bookingData) {
         if (orderTitle) {
-            orderTitle.textContent = `Заказ`;
+            orderTitle.textContent = bookingData.orderId;
         }
 
-        const nameText = bookingData.instrumentName || bookingData.itemName || 'Неизвестно';
+        // Заполняем таблицу позиций
+        if (invoiceItemsBody) {
+            invoiceItemsBody.innerHTML = ''; // Очищаем перед заполнением
+            let rowNumber = 1;
+            let subtotal = 0;
 
-        if (orderInstrument) {
+            // Основная позиция (помещение или инструмент)
+            const nameText = bookingData.instrumentName || bookingData.itemName || 'Неизвестно';
+            let mainItemName = '';
+            let mainItemQty = '';
+            let mainItemPrice = '';
+            let mainItemTotal = 0;
+
             if (bookingData.itemType === 'Room') {
-                orderInstrument.textContent = `Бронирование помещения: ${nameText}`;
+                mainItemName = `Помещение: ${nameText}`;
+                mainItemQty = `${bookingData.date}, ${bookingData.time} <br>(${bookingData.hours} ч.)`;
+                // Используем originalPricePerHour напрямую (оригинальная цена за час из room.js)
+                const originalPricePerHour = bookingData.originalPricePerHour || bookingData.pricePerHour;
+                mainItemPrice = `${Math.round(originalPricePerHour)} ₽/ч`;
+                mainItemTotal = originalPricePerHour * bookingData.hours;
             } else {
-                orderInstrument.textContent = `Аренда инструмента: ${nameText}`;
+                mainItemName = `Инструмент: ${nameText}`;
+                // Используем originalDailyPrice напрямую (оригинальная цена за сутки из instrument.js)
+                const originalDailyPrice = bookingData.originalDailyPrice || bookingData.dailyPrice || bookingData.pricePerHour;
+                const days = bookingData.days || 1;
+                mainItemQty = `${bookingData.startDate} - ${bookingData.endDate} <br>(${days} дн.)`;
+                mainItemPrice = `${originalDailyPrice} ₽/сут`;
+                mainItemTotal = originalDailyPrice * days;
             }
-        }
 
-        // Отображаем даты и время
-        if (orderDates) {
-            if (bookingData.itemType === 'Room') {
-                orderDates.textContent = `Дата: ${bookingData.date}, Начало: ${bookingData.time}, Длительность: ${bookingData.hours} ч.`;
-            } else {
-                orderDates.textContent = `Срок бронирования: ${bookingData.startDate} - ${bookingData.endDate}`;
+            subtotal += mainItemTotal;
+
+            let mainRowHtml = `
+                <tr>
+                    <td class="col-num">${rowNumber}</td>
+                    <td class="col-name">${escapeHtml(mainItemName)}</td>
+                    <td class="col-qty">${mainItemQty}</td>
+                    <td class="col-price">${mainItemPrice}</td>
+                    <td class="col-total">${mainItemTotal} ₽</td>
+                </tr>
+            `;
+            invoiceItemsBody.innerHTML += mainRowHtml;
+            rowNumber++;
+
+            // Дополнительное оборудование
+            if (bookingData.selectedEquipment && bookingData.selectedEquipment.length > 0) {
+                bookingData.selectedEquipment.forEach(eq => {
+                    subtotal += eq.price;
+                    invoiceItemsBody.innerHTML += `
+                        <tr>
+                            <td class="col-num">${rowNumber}</td>
+                            <td class="col-name">${escapeHtml(eq.name)}</td>
+                            <td class="col-qty">1</td>
+                            <td class="col-price">${eq.price} ₽</td>
+                            <td class="col-total">${eq.price} ₽</td>
+                        </tr>
+                    `;
+                    rowNumber++;
+                });
             }
+
+            // Сохраняем подытог для расчёта скидки
+            bookingData.subtotal = subtotal;
         }
 
-        // Отображаем дополнительное оборудование (если есть)
-        if (additionalEquipmentContainer && bookingData.selectedEquipment && bookingData.selectedEquipment.length > 0) {
-            let equipmentHtml = '<h4>Дополнительное оборудование:</h4><ul class="order-equipment-list">';
-            bookingData.selectedEquipment.forEach(eq => {
-                equipmentHtml += `
-                    <li>
-                        <span>${escapeHtml(eq.name)}</span>
-                        <span class="equipment-price">+${eq.price} ₽</span>
-                    </li>
-                `;
-            });
-            equipmentHtml += '</ul>';
-            additionalEquipmentContainer.innerHTML = equipmentHtml;
-            additionalEquipmentContainer.style.display = 'block';
-        } else if (additionalEquipmentContainer) {
-            additionalEquipmentContainer.style.display = 'none';
-        }
-
-        // Отображаем цену
+        // Отображаем цену с полным расчётом
         if (orderTotal) {
             const userId = userData.userUid || userData.uid || userData.id;
 
-            // Если данные уже содержат скидку (пришли из room.js/instrument.js), используем их напрямую
-            let discount = bookingData.discountPercent || 0;
-            let total = bookingData.totalPrice;
-            let originalTotal = bookingData.originalTotal || total;
-
-            // Если скидка неизвестна, запрашиваем абонемент
-            if (discount === 0) {
-                const discountResult = await applySubscriptionDiscount(userId, bookingData.totalPrice);
-                discount = discountResult.discount;
-                total = discountResult.total;
-                originalTotal = bookingData.totalPrice;
+            // 1. Сначала рассчитываем исходную цену (до скидки) — используем originalTotal из room.js/instrument.js
+            let originalPrice = bookingData.originalTotal || bookingData.subtotal || 0;
+            if (originalPrice === 0) {
+                // Если originalTotal не рассчитан, используем subtotal
+                originalPrice = bookingData.subtotal || bookingData.totalPrice;
             }
 
-            let itemsHtml = '';
-            const hasDiscount = discount > 0;
+            // 2. Проверяем абонемент и получаем скидку
+            const discountResult = await applySubscriptionDiscount(userId, originalPrice);
+            const discountPercent = discountResult.discount;
+            const finalPrice = discountResult.total;
 
-            if (bookingData.itemType === 'Room') {
-                const roomBase = bookingData.hours * bookingData.pricePerHour;
-                const roomOriginal = hasDiscount
-                    ? Math.round(roomBase / (1 - discount / 100))
-                    : roomBase;
-                if (hasDiscount) {
-                    itemsHtml += `Аренда помещения: <span style="text-decoration:line-through;color:#888;">${roomOriginal} ₽</span> <b>${roomBase} ₽</b><br>`;
-                } else {
-                    itemsHtml += `Аренда помещения: ${roomBase} ₽<br>`;
-                }
-                if (bookingData.equipmentTotal > 0) {
-                    const eqDiscounted = hasDiscount
-                        ? Math.round(bookingData.equipmentTotal * (1 - discount / 100))
-                        : bookingData.equipmentTotal;
-                    if (hasDiscount) {
-                        itemsHtml += `Доп. оборудование: <span style="text-decoration:line-through;color:#888;">${bookingData.equipmentTotal} ₽</span> <b>${eqDiscounted} ₽</b><br>`;
-                    } else {
-                        itemsHtml += `Доп. оборудование: +${bookingData.equipmentTotal} ₽<br>`;
-                    }
-                }
-            } else {
-                const instrumentTotal = bookingData.totalPrice;
-                if (hasDiscount) {
-                    itemsHtml += `Аренда инструмента: <span style="text-decoration:line-through;color:#888;">${originalTotal} ₽</span> <b>${instrumentTotal} ₽</b><br>`;
-                } else {
-                    itemsHtml += `Аренда инструмента: ${instrumentTotal} ₽<br>`;
+            // 3. Обновляем подытог (исходная цена)
+            if (subtotalAmount) {
+                subtotalAmount.textContent = `${Math.round(originalPrice)} ₽`;
+            }
+
+            // 4. Обновляем строку скидки
+            if (discountPercent > 0) {
+                discountRow.style.display = 'flex';
+                if (discountAmount) {
+                    const discountValue = originalPrice - finalPrice;
+                    discountAmount.textContent = `-${Math.round(discountValue)} ₽ (${discountPercent}%)`;
                 }
             }
 
-            if (hasDiscount) {
-                orderTotal.innerHTML = `
-                    <div style="margin-bottom: 10px; font-size: 0.9em; color: #666;">
-                        ${itemsHtml}
-                    </div>
-                    <div style="border-top: 1px solid #eee; padding-top: 10px;">
-                        <div style="color: #888; font-size: 0.95em;">Старая цена: ${originalTotal} ₽</div>
-                        <div style="font-size: 1.4em; margin-top: 5px;">
-                            <strong>К оплате: <span style="color: black;">${Math.round(total)} ₽</span></strong>
-                        </div>
-                        <div style="color: #888; font-size: 0.85em; margin-top: 5px;">
-                            ✓ Применен абонемент (скидка ${discount}%)
-                        </div>
-                    </div>
-                `;
-            } else {
-                orderTotal.innerHTML = `${itemsHtml}<br><strong>Итого: ${bookingData.totalPrice} ₽</strong>`;
+            // 5. Обновляем итог (цена после скидки)
+            if (orderTotal) {
+                orderTotal.textContent = `${Math.round(finalPrice)} ₽`;
             }
         }
-    }
 
-    // 6. Подтверждение бронирования
+    }// 6. Подтверждение бронирования
     if (confirmBtn) {
         confirmBtn.addEventListener('click', async function () {
             const pendingRequestString = sessionStorage.getItem('pendingBookingRequest');

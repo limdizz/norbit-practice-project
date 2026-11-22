@@ -3077,3 +3077,368 @@ body.dark-theme .status-available {
     color: #fff !important;
 }
 
+/* ===================== Страница заказа (официальный счёт) ===================== */
+
+/* Основной контейнер счёта */
+.invoice-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 40px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Шапка счёта */
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #000;
+    margin-bottom: 30px;
+}
+
+.invoice-logo-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.invoice-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.invoice-company h2 {
+    margin: 0 0 10px -20px;
+    font-size: 1.5em;
+    color: #000;
+}
+
+.invoice-company-details {
+    margin: 5px 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.invoice-title-section {
+    text-align: right;
+}
+
+.invoice-title {
+    font-size: 2em;
+    font-weight: bold;
+    color: #000;
+    margin: 0 0 10px 0;
+    letter-spacing: 2px;
+}
+
+.invoice-number,
+.invoice-date {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #333;
+}
+
+/* Блок с данными заказчика */
+.invoice-parties {
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #000;
+}
+
+.invoice-parties h3 {
+    margin: 0 0 10px 0;
+    font-size: 1em;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.party-name {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Таблица позиций */
+.invoice-items {
+    margin-bottom: 30px;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.invoice-table thead {
+    background: #000;
+    color: #fff;
+}
+
+.invoice-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.5px;
+}
+
+.invoice-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.invoice-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.col-num {
+    width: 5%;
+    text-align: center;
+}
+
+.col-name {
+    width: 45%;
+    font-weight: 500;
+}
+
+.col-qty {
+    width: 15%;
+    text-align: center;
+}
+
+.col-price {
+    width: 15%;
+    text-align: right;
+}
+
+.col-total {
+    width: 20%;
+    text-align: right;
+    font-weight: 600;
+}
+
+/* Блок с итогами */
+.invoice-totals {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.total-row.discount-row {
+    color: grey;
+    font-weight: 500;
+}
+
+.total-final {
+    border-top: 2px solid #000;
+    margin-top: 10px;
+    padding-top: 15px;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Подвал счёта */
+.invoice-footer {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.invoice-note {
+    margin: 0 0 20px 0;
+    color: #666;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+.confirm-btn {
+    display: inline-block;
+    padding: 15px 40px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.confirm-btn:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Дополнительное оборудование */
+.additional-equipment-order {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.additional-equipment-order h4 {
+    margin: 0 0 10px 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.order-equipment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.order-equipment-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.order-equipment-list li:last-child {
+    border-bottom: none;
+}
+
+.equipment-price {
+    color: #000;
+    font-weight: 600;
+}
+
+/* ===================== Тёмная тема — страница заказа ===================== */
+
+body.dark-theme .invoice-container {
+    background: #2a2a2a;
+    border-color: #444;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .invoice-header {
+    border-bottom-color: #fff;
+}
+
+body.dark-theme .invoice-company h2 {
+    color: #fff;
+}
+
+body.dark-theme .invoice-company-details {
+    color: #999;
+}
+
+body.dark-theme .invoice-title {
+    color: #fff;
+}
+
+body.dark-theme .invoice-number,
+body.dark-theme .invoice-date {
+    color: #e0e0e0;
+}
+
+body.dark-theme .invoice-parties {
+    background: #333;
+    border-left-color: #fff;
+}
+
+body.dark-theme .invoice-parties h3 {
+    color: #999;
+}
+
+body.dark-theme .party-name {
+    color: #fff;
+}
+
+body.dark-theme .invoice-table th {
+    background: #fff;
+    color: #000;
+}
+
+body.dark-theme .invoice-table td {
+    border-bottom-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-theme .invoice-table tbody tr:hover {
+    background: #333;
+}
+
+body.dark-theme .invoice-totals {
+    background: #333;
+}
+
+body.dark-theme .total-row {
+    color: #e0e0e0;
+}
+
+body.dark-theme .total-final {
+    border-top-color: #fff;
+    color: #fff;
+}
+
+body.dark-theme .invoice-note {
+    color: #999;
+}
+
+body.dark-theme .confirm-btn {
+    background: #fff;
+    color: #000;
+}
+
+body.dark-theme .confirm-btn:hover {
+    background: #000;
+    color: #fff;
+    border-color: #fff;
+}
+
+body.dark-theme .confirm-btn:disabled {
+    background: #555;
+    color: #999;
+}
+
+body.dark-theme .additional-equipment-order {
+    background: #333;
+    border-color: #555;
+}
+
+body.dark-theme .additional-equipment-order h4 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .order-equipment-list li {
+    border-bottom-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-theme .equipment-price {
+    color: #fff !important;
+}

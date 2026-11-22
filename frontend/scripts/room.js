@@ -629,16 +629,21 @@ function calculatePrice() {
     const hours = hoursSelect ? parseInt(hoursSelect.value) : 1;
 
     const hasDiscount = discountPercent > 0;
-    const discountedUnitPrice = hasDiscount
-        ? Math.round(currentRoom.price * (1 - discountPercent / 100))
-        : currentRoom.price;
 
-    const roomTotal = hours * discountedUnitPrice;
+    // Расчёт итоговых сумм (скидка применяется к общей сумме, не к единице цены)
+    const roomTotal = hasDiscount
+        ? Math.round(hours * currentRoom.price * (100 - discountPercent) / 100)
+        : hours * currentRoom.price;
     const equipmentTotal = getAdditionalEquipmentTotal();
     const discountedEquipmentTotal = hasDiscount
-        ? Math.round(equipmentTotal * (1 - discountPercent / 100))
+        ? Math.round(equipmentTotal * (100 - discountPercent) / 100)
         : equipmentTotal;
     const total = roomTotal + discountedEquipmentTotal;
+
+    // Цена за час для отображения
+    const discountedUnitPrice = hasDiscount
+        ? Math.round(currentRoom.price * (100 - discountPercent) / 100)
+        : currentRoom.price;
 
     // Итоговая сумма внизу
     const totalEl = document.getElementById('total-price');
@@ -744,6 +749,7 @@ async function handleBooking() {
         time: timeStr,
         hours: hours,
         pricePerHour: discountedPrice,
+        originalPricePerHour: currentRoom.price,
         roomTotal: hours * discountedPrice,
         equipmentTotal: equipmentTotal,
         totalPrice: (hours * discountedPrice) + discountedEquipmentTotal,
